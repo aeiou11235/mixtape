@@ -717,13 +717,16 @@ final class Deck: NSObject, ObservableObject {
         soundItem.submenu = soundMenu
         m.addItem(soundItem)
         m.addItem(.separator())
-        m.addItem(item(L("Per E-Mail verschicken …"), #selector(mailItem)))
-        m.addItem(item(L("Im Finder zeigen"), #selector(revealItem)))
+        m.addItem(NSMenuItem.sectionHeader(title: L("An Freunde verschicken")))
+        m.addItem(item(L("Als Webseite – spielt in jedem Browser …"), #selector(webItem)))
+        m.addItem(item(L("Als Mixtape-Datei – für Freunde mit der App …"), #selector(tapeFileItem)))
         m.addItem(.separator())
         let top = item(L("Immer im Vordergrund"), #selector(floatItem))
         top.state = onTop ? .on : .off
         m.addItem(top)
         m.addItem(item(L("Kassette schließen"), #selector(closeItem)))
+        m.addItem(.separator())
+        m.addItem(item(L("Über Mixtape"), #selector(aboutItem)))
         m.addItem(item(L("Mixtape beenden"), #selector(quitItem)))
         return m
     }
@@ -777,23 +780,50 @@ final class Deck: NSObject, ObservableObject {
         (NSApp.delegate as? AppDelegate)?.setAlwaysOnTop(!onTop)
     }
 
-    @objc private func revealItem() {
-        if doc.fileURL == nil { save() }
-        if let url = doc.fileURL { NSWorkspace.shared.activateFileViewerSelecting([url]) }
-    }
+    @objc private func aboutItem() { AboutScreen.shared.show(briefly: false) }
 
-    @objc private func mailItem() {
+    /// The .mixtape itself, for friends who have the app: saved and shown in the Finder,
+    /// ready to drag into an email or a message.
+    @objc private func tapeFileItem() {
         if transport != .stopped { pressStop() }
         if drawMode { toggleDrawMode() }
         save()
-        guard let url = doc.fileURL else { return }
-        let subject = doc.data.titleA.isEmpty ? L("Ich hab dir ein Mixtape aufgenommen")
-            : String(format: L("Ich hab dir „%@“ aufgenommen"), doc.data.titleA)
-        if let svc = NSSharingService(named: .composeEmail) {
-            svc.subject = subject
-            svc.perform(withItems: [url])
-        } else {
-            NSWorkspace.shared.activateFileViewerSelecting([url])
+        if let url = doc.fileURL { NSWorkspace.shared.activateFileViewerSelecting([url]) }
+    }
+
+    /// The tape as a web page next to it, for friends without the app: it plays in any browser.
+    /// Shown in the Finder when ready, to drag into an email.
+    @objc private func webItem() {
+        if transport != .stopped { pressStop() }
+        if drawMode { toggleDrawMode() }
+        save()
+        guard let tapeURL = doc.fileURL, busy == nil else { return }
+        let url = tapeURL.deletingPathExtension().appendingPathExtension("html")
+        var picture = paint
+        picture.hint = false
+        picture.hideTitle = false
+        let source = WebTape.source(doc, picture: picture)
+        // Re-encoding the audio takes a few seconds; the deck stays usable meanwhile.
+        busy = BusyPanel(L("Webseite wird erstellt …"), near: window)
+        DispatchQueue.global(qos: .userInitiated).async {
+            let result = Result { try WebTape.write(source, to: url) }
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                self.busy?.close()
+                self.busy = nil
+                switch result {
+                case .failure(let error):
+                    self.showError(L("Die Webseite konnte nicht erstellt werden.") + " " + error.localizedDescription)
+                case .success(let size):
+                    WebTape.setIcon(picture, on: url)
+                    NSWorkspace.shared.activateFileViewerSelecting([url])
+                    if size >= WebTape.mailLimit {
+                        self.showError(String(format: L("Die Webseite ist %d MB groß – zu groß für die meisten E-Mails. Teile sie am besten als Link, z. B. über iCloud Drive oder WeTransfer."),
+                                              size / 1_000_000))
+                    }
+                }
+            }
         }
     }
+    private var busy: BusyPanel?
 }

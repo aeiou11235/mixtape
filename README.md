@@ -26,7 +26,9 @@ Mixtape App is as personal as it gets. *Vibe-coded with love.*
 - **VU meters and a REC LEVEL fader** that saturates like analog tape when you push it into the red. Outside recording the fader is the volume control.
 - **Tape sound** – hiss, wow & flutter, spool noise, key clunks, pause squeal – each can be switched off, and the settings travel with the tape.
 - **Pause from anywhere** with ⌥⌘P.
-- **Send it:** a tape is a single `.mixtape` file on your Desktop. Attach it to an email or message; the recipient double-clicks it and the cassette appears.
+- **Send it to a friend – two ways:**
+  - **As a web page** for anyone: one `.html` file with the whole tape inside. Your friend opens it in any browser – on a Mac, a PC or a phone, no app needed – and sees your cassette with its label and drawings, ready to play from the start of side A. It stays under 25 MB, so it fits in an email.
+  - **As a Mixtape file** for friends who have the app: they can record over it and send it back.
 
 <p align="center"><img src="docs/deck.png" width="520" alt="Mixtape with the deck and VU meters open"></p>
 
@@ -54,7 +56,7 @@ The guide “Read me first” inside the disk image explains this step by step, 
 | Pencil | draw on the cassette |
 | Gauge | VU meters and the level fader |
 | STOP / EJECT | stops the tape; when stopped, turns the cassette over |
-| ••• or right-click the cassette | new cassette, tape type, tape sound, all other settings |
+| ••• or right-click the cassette | new cassette, tape type, tape sound, **Send to a Friend**, all other settings |
 | ⌥⌘P | pause from any app |
 
 ## Building from source
@@ -67,4 +69,4 @@ Requires the Xcode command line tools (`xcode-select --install`).
 ./release.sh 0.2 "What’s new"   # publishes a new version here on GitHub
 ```
 
-The app is plain Swift (AppKit + SwiftUI) without an Xcode project. System audio is captured with a Core Audio process tap, the microphone through the HAL directly. A `.mixtape` file is a zip archive holding `tape.json` and the recorded takes as AAC files.
+The app is plain Swift (AppKit + SwiftUI) without an Xcode project. The web-page tape is `Player/player.html`, filled in by the app with the tape and its audio. System audio is captured with a Core Audio process tap, the microphone through the HAL directly. A `.mixtape` file is a zip archive holding `tape.json` and the recorded takes as AAC files.

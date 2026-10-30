@@ -115,6 +115,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 if self.controllers.isEmpty { self.newTape(design: "ferro", length: .c60) }
             }
         }
+        if !CommandLine.arguments.contains(where: { $0.hasPrefix("--auto") }) {
+            AboutScreen.shared.show(briefly: true)
+        }
         // Development aid: clicks the REC key with a real mouse event, like a user.
         if let i = CommandLine.arguments.firstIndex(of: "--autoclick"), i + 1 < CommandLine.arguments.count {
             let out = CommandLine.arguments[i + 1]
@@ -322,7 +325,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 @MainActor
 enum Tools {
     static func run(_ args: [String]) -> Bool {
-        if args.contains(where: { ["--rectest", "--mictest", "--tapbench", "--switchtest", "--autorecord", "--autoclick", "--selftest", "--snapshot", "--icon", "--taptest"].contains($0) }) {
+        if args.contains(where: { ["--rectest", "--mictest", "--tapbench", "--switchtest", "--autorecord", "--autoclick", "--selftest", "--snapshot", "--icon", "--taptest", "--webtape", "--aboutshot"].contains($0) }) {
             TapeDocument.libraryOverride = FileManager.default.temporaryDirectory.appendingPathComponent("MixtapeTests", isDirectory: true)
         }
         func value(_ key: String) -> String? {
@@ -351,6 +354,30 @@ enum Tools {
             }
             write(TapeRootView(deck: deck).background(Color(hex: 0x8e98a3)), scale: 2, to: out)
             deck.doc.discard()
+            return true
+        }
+        if let out = value("--aboutshot") {
+            AboutScreen.shared.show(briefly: false)
+            if let v = AboutScreen.shared.window?.contentView, let rep = v.bitmapImageRepForCachingDisplay(in: v.bounds) {
+                v.cacheDisplay(in: v.bounds, to: rep)
+                try? rep.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: out))
+            }
+            return true
+        }
+        if let out = value("--webtape"), let path = value("--file") {
+            // Same as "Send as Web Page", from the command line; the tape is only read.
+            let doc = try! TapeDocument(url: URL(fileURLWithPath: path))
+            let deck = Deck(doc: doc, snapshotMode: true)
+            var picture = deck.paint
+            picture.hint = false
+            let url = URL(fileURLWithPath: out)
+            do {
+                let started = Date()
+                let size = try WebTape.write(WebTape.source(doc, picture: picture), to: url)
+                WebTape.setIcon(picture, on: url)
+                print("\(out): \(String(format: "%.1f", Double(size) / 1e6)) MB in \(String(format: "%.1f", Date().timeIntervalSince(started))) s")
+            } catch { print("failed: \(error.localizedDescription)") }
+            doc.discard()
             return true
         }
         if let out = value("--icon") {
