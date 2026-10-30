@@ -1,0 +1,56 @@
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { font-family: "Helvetica Neue", Helvetica, sans-serif; font-size: 11.5pt; color: #222; line-height: 1.4; }
+  h1 { font-size: 21pt; margin: 0 0 2pt 0; }
+  h2 { font-size: 13pt; margin: 14pt 0 4pt 0; color: #c42f28; }
+  .sub { color: #666; font-size: 10.5pt; }
+  .step { margin: 0 0 5pt 14pt; }
+  code { font-family: Menlo, monospace; font-size: 9.5pt; background: #f1f1f1; }
+  .small { font-size: 9.5pt; color: #555; }
+  hr { border: 0; border-top: 1px solid #ccc; margin: 18pt 0; }
+</style>
+</head>
+<body>
+
+<p><img src="icon-small.png"></p>
+<h1>Mixtape</h1>
+<p class="sub">Zuerst lesen &nbsp;·&nbsp; Read me first (English below)</p>
+
+<h2>Mixtape installieren</h2>
+<p>Mixtape läuft auf jedem Mac mit <b>macOS 14.4 oder neuer</b>, mit Apple- oder Intel-Prozessor. Weil die App (noch) nicht bei Apple registriert ist, warnt macOS beim ersten Öffnen. Das ist normal. So öffnest du sie trotzdem, und zwar nur ein einziges Mal:</p>
+<p class="step"><b>1.</b>&nbsp; Ziehe <b>Mixtape</b> auf den Ordner <b>Programme</b>. Beide liegen im selben Fenster wie diese Anleitung.</p>
+<p class="step"><b>2.</b>&nbsp; Öffne <b>Programme</b> und doppelklicke <b>Mixtape</b>. macOS meldet: <i>„‚Mixtape' wurde nicht geöffnet“</i> oder <i>„Apple konnte nicht überprüfen …“</i>. Klicke auf <b>Fertig</b>, <u>nicht</u> auf „In den Papierkorb legen“.</p>
+<p class="step"><b>3.</b>&nbsp; Öffne <b>Systemeinstellungen → Datenschutz &amp; Sicherheit</b> und scrolle ganz nach unten zum Abschnitt <b>Sicherheit</b>. Dort steht: <i>„‚Mixtape' wurde blockiert …“</i>. Klicke auf <b>Trotzdem öffnen</b> und bestätige mit deinem Passwort oder Touch ID.</p>
+<p class="step"><b>4.</b>&nbsp; Bei der letzten Rückfrage klickst du nochmal <b>Trotzdem öffnen</b>. Ab jetzt startet Mixtape ganz normal.</p>
+
+
+<h2>Nach dem Start</h2>
+<p class="step">•&nbsp; Mixtape hat kein Fenster und kein Dock-Symbol. Du siehst nur die Kassette. Fährst du mit der Maus darüber, erscheinen die Tasten.</p>
+<p class="step">•&nbsp; Kassetten (Dateien mit der Endung <b>.mixtape</b>) öffnest du per Doppelklick.</p>
+<p class="step">•&nbsp; Beim ersten Aufnehmen fragt macOS, ob Mixtape den Systemton oder das Mikrofon aufnehmen darf. Klicke auf <b>Erlauben</b>. Kommt danach trotzdem kein Ton an, beende Mixtape einmal (⌘Q) und öffne es neu.</p>
+<p class="step">•&nbsp; Beenden: ⌘Q oder Rechtsklick auf die Kassette → „Mixtape beenden“.</p>
+
+<p class="small">Für Fortgeschrittene: Statt Schritt 2–4 geht auch im Terminal:<br><code>xattr -dr com.apple.quarantine /Applications/Mixtape.app</code></p>
+
+<hr>
+
+<h2>Installing Mixtape</h2>
+<p>Mixtape runs on any Mac with <b>macOS 14.4 or later</b>, Apple silicon or Intel. Because the app isn’t registered with Apple (yet), macOS shows a warning the first time you open it. That’s expected. Here is how to open it anyway. You only need to do this once:</p>
+<p class="step"><b>1.</b>&nbsp; Drag <b>Mixtape</b> onto the <b>Applications</b> folder. Both are in the same window as this guide.</p>
+<p class="step"><b>2.</b>&nbsp; Open <b>Applications</b> and double-click <b>Mixtape</b>. macOS says <i>“‘Mixtape’ Not Opened”</i> or <i>“Apple could not verify …”</i>. Click <b>Done</b>, <u>not</u> “Move to Trash”.</p>
+<p class="step"><b>3.</b>&nbsp; Open <b>System Settings → Privacy &amp; Security</b> and scroll all the way down to the <b>Security</b> section. It says <i>“‘Mixtape’ was blocked …”</i>. Click <b>Open Anyway</b> and confirm with your password or Touch ID.</p>
+<p class="step"><b>4.</b>&nbsp; At the final prompt, click <b>Open Anyway</b> once more. From now on, Mixtape opens normally.</p>
+
+
+<h2>Once it’s running</h2>
+<p class="step">•&nbsp; Mixtape has no window and no Dock icon. All you see is the cassette. Move the pointer over it and the controls appear.</p>
+<p class="step">•&nbsp; Double-click a cassette (a file ending in <b>.mixtape</b>) to open it.</p>
+<p class="step">•&nbsp; The first time you record, macOS asks whether Mixtape may record system audio or the microphone. Click <b>Allow</b>. If no sound comes through after that, quit Mixtape once (⌘Q) and open it again.</p>
+<p class="step">•&nbsp; To quit: ⌘Q, or right-click the cassette → “Quit Mixtape”.</p>
+
+<p class="small">For the technically inclined: instead of steps 2–4 you can run this in Terminal:<br><code>xattr -dr com.apple.quarantine /Applications/Mixtape.app</code></p>
+
+</body>
+</html>
