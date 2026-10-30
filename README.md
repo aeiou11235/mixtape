@@ -78,3 +78,5 @@ Requires the Xcode command line tools (`xcode-select --install`).
 ```
 
 The app is plain Swift (AppKit + SwiftUI) without an Xcode project. The web-page tape is `Player/player.html`, filled in by the app with the tape and its audio. System audio is captured with a Core Audio process tap, the microphone through the HAL directly. A `.mixtape` file is a zip archive holding `tape.json` and the recorded takes as AAC files.
+
+Mixtape was written with the help of AI coding tools.
