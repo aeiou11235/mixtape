@@ -330,10 +330,20 @@ enum Tools {
             return args[i + 1]
         }
         if let out = value("--snapshot") {
-            let deck = demoDeck(design: value("--design") ?? "ferro",
-                                fraction: Double(value("--pos") ?? "") ?? 0.3,
-                                side: value("--side") == "b" ? .b : .a,
+            let fraction = Double(value("--pos") ?? "") ?? 0.3
+            let side: Side = value("--side") == "b" ? .b : .a
+            let deck: Deck
+            if let path = value("--file") {
+                // A real tape, label and drawings as the user made them; it is only read, never saved.
+                let doc = try! TapeDocument(url: URL(fileURLWithPath: path))
+                doc.fileURL = nil
+                doc.data.sideUp = side
+                deck = Deck(doc: doc, snapshotMode: true)
+                deck.scrub(toFraction: fraction)
+            } else {
+                deck = demoDeck(design: value("--design") ?? "ferro", fraction: fraction, side: side,
                                 drawing: args.contains("--draw"))
+            }
             deck.showPanel = !args.contains("--nopanel")
             if args.contains("--meter") {
                 deck.meterOpen = true

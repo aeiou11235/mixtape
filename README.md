@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/cassette.png" width="520" alt="Mixtape cassette"></p>
+<p align="center"><img src="docs/cassette.png" width="520" alt="A ferro tape labelled MIXTAPE by hand"></p>
 
 <h1 align="center">Mixtape App</h1>
 
@@ -30,7 +30,7 @@ Mixtape App is as personal as it gets. *Vibe-coded with love.*
 
 <p align="center"><img src="docs/deck.png" width="520" alt="Mixtape with the deck and VU meters open"></p>
 
-<p align="center"><img src="docs/chrome.png" width="440" alt="A chrome tape, side B"></p>
+<p align="center"><img src="docs/chrome.png" width="440" alt="A chrome tape labelled OCT 30, 2026"> <img src="docs/clear.png" width="440" alt="A clear tape, side B, labelled MIXTAPE 2B"></p>
 
 ## Install
 

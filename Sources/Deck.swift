@@ -127,7 +127,8 @@ final class Deck: NSObject, ObservableObject {
                           total: length, leader: TapeLength.leaderSeconds,
                           leftAmount: length - elapsed, rightAmount: elapsed,
                           leftAngle: leftAngle, rightAngle: rightAngle,
-                          hideTitle: editingLabel, hint: showPanel && title.isEmpty && !drawMode,
+                          hideTitle: editingLabel,
+                          hint: showPanel && title.isEmpty && !drawMode && doc.drawing(side).isEmpty,
                           strokes: doc.drawing(side) + (liveStroke.map { [$0] } ?? []))
     }
 
