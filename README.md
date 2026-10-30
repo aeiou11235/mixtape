@@ -20,7 +20,11 @@ Mixtape App is as personal as it gets. *Made with love.*
 
 Where I grew up, in the south of Germany near the Czech border, the local record store only had country music. Swapping tapes with friends at school (and after) was the only way to hear anything new. We put real effort into every mixtape, because we made them for each other. A good tape was a sign of friendship.
 
-That’s the feeling Mixtape App is meant to bring back.
+That’s the feeling Mixtape App is meant to bring back – into the digital age.
+
+With Mixtape App you can record anything, anywhere, anytime: a music clip on YouTube, an Instagram reel (if you have to), or your own voice introducing the next song – then switch over to your Spotify playlist. Mixtape App is your always-on audio recorder. And you’re not recording for yourself. You’re recording for your friends.
+
+**Make the perfect mixtape. Share it with friends.**
 
 ## What it does
 
