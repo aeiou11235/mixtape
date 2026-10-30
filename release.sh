@@ -11,6 +11,8 @@ VERSION="${1:?usage: ./release.sh [--dry-run] <version> [notes]}"
 NOTES="${2:-}"
 TAG="v$VERSION"
 GUIDE="build/Zuerst lesen – Read me first.pdf"
+# gh keeps its login in ~/.config/gh; where that folder isn't writable, it lives here instead.
+[ -w "$HOME/.config" ] || export GH_CONFIG_DIR="${GH_CONFIG_DIR:-$HOME/Library/Application Support/gh}"
 
 if [ $DRY = 0 ]; then
     gh auth status >/dev/null 2>&1 || { echo "Not logged in to GitHub. Run: gh auth login"; exit 1; }
