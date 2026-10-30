@@ -1,13 +1,18 @@
 <p align="center"><img src="docs/cassette.png" width="520" alt="Mixtape cassette"></p>
 
-<h1 align="center">Mixtape</h1>
+<h1 align="center">Mixtape App</h1>
+
+<p align="center"><b>The perfect simulation of an audio cassette for your Mac – just like in 1986.</b></p>
+
+Recording is fiddly. You have to handle everything just right, or something goes wrong. But you make the effort, because it’s all for that one special friend. You record the perfect tape and pass it on.
+
+A cassette on your Mac desktop. Tape what your Mac is playing, flip it over, scribble on the label – and send it to a friend, who can record over it and send it back.
+
+Mixtape App is as personal as it gets. *Vibe-coded with love.*
 
 <p align="center">
-A cassette on your Mac desktop. Tape what your Mac is playing, flip it over, scribble on the label – and send it to a friend, who can record over it and send it back.<br>
 <b><a href="../../releases/latest/download/Mixtape.dmg">⬇ Download Mixtape.dmg</a></b> &nbsp;·&nbsp; macOS 14.4 or later · Apple silicon & Intel
 </p>
-
-<p align="center"><a href="#deutsch">Deutsch ↓</a></p>
 
 ---
 
@@ -24,6 +29,8 @@ A cassette on your Mac desktop. Tape what your Mac is playing, flip it over, scr
 - **Send it:** a tape is a single `.mixtape` file on your Desktop. Attach it to an email or message; the recipient double-clicks it and the cassette appears.
 
 <p align="center"><img src="docs/deck.png" width="520" alt="Mixtape with the deck and VU meters open"></p>
+
+<p align="center"><img src="docs/chrome.png" width="440" alt="A chrome tape, side B"></p>
 
 ## Install
 
@@ -61,38 +68,3 @@ Requires the Xcode command line tools (`xcode-select --install`).
 ```
 
 The app is plain Swift (AppKit + SwiftUI) without an Xcode project. System audio is captured with a Core Audio process tap, the microphone through the HAL directly. A `.mixtape` file is a zip archive holding `tape.json` and the recorded takes as AAC files.
-
----
-
-<a name="deutsch"></a>
-
-## Deutsch
-
-Eine Kassette auf deinem Mac-Schreibtisch. Nimm auf, was dein Mac abspielt, dreh die Kassette um, beschrifte sie – und schick sie an Freunde, die etwas drüber aufnehmen und sie zurückschicken können.
-
-**[⬇ Mixtape.dmg laden](../../releases/latest/download/Mixtape.dmg)** · ab macOS 14.4 · Apple- und Intel-Prozessoren
-
-<p align="center"><img src="docs/chrome.png" width="440" alt="Chrome-Kassette, Seite B"></p>
-
-**Was Mixtape kann**
-
-- **Nur eine Kassette:** kein Fenster, kein Dock-Symbol. Fährst du mit der Maus darüber, erscheint das Tapedeck.
-- **Nimmt auf, was dein Mac abspielt** (Spotify, YouTube …) oder das Mikrofon. Während der Aufnahme kannst du zwischen SYS und MIC umschalten.
-- **Wie ein echtes Band:** Aufnehmen überschreibt, jede Seite hat die halbe Laufzeit (C46, C60, C90), für Seite B drehst du die Kassette um.
-- **Vier Bandsorten:** Ferro, Chrome, Metal und Klar.
-- **Handschriftliches Etikett und Zeichnungen** direkt auf der Kassette.
-- **VU-Meter und REC-LEVEL-Regler**, der im roten Bereich analog übersteuert. Ohne Aufnahme ist er der Lautstärkeregler.
-- **Bandklang** (Rauschen, Leiern, Spulgeräusch, Tastenklacken, Pausenquietschen), jeweils abschaltbar. Die Einstellung reist mit dem Band.
-- **Pause von überall** mit ⌥⌘P.
-- **Verschicken:** Jedes Band ist eine einzelne `.mixtape`-Datei auf dem Schreibtisch. Hänge sie an eine Mail oder Nachricht; ein Doppelklick beim Empfänger, und die Kassette erscheint.
-
-**Installieren**
-
-1. **[Mixtape.dmg](../../releases/latest/download/Mixtape.dmg)** laden und öffnen.
-2. **Mixtape** auf **Programme** ziehen.
-3. Mixtape ist (noch) nicht von Apple signiert, deshalb blockiert macOS es beim ersten Mal. Mixtape doppelklicken, **Fertig** klicken, dann **Systemeinstellungen → Datenschutz & Sicherheit**, nach unten scrollen und **Trotzdem öffnen** klicken. Das ist nur einmal nötig.
-
-   Oder im Terminal: `xattr -dr com.apple.quarantine /Applications/Mixtape.app`
-4. Bei der ersten Aufnahme erlauben, dass Mixtape Systemton bzw. Mikrofon aufnehmen darf.
-
-Die Anleitung „Zuerst lesen“ im Disk-Image erklärt das Schritt für Schritt.
