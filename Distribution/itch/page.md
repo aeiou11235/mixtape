@@ -23,6 +23,14 @@ A cassette on your Mac desktop. Tape what your Mac is playing, flip it over, scr
 
 Mixtape App is as personal as it gets. *Vibe-coded with love.*
 
+### The story behind it
+
+I wrote my first program in 1986, in BASIC on an Atari 800XL. I was 13. These days I'm a freelance creative and photographer, not a coder, so I made this one with the help of AI.
+
+Where I grew up, in the south of Germany near the Czech border, the local record store only had country music. Swapping tapes with friends at school (and after) was the only way to hear anything new. We put real effort into every mixtape, because we made them for each other. A good tape was a sign of friendship.
+
+That's the feeling Mixtape App is meant to bring back.
+
 ### What it does
 
 - **Just a cassette.** No window, no Dock icon – only the tape floats on your desktop. Hover over it and the deck appears.
