@@ -23,7 +23,9 @@ Recording is fiddly, just like back then in 1986. You have to get everything jus
 
 ### The story behind it
 
-Where I grew up, in the south of Germany near the Czech border (it was the Czechoslovak border back then, just to be exact), our local record store only had country music. Swapping tapes with friends at school (and after) was the only way to hear anything new. We put real effort into every mixtape, because we made them for each other. To be honest, I wouldn't have known about The Cramps or The Vaselines without them back then. A good tape was a sign of friendship.
+I'm old enough to have done this for real. In 1986, where I grew up – in the south of Germany near the Czech border (it was the Czechoslovak border back then, just to be exact) – our local record store only had country music. Swapping tapes with friends at school (and after) was the only way to hear anything new. We put real effort into every mixtape, because we made them for each other. To be honest, I wouldn't have known about The Cramps or The Vaselines without them. A good tape was a sign of friendship.
+
+Tapes stayed with me. In Berlin in the 90s, cassettes were still the medium of the underground – demos, mixtapes and live recordings, passed from hand to hand.
 
 That's the feeling Mixtape App brings back – into the digital age. You're not recording for yourself. You're recording for your friends.
 
