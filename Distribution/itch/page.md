@@ -17,19 +17,15 @@ Source code link: https://github.com/aeiou11235/mixtape
 
 **The perfect simulation of an audio cassette for your Mac – just like in 1986.**
 
-Recording is fiddly. You have to handle everything just right, or something goes wrong. But you make the effort, because it's all for that one special friend. You record the perfect tape and pass it on.
+A cassette on your Mac desktop. Tape whatever your Mac is playing – a song on Spotify, a clip on YouTube, an Instagram reel (if you REALLY have to) – or your own voice introducing the next song. Flip it over, scribble on the label, and send it to a friend. They don't even need the app: the tape plays in any browser.
 
-A cassette on your Mac desktop. Tape what your Mac is playing, flip it over, scribble on the label – and send it to a friend, who can record over it and send it back.
-
-Mixtape App is as personal as it gets. *Made with love.*
+Recording is fiddly, just like back then in 1986. You have to get everything just right. But you make the effort, because it's for that one special friend.
 
 ### The story behind it
 
-Where I grew up, in the south of Germany near the Czech border, the local record store only had country music. Swapping tapes with friends at school (and after) was the only way to hear anything new. We put real effort into every mixtape, because we made them for each other. A good tape was a sign of friendship.
+Where I grew up, in the south of Germany near the Czech border (it was the Czechoslovak border back then, just to be exact), our local record store only had country music. Swapping tapes with friends at school (and after) was the only way to hear anything new. We put real effort into every mixtape, because we made them for each other. To be honest, I wouldn't have known about The Cramps or The Vaselines without them back then. A good tape was a sign of friendship.
 
-That's the feeling Mixtape App is meant to bring back – into the digital age.
-
-With Mixtape App you can record anything, anywhere, anytime: a music clip on YouTube, an Instagram reel (if you have to), or your own voice introducing the next song – then switch over to your Spotify playlist. Mixtape App is your always-on audio recorder. And you're not recording for yourself. You're recording for your friends.
+That's the feeling Mixtape App brings back – into the digital age. You're not recording for yourself. You're recording for your friends.
 
 **Make the perfect mixtape. Share it with friends.**
 
