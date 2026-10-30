@@ -1,11 +1,11 @@
-Zum Kopieren in eine Mail oder Nachricht. Den Link zur Mixtape.dmg (iCloud Drive, Dropbox, WeTransfer …) bitte selbst einsetzen.
+Zum Kopieren in eine Mail oder Nachricht. Der Link lädt immer die neueste Version.
 
 — Deutsch —
 
 Hey! Ich hab dir ein Mixtape aufgenommen 🎧
 
 Zum Anhören brauchst du einmalig die App „Mixtape“ (für Mac, ab macOS 14.4):
-[LINK ZUR MIXTAPE.DMG]
+https://github.com/aeiou11235/mixtape/releases/latest/download/Mixtape.dmg
 
 Öffne die Datei, zieh Mixtape in den Ordner Programme und folge der Anleitung „Zuerst lesen“. macOS warnt beim ersten Öffnen, weil die App nicht aus dem App Store kommt – das ist normal und dauert eine Minute.
 
@@ -16,7 +16,7 @@ Danach einfach die angehängte .mixtape-Datei doppelklicken. Du kannst auch selb
 Hey! I made you a mixtape 🎧
 
 To listen, you’ll need the Mixtape app once (Mac, macOS 14.4 or later):
-[LINK TO MIXTAPE.DMG]
+https://github.com/aeiou11235/mixtape/releases/latest/download/Mixtape.dmg
 
 Open the file, drag Mixtape into Applications and follow the “Read me first” guide. macOS shows a warning the first time because the app isn’t from the App Store – that’s normal and takes a minute.
 
