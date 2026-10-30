@@ -4,9 +4,11 @@
 
 <p align="center"><b>The perfect simulation of an audio cassette for your Mac – just like in 1986.</b></p>
 
-A cassette on your Mac desktop. Tape whatever your Mac is playing – a song on Spotify, a clip on YouTube, an Instagram reel (if you REALLY have to) – or your own voice introducing the next song. Flip it over, scribble on the label, and send it to a friend. They don’t even need the app: the tape plays in any browser.
+<p align="center"><i>“Fucking skeuomorphism, and not even good one.”</i><br>— a Reddit user</p>
 
-Recording is fiddly, just like back then in 1986. You have to get everything just right. But you make the effort, because it’s for that one special friend.
+Guilty as charged. It’s the simulation of a cheap tape recorder, not a high-end audiophile component. A cassette on your Mac desktop. Tape whatever your Mac is playing – a song on Spotify, a clip on YouTube, an Instagram reel (if you REALLY have to) – or your own voice introducing the next song. Flip it over, scribble on the label, and send it to a friend. They don’t even need the app: the tape plays in any browser.
+
+Recording is fiddly, just like back then in 1986. You can only record by actually listening to the music while it plays – no dragging songs into a playlist. It takes time, it’s a pain in the …, but it’s actually fun. And you make the effort, because it’s for that one special friend.
 
 <p align="center">
 <b><a href="../../releases/latest/download/Mixtape.dmg">⬇ Download Mixtape.dmg</a></b> &nbsp;·&nbsp; macOS 14.4 or later · Apple silicon & Intel
