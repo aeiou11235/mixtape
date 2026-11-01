@@ -690,8 +690,10 @@ final class Deck: NSObject, ObservableObject {
                     t.cells = embossDraft
                     t.color = editingColor
                     // Pressed in place, or below the title: it stays exactly there.
-                    if editAnchor != nil || i > 0 {
-                        let f = Painter.stripFrame(t, index: i, cells: embossDraft, design: doc.design, anchor: editAnchor)
+                    let placed = Painter.stripFrame(t, index: i, cells: embossDraft, design: doc.design, anchor: editAnchor)
+                    if editAnchor != nil || i > 0 || Painter.stripCoversHub(placed, doc.design) {
+                        // Stuck where it was pressed – unless that is over a hub hole, which it must leave free.
+                        let f = Painter.clearOfHubs(placed, doc.design)
                         t.x = f.center.x
                         t.y = f.center.y
                         t.angle = f.angle
@@ -807,6 +809,8 @@ final class Deck: NSObject, ObservableObject {
             f.center.x = min(max(f.center.x + p.x - d.start.x, 0), Painter.W)
             f.center.y = min(max(f.center.y + p.y - d.start.y, 0), Painter.H)
         }
+        // A strip can't go over a hub hole: it stops at the edge.
+        if Painter.stripCoversHub(f, doc.design) { return }
         // The left end is what stays put while pressing, so the strip keeps growing from there.
         objectWillChange.send()
         editAnchor = Painter.anchor(of: f)

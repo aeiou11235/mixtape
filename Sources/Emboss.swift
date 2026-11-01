@@ -159,6 +159,34 @@ extension Painter {
         return nil
     }
 
+    /// Whether a strip would cover a hub hole: on a real cassette that blocks the deck's spindle,
+    /// so the tape wouldn't play.
+    static func stripCoversHub(_ f: EmbossFrame, _ d: CassetteDesign) -> Bool {
+        let hy = (d.skin?.spec.hubY).map { $0 * mm } ?? hubY
+        let r = 6.0 * mm
+        let a = -f.angle * .pi / 180
+        for c in [CGPoint(x: hubL.x, y: hy), CGPoint(x: hubR.x, y: hy)] {
+            let dx = c.x - f.center.x, dy = c.y - f.center.y
+            let lx = dx * cos(a) - dy * sin(a), ly = dx * sin(a) + dy * cos(a)
+            let nx = min(max(lx, -f.size.width / 2), f.size.width / 2), ny = min(max(ly, -f.size.height / 2), f.size.height / 2)
+            if hypot(lx - nx, ly - ny) < r { return true }
+        }
+        return false
+    }
+
+    /// The nearest place up or down where the strip leaves the hub holes free.
+    static func clearOfHubs(_ f: EmbossFrame, _ d: CassetteDesign) -> EmbossFrame {
+        guard stripCoversHub(f, d) else { return f }
+        for step in stride(from: 4.0, through: 160, by: 4) {
+            for sign in [1.0, -1.0] {
+                var g = f
+                g.center.y = f.center.y + sign * step
+                if g.center.y > 8, g.center.y < H - 8, !stripCoversHub(g, d) { return g }
+            }
+        }
+        return f
+    }
+
     static func embossContains(_ f: EmbossFrame, _ p: CGPoint) -> Bool {
         let a = -f.angle * .pi / 180
         let dx = p.x - f.center.x, dy = p.y - f.center.y
