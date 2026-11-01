@@ -17,10 +17,7 @@ Source code link: https://github.com/aeiou11235/mixtape
 
 **The perfect simulation of an audio cassette for your Mac – just like in 1986.**
 
-*"Fucking skeuomorphism, and not even good one."*  
-— a Reddit user
-
-Guilty as charged. It's the simulation of a cheap tape recorder, not a high-end audiophile component. A cassette on your Mac desktop. Tape whatever your Mac is playing – a song on Spotify, a clip on YouTube, an Instagram reel (if you REALLY have to) – or your own voice introducing the next song. Flip it over, scribble on the label, and send it to a friend. They don't even need the app: the tape plays in any browser.
+It's the simulation of a cheap tape recorder, not a high-end audiophile component. A cassette on your Mac desktop. Tape whatever your Mac is playing – a song on Spotify, a clip on YouTube, an Instagram reel (if you REALLY have to) – or your own voice introducing the next song. Flip it over, scribble on the label, and send it to a friend. They don't even need the app: the tape plays in any browser.
 
 Recording is fiddly, just like back then in 1986. There's no shortcut: you can't just drop in a playlist and hit send. You record in real time, listening to every song as it goes onto the tape. You hit PAUSE at just the right moment – the pause key squeaks a little, and the cut is never quite perfect. It takes time, it's a pain in the …, but it's actually fun. That's exactly the feeling. And you make the effort, because it's for that one special friend.
 
