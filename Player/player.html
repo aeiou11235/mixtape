@@ -649,16 +649,31 @@ function startAudio() {
   noise.connect(spoolFilter); spoolFilter.connect(spoolGain); spoolGain.connect(master);
   noise.start();
   clunkOut = ac.createGain(); clunkOut.gain.value = .5 * lvl('clicks', 1); clunkOut.connect(ac.destination);
-  // Phones only let sound start from a tap. The recordings start later, when the tape reaches them,
-  // so each one is set up and given a silent start here, during the tap that starts the audio.
-  for (const file in AUDIO) {
+  unlockMedia();
+}
+
+// Phones only let a recording start from a tap – on an iPhone only when the finger lifts. The
+// recordings start later, when the tape reaches them, so each one gets a silent start during a tap;
+// until every one has had one, each tap tries again.
+let mediaUnlocked = false;
+function unlockMedia() {
+  if (mediaUnlocked || !ac) return;
+  if (ac.state === 'suspended') ac.resume();
+  const files = Object.keys(AUDIO);
+  if (!files.length) { mediaUnlocked = true; return; }
+  let ok = 0;
+  for (const file of files) {
     const el = element(file);
     el.muted = true;
+    const done = good => {
+      el.pause(); el.muted = false;
+      if (good && ++ok === files.length) mediaUnlocked = true;
+    };
     const p = el.play();
-    const done = () => { el.pause(); el.muted = false; };
-    if (p && p.then) p.then(done, done); else done();
+    if (p && p.then) p.then(() => done(true), () => done(false)); else done(true);
   }
 }
+for (const type of ['touchend', 'click']) document.addEventListener(type, () => { if (ac) unlockMedia(); }, true);
 
 function clunk(kind) {
   if (!ac || !sound.clicks) return;
@@ -993,7 +1008,7 @@ function layout() {
 // at speed, like holding REW or FF on a deck; hold it when stopped to wind until you let go.
 let hold = null;
 const isPhone = () => document.documentElement.classList.contains('phone');
-tapeCanvas.addEventListener('touchend', () => { if (isPhone()) startAudio(); }, { passive: true });
+tapeCanvas.addEventListener('touchend', () => { if (isPhone()) { startAudio(); unlockMedia(); } }, { passive: true });
 tapeCanvas.addEventListener('pointerdown', e => {
   if (!isPhone()) return;
   e.preventDefault();
