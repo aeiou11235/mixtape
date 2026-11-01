@@ -92,7 +92,9 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
   .logo { margin: 0; font: italic 900 clamp(56px, 14vw, 128px)/.9 "Futura", "Avenir Next", "Helvetica Neue", sans-serif; letter-spacing: -.02em;
     background: linear-gradient(180deg, #fff 0%, #fff 42%, #ffd2f0 48%, #ff7ad0 60%, #ffd23f 100%); -webkit-background-clip: text; background-clip: text;
     color: transparent; filter: drop-shadow(0 3px 0 #3a0a5e) drop-shadow(0 0 22px rgba(255,63,164,.55)); }
-  .stripes { width: min(420px, 80%); height: 18px; margin: 18px auto 0;
+  /* The stripes run exactly as wide as the tagline under them. */
+  .lockup { display: inline-block; max-width: 34em; }
+  .stripes { width: 100%; height: 18px; margin: 18px 0 0;
     background: linear-gradient(#ff3b30 0 20%, transparent 20% 25%, #ff9500 25% 45%, transparent 45% 50%, #ffd60a 50% 70%, transparent 70% 75%, #33e1ff 75% 95%, transparent 95%); }
   .tagline { margin: 18px auto 0; max-width: 34em; font-size: clamp(18px, 2.6vw, 22px); font-weight: 600; color: var(--ink); }
 
@@ -149,8 +151,10 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
 <div id="home">
   <header class="wrap">
     <h1 class="logo">MIXTAPE</h1>
-    <div class="stripes" aria-hidden="true"></div>
-    <p class="tagline">The perfect simulation of an audio cassette for your Mac – just like in 1986.</p>
+    <div class="lockup">
+      <div class="stripes" aria-hidden="true"></div>
+      <p class="tagline">The perfect simulation of an audio cassette for your Mac – just like in 1986.</p>
+    </div>
   </header>
 
   <div class="wrap hero">
