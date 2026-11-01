@@ -13,6 +13,14 @@ private let english: [String: String] = [
     // Menus
     "Neue Kassette": "New Cassette",
     "Kassetten-Designs hinzufügen …": "Add Cassette Designs…",
+    "Gratis-Designs laden …": "Get Free Designs…",
+    "Gratis-Designs laden": "Get Free Designs",
+    "Mehr Designs ansehen …": "See More Designs…",
+    "Drei Kassetten aus der 80s Collection – Worn Edition, geschenkt. Mixtape ist ein Hobbyprojekt: Wenn dir die App gefällt, freue ich mich über eine kleine Spende.": "Three cassettes from the 80s Collection – Worn Edition, free. Mixtape is a labour of love: if you like it, a small donation would make my day.",
+    "Spenden & laden": "Donate & Download",
+    "Nur laden": "Just Download",
+    "Abbrechen": "Cancel",
+    "Designs werden geladen …": "Getting the designs…",
     "Schreibschutz": "Write Protection",
     "Prägeband": "Label Tape",
     "Neues Band – das alte abschneiden": "New strip – cut off the old one",
@@ -101,7 +109,6 @@ private let english: [String: String] = [
     "Doppelklick zum Beschriften": "Double-click to write a label",
 
     // Messages
-    "Abbrechen": "Cancel",
     "Systemeinstellungen öffnen": "Open System Settings",
     "Mixtape neu starten": "Restart Mixtape",
     "Die Aufnahme konnte nicht starten.": "The recording couldn’t start.",

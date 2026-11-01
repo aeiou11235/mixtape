@@ -198,6 +198,41 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         } catch { alert(error) }
     }
 
+    // Free designs live on GitHub; the website shows them all; donations go through itch.io.
+    static let freeDesigns = URL(string: "https://github.com/aeiou11235/mixtape/releases/download/addons/Free-Sampler.mixtapeskins")!
+    static let designsPage = URL(string: "https://mixtape.toyko.online/#designs")!
+    static let donatePage = URL(string: "https://aeiou11235.itch.io/mixtape-app/purchase")!
+
+    /// Downloads the free designs and installs them – after asking, kindly, for a donation.
+    func downloadFreeDesigns() {
+        let a = NSAlert()
+        a.messageText = L("Gratis-Designs laden")
+        a.informativeText = L("Drei Kassetten aus der 80s Collection – Worn Edition, geschenkt. Mixtape ist ein Hobbyprojekt: Wenn dir die App gefällt, freue ich mich über eine kleine Spende.")
+        a.addButton(withTitle: L("Spenden & laden"))
+        a.addButton(withTitle: L("Nur laden"))
+        a.addButton(withTitle: L("Abbrechen"))
+        NSApp.activate()
+        let answer = a.runModal()
+        if answer == .alertThirdButtonReturn { return }
+        if answer == .alertFirstButtonReturn { NSWorkspace.shared.open(Self.donatePage) }
+        let busy = BusyPanel(L("Designs werden geladen …"), near: nil)
+        Task {
+            do {
+                let (tmp, response) = try await URLSession.shared.download(from: Self.freeDesigns)
+                guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw SkinError.invalid }
+                let file = FileManager.default.temporaryDirectory.appendingPathComponent("Free Sampler.mixtapeskins")
+                try? FileManager.default.removeItem(at: file)
+                try FileManager.default.moveItem(at: tmp, to: file)
+                busy.close()
+                installDesigns(file)
+                try? FileManager.default.removeItem(at: file)
+            } catch {
+                busy.close()
+                alert(error)
+            }
+        }
+    }
+
     @objc func chooseDesigns() {
         let p = NSOpenPanel()
         p.allowedContentTypes = [UTType(filenameExtension: "mixtapeskins") ?? .data]

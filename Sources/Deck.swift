@@ -959,6 +959,8 @@ final class Deck: NSObject, ObservableObject {
             pack.skins.map(\.design).forEach(addDesign)
         }
         designs.addItem(.separator())
+        designs.addItem(item(L("Gratis-Designs laden …"), #selector(freeDesignsItem)))
+        designs.addItem(item(L("Mehr Designs ansehen …"), #selector(moreDesignsItem)))
         designs.addItem(item(L("Kassetten-Designs hinzufügen …"), #selector(addDesignsItem)))
         newItem.submenu = designs
         m.addItem(newItem)
@@ -1067,6 +1069,8 @@ final class Deck: NSObject, ObservableObject {
 
     @objc private func openItem() { (NSApp.delegate as? AppDelegate)?.openDocument(nil) }
     @objc private func addDesignsItem() { (NSApp.delegate as? AppDelegate)?.chooseDesigns() }
+    @objc private func freeDesignsItem() { (NSApp.delegate as? AppDelegate)?.downloadFreeDesigns() }
+    @objc private func moreDesignsItem() { NSWorkspace.shared.open(AppDelegate.designsPage) }
 
     @objc private func protectItem(_ sender: NSMenuItem) {
         guard let raw = sender.representedObject as? String, let sd = Side(rawValue: raw) else { return }
