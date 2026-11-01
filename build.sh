@@ -36,7 +36,10 @@ cp Player/player.html "$APP/Contents/Resources/player.html"   # the web-page pla
 cp Resources/emboss-glyphs.json "$APP/Contents/Resources/"    # the label-tape letters, for the app and the web page
 # The share server plays every link with its own copy of the player, so links sent earlier get fixes too.
 python3 -c 'import json,sys; t=open("Player/player.html").read(); g=json.dumps(json.load(open("Resources/emboss-glyphs.json")),ensure_ascii=False,separators=(",",":")); open("Share/php/player.html","w").write(t.replace("__GLYPHS_JSON__",g))'
-[ -d Share/deploy/mixtape.toyko.online ] && cp Share/php/player.html Share/php/index.php Share/php/.htaccess Share/deploy/mixtape.toyko.online/
+if [ -d Share/deploy/mixtape.toyko.online ]; then
+    cp Share/php/player.html Share/php/index.php Share/php/.htaccess Share/php/preview.png Share/deploy/mixtape.toyko.online/
+    cp -R Share/php/site Share/deploy/mixtape.toyko.online/
+fi
 
 # App and document icon, rendered from the cassette itself.
 ICONSET=build/AppIcon.iconset

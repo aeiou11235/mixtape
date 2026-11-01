@@ -1,35 +1,143 @@
 <?php
-// The share page. Messengers like Signal and WhatsApp read the page for a preview, but never the
-// part after the # – so the link also names its tape as ?t=…, and the preview shows its cassette.
+// mixtape.toyko.online: the home of Mixtape, and the page every shared tape opens on.
+// A tape link is …/?t=<tape>#<tape>.<key>. Messengers like Signal and WhatsApp read the page for a
+// preview but never the part after the #, so ?t= names the tape and the preview shows its cassette.
 $id = preg_match('/^[A-Za-z0-9]{10}$/', $_GET['t'] ?? '') ? $_GET['t'] : '';
 $base = 'https://' . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 // Links from before they named their tape get a picture of a cassette all the same.
 $image = ($id && is_file(__DIR__ . "/t/$id.png")) ? "$base/t/$id.png" : (is_file(__DIR__ . '/preview.png') ? "$base/preview.png" : '');
+$title = $id ? 'Someone made you a mixtape' : 'Mixtape – a cassette for your Mac';
+$about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything your Mac plays, punch the title onto label tape, send it to a friend. Free.';
 ?><!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mixtape</title>
+<meta name="description" content="<?= htmlspecialchars($about) ?>">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Mixtape">
-<meta property="og:title" content="Someone made you a mixtape">
-<meta property="og:description" content="Tap to play – made with Mixtape for Mac.">
+<meta property="og:title" content="<?= htmlspecialchars($title) ?>">
+<meta property="og:description" content="<?= htmlspecialchars($about) ?>">
 <?php if ($image): ?>
 <meta property="og:image" content="<?= htmlspecialchars($image) ?>">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="<?= htmlspecialchars($image) ?>">
 <?php endif; ?>
 <style>
-  html, body { margin: 0; height: 100%; background: linear-gradient(#1a0638, #c42583 60%, #ffb347); color: #fff;
-    font: 17px/1.45 -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; }
-  main { min-height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; box-sizing: border-box; }
+  :root { --ink: #fff7ee; --dim: rgba(255,247,238,.78); --neon: #ff3fa4; --cyan: #33e1ff; --sun: #ffd23f; --night: #14052e; }
+  * { box-sizing: border-box; }
+  html { background: var(--night); }
+  body { margin: 0; color: var(--ink); font: 17px/1.55 -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    background: linear-gradient(180deg, #14052e 0%, #2c0a5e 18%, #6a1a8c 36%, #c42583 56%, #ff5f62 74%, #ffb347 92%, #ffd36b 100%); min-height: 100vh; }
+  a { color: inherit; }
+  .wrap { width: min(1040px, 100%); margin: 0 auto; padding: 0 16px; }
+
+  /* The unwrapping note while a shared tape loads. */
+  #unwrap { display: none; min-height: 100vh; align-items: center; justify-content: center; text-align: center; padding: 24px; }
+  body.tape #unwrap { display: flex; }
+  body.tape #home { display: none; }
+
+  header { padding: 56px 0 8px; text-align: center; }
+  .logo { margin: 0; font: italic 900 clamp(56px, 14vw, 128px)/.9 "Futura", "Avenir Next", "Helvetica Neue", sans-serif; letter-spacing: -.02em;
+    background: linear-gradient(180deg, #fff 0%, #fff 42%, #ffd2f0 48%, #ff7ad0 60%, #ffd23f 100%); -webkit-background-clip: text; background-clip: text;
+    color: transparent; filter: drop-shadow(0 3px 0 #3a0a5e) drop-shadow(0 0 22px rgba(255,63,164,.55)); }
+  .stripes { width: min(420px, 80%); height: 18px; margin: 18px auto 0;
+    background: linear-gradient(#ff3b30 0 20%, transparent 20% 25%, #ff9500 25% 45%, transparent 45% 50%, #ffd60a 50% 70%, transparent 70% 75%, #33e1ff 75% 95%, transparent 95%); }
+  .tagline { margin: 18px auto 0; max-width: 34em; font-size: clamp(18px, 2.6vw, 22px); font-weight: 600; color: var(--ink); }
+
+  .hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 40px; align-items: center; padding: 36px 0 24px; }
+  .hero img { width: 100%; height: auto; filter: drop-shadow(0 24px 40px rgba(20,5,46,.55)); }
+  .pitch p { margin: 0 0 14px; color: var(--ink); }
+  .buttons { display: flex; flex-wrap: wrap; gap: 12px; margin: 22px 0 8px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; border-radius: 999px; font-weight: 800; text-decoration: none;
+    letter-spacing: .02em; transition: transform .12s; }
+  .btn:hover { transform: translateY(-2px); }
+  .btn.main { background: var(--sun); color: #2c0a5e; box-shadow: 0 6px 0 #b36b00, 0 10px 24px rgba(20,5,46,.4); }
+  .btn.alt { background: rgba(20,5,46,.45); border: 2px solid rgba(255,247,238,.6); }
+  .small { font-size: 14px; color: var(--dim); }
+
+  section { padding: 40px 0; }
+  h2 { margin: 0 0 18px; font: italic 900 clamp(28px, 4.6vw, 40px)/1.05 "Futura", "Avenir Next", sans-serif; text-transform: uppercase; letter-spacing: .01em;
+    text-shadow: 0 3px 0 rgba(58,10,94,.8); }
+  .features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .card { padding: 18px 18px 16px; border-radius: 16px; background: rgba(20,5,46,.5); border: 1px solid rgba(255,247,238,.18); }
+  .card h3 { margin: 0 0 6px; font: 800 17px/1.25 "Avenir Next", -apple-system, sans-serif; color: var(--sun); }
+  .card p { margin: 0; font-size: 15.5px; color: var(--ink); }
+
+  .tapes { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center; }
+  .tapes img { width: 100%; height: auto; filter: drop-shadow(0 16px 28px rgba(20,5,46,.5)); }
+  .tapes img:nth-child(1) { transform: rotate(-3deg); }
+  .tapes img:nth-child(2) { transform: rotate(2.5deg); }
+
+  .story { max-width: 44em; }
+  .story p { margin: 0 0 14px; color: #2c0a5e; font-weight: 500; }
+  .claim { font: italic 900 clamp(22px, 3.4vw, 30px)/1.2 "Futura", "Avenir Next", sans-serif; color: #2c0a5e; margin-top: 22px; }
+  footer { padding: 36px 0 48px; text-align: center; color: #2c0a5e; font-weight: 600; font-size: 14px; }
+  footer a { color: #2c0a5e; }
+
+  @media (max-width: 760px) {
+    header { padding-top: 40px; }
+    .hero { grid-template-columns: 1fr; gap: 20px; padding-top: 24px; }
+    .features { grid-template-columns: 1fr; }
+    .tapes { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
-<main><p id="msg">Unwrapping your mixtape …</p></main>
+<div id="unwrap"><p id="msg">Unwrapping your mixtape …</p></div>
+
+<div id="home">
+  <header class="wrap">
+    <h1 class="logo">MIXTAPE</h1>
+    <div class="stripes" aria-hidden="true"></div>
+    <p class="tagline">The perfect simulation of an audio cassette for your Mac – just like in 1986.</p>
+  </header>
+
+  <div class="wrap hero">
+    <img src="site/hero.png" alt="A yellow cassette labelled 90’s Indie Rock, with the tape deck and VU meters below it" width="760" height="713">
+    <div class="pitch">
+      <p>A cassette on your Mac desktop. Tape whatever your Mac is playing – a song on Spotify, a clip on YouTube, an Instagram reel (if you REALLY have to) – or your own voice introducing the next song.</p>
+      <p>Flip it over, punch the title onto label tape, and send it to a friend. They don’t even need the app: one tap on the link and the tape plays – on a phone it fills the whole screen.</p>
+      <div class="buttons">
+        <a class="btn main" href="https://aeiou11235.itch.io/mixtape-app">⬇ Download for Mac – free</a>
+        <a class="btn alt" href="https://github.com/aeiou11235/mixtape/releases/latest">GitHub</a>
+      </div>
+      <p class="small">macOS 14.4 or later · Apple silicon &amp; Intel · pay what you want</p>
+    </div>
+  </div>
+
+  <section class="wrap">
+    <h2>What it does</h2>
+    <div class="features">
+      <div class="card"><h3>Records what your Mac plays</h3><p>Spotify, YouTube, anything – or the microphone. Real time only: you hit PAUSE at just the right moment, and the pause key squeaks.</p></div>
+      <div class="card"><h3>Like real tape</h3><p>Recording overwrites what was there. C46, C60 or C90, side A and side B. Break out the tab and REC won’t go down.</p></div>
+      <div class="card"><h3>Label tape</h3><p>Punch titles onto embossed plastic strips – 16 colours, as many as you like, anywhere on the cassette. No delete key: go back and press over it.</p></div>
+      <div class="card"><h3>Send it as a link</h3><p>One tap and it plays, on any phone or computer. Encrypted on your Mac – the key travels only in the link, so the server can’t read it.</p></div>
+      <div class="card"><h3>Tape sound</h3><p>Hiss, wow &amp; flutter, tape tone, winding noise, key clunks – each with its own slider. VU meters and a REC LEVEL fader that saturates like tape.</p></div>
+      <div class="card"><h3>Cassette designs</h3><p>Ferro, Chrome, Metal and Clear – and add-ons like the <em>80s Collection</em> and its well-loved <em>Worn Edition</em>.</p></div>
+    </div>
+  </section>
+
+  <section class="wrap tapes" aria-label="Some tapes">
+    <img src="site/japanoise.png" alt="A worn clear cassette labelled Japanoise" width="560" height="367" loading="lazy">
+    <img src="site/darkwave.png" alt="A black cassette with label strips: Dark Wave, Goth, The Cure" width="560" height="368" loading="lazy">
+  </section>
+
+  <section class="wrap story">
+    <h2>The story behind it</h2>
+    <p>I’m old enough to have done this for real. In 1986, where I grew up – in the south of Germany near the Czech border – our local record store only had country music. Swapping tapes with friends was the only way to hear anything new. We put real effort into every mixtape, because we made them for each other. A good tape was a sign of friendship.</p>
+    <p>Tapes stayed with me. In Berlin in the 90s, cassettes were still the medium of the underground, passed from hand to hand. That’s the feeling Mixtape brings back – into the digital age. You’re not recording for yourself. You’re recording for your friends.</p>
+    <p class="claim">Make the perfect mixtape. Share it with friends.</p>
+  </section>
+
+  <footer class="wrap">
+    Made by AEIOU · <a href="https://aeiou11235.itch.io/mixtape-app">itch.io</a> · <a href="https://github.com/aeiou11235/mixtape">GitHub</a>
+  </footer>
+</div>
+
 <script>
-// The link is …/#<tape>.<key>. The part after # never leaves this browser: the tape is fetched
+// A shared tape: …/#<tape>.<key>. The part after # never leaves this browser: the tape is fetched
 // encrypted and unlocked here with AES-GCM, then it takes over the page – played by the newest
 // player.html on this server, so links sent before a fix get it too. Only the tape's own data is
 // taken from it; if that can't be found, the tape plays with the player it came with.
@@ -54,6 +162,9 @@ async function newest(html) {
   }
 }
 (async () => {
+  // Without a tape after the #, this is just the home page.
+  if (location.hash.length < 2) return;
+  document.body.classList.add('tape');
   const say = t => { document.getElementById('msg').textContent = t; };
   const [id, k] = location.hash.slice(1).split('.');
   if (!/^[A-Za-z0-9]{10}$/.test(id || '') || !k) return say('This link is incomplete – ask for it again.');
