@@ -47,6 +47,12 @@ That’s the feeling Mixtape App brings back – into the digital age. You’re 
 
 <p align="center"><img src="docs/chrome.png" width="440" alt="A black dark wave tape with three label strips"> <img src="docs/clear.png" width="440" alt="A yellow rainbow tape on blue"></p>
 
+## Free cassette designs
+
+<p align="center"><img src="docs/free-sampler.png" width="700" alt="Three worn cassettes: a clear one labelled Japanoise, a yellow one labelled Indie Rock, a black one labelled Dark Wave"></p>
+
+**[⬇ Free Sampler](https://github.com/aeiou11235/mixtape/releases/download/addons/Free-Sampler.mixtapeskins)** – three cassettes from the *80s Collection – Worn Edition*, well loved, scratched and stickered. Download it, double-click it, and the designs appear under **New Cassette** in the cassette's menu – each as C46, C60 or C90. Make your own: [docs/ADDONS.md](docs/ADDONS.md).
+
 ## Install
 
 1. Download **[Mixtape.dmg](../../releases/latest/download/Mixtape.dmg)** and open it.

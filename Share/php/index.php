@@ -120,6 +120,8 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
   .tapes img:nth-child(1) { transform: rotate(-3deg); }
   .tapes img:nth-child(2) { transform: rotate(2.5deg); }
 
+  .free img { width: 100%; height: auto; margin: 4px 0 14px; filter: drop-shadow(0 16px 28px rgba(20,5,46,.5)); }
+  .free p { margin: 0; max-width: 40em; }
   .story { max-width: 44em; }
   .story p { margin: 0 0 14px; color: #2c0a5e; font-weight: 500; }
   .claim { font: italic 900 clamp(22px, 3.4vw, 30px)/1.2 "Futura", "Avenir Next", sans-serif; color: #2c0a5e; margin-top: 22px; }
@@ -165,13 +167,20 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
       <div class="card"><h3>Label tape</h3><p>Punch titles onto embossed plastic strips – 16 colours, as many as you like, anywhere on the cassette. No delete key: go back and press over it.</p></div>
       <div class="card"><h3>Send it as a link</h3><p>One tap and it plays, on any phone or computer. Encrypted on your Mac – the key travels only in the link, so the server can’t read it.</p></div>
       <div class="card"><h3>Tape sound</h3><p>Hiss, wow &amp; flutter, tape tone, winding noise, key clunks – each with its own slider. VU meters and a REC LEVEL fader that saturates like tape.</p></div>
-      <div class="card"><h3>Cassette designs</h3><p>Ferro, Chrome, Metal and Clear – and add-ons like the <em>80s Collection</em> and its well-loved <em>Worn Edition</em>.</p></div>
+      <div class="card"><h3>Cassette designs</h3><p>Ferro, Chrome, Metal and Clear – and add-ons like the <em>80s Collection</em> and its well-loved <em>Worn Edition</em>. <a href="#designs">Three of them are free.</a></p></div>
     </div>
   </section>
 
   <section class="wrap tapes" aria-label="Some tapes">
     <img src="site/japanoise.png" alt="A worn clear cassette labelled Japanoise" width="560" height="367" loading="lazy">
     <img src="site/darkwave.png" alt="A black cassette with label strips: Dark Wave, Goth, The Cure" width="560" height="368" loading="lazy">
+  </section>
+
+  <section class="wrap free" id="designs">
+    <h2>Free cassette designs</h2>
+    <img src="site/free-sampler.png" alt="Three worn cassettes: Japanoise, Indie Rock and Dark Wave" width="1200" height="370" loading="lazy">
+    <p>Three cassettes from the <em>80s Collection – Worn Edition</em>: well loved, scratched and stickered. Download, double-click, and they appear under <b>New Cassette</b> – as C46, C60 or C90.</p>
+    <div class="buttons"><a class="btn main" href="https://github.com/aeiou11235/mixtape/releases/download/addons/Free-Sampler.mixtapeskins">⬇ Free Sampler – 3 designs</a></div>
   </section>
 
   <section class="wrap story">

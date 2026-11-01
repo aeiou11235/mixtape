@@ -372,6 +372,7 @@ enum Tools {
         if let p = value("--designs") {
             do { _ = try SkinStore.shared.install(URL(fileURLWithPath: p)) } catch { print("designs: \(error.localizedDescription)") }
         }
+        if let l = value("--length").flatMap({ Int($0) }).flatMap({ TapeLength(rawValue: $0) }) { demoLength = l }
         if let out = value("--snapshot") {
             let fraction = Double(value("--pos") ?? "") ?? 0.3
             let side: Side = value("--side") == "b" ? .b : .a
@@ -624,8 +625,11 @@ enum Tools {
         }
     }
 
+    /// --length 46|60|90 for demo tapes.
+    static var demoLength = TapeLength.c60
+
     private static func demoDeck(design: String, fraction: Double, side: Side, drawing: Bool) -> Deck {
-        let doc = try! TapeDocument(length: .c60, design: design)
+        let doc = try! TapeDocument(length: demoLength, design: design)
         doc.data.titleA = "Sommer ’86"
         doc.data.titleB = "Nachtfahrt"
         doc.data.sideUp = side
