@@ -132,6 +132,7 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
   .donate { margin-top: 72px; text-align: center; }
   .donate p { margin-bottom: 0; }
   .donate .buttons { justify-content: center; margin: 24px 0 0; }
+  .donate .btn { background: #b8323a; border: 2px solid rgba(255,247,238,.45); color: #fff7ee; box-shadow: 0 6px 0 #7e1d24, 0 10px 24px rgba(20,5,46,.3); }
   .story p { margin: 0 0 24px; color: #2c0a5e; font-weight: 500; line-height: 1.6; }
   .claim { font: italic 900 clamp(22px, 3.4vw, 30px)/1.2 "Futura", "Avenir Next", sans-serif; color: #2c0a5e; margin-top: 48px; }
   footer { padding: 36px 0 48px; text-align: center; color: #2c0a5e; font-weight: 600; font-size: 14px; }
