@@ -3,7 +3,8 @@
 // part after the # – so the link also names its tape as ?t=…, and the preview shows its cassette.
 $id = preg_match('/^[A-Za-z0-9]{10}$/', $_GET['t'] ?? '') ? $_GET['t'] : '';
 $base = 'https://' . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
-$image = ($id && is_file(__DIR__ . "/t/$id.png")) ? "$base/t/$id.png" : '';
+// Links from before they named their tape get a picture of a cassette all the same.
+$image = ($id && is_file(__DIR__ . "/t/$id.png")) ? "$base/t/$id.png" : (is_file(__DIR__ . '/preview.png') ? "$base/preview.png" : '');
 ?><!doctype html>
 <html lang="en">
 <head>
@@ -16,8 +17,6 @@ $image = ($id && is_file(__DIR__ . "/t/$id.png")) ? "$base/t/$id.png" : '';
 <meta property="og:description" content="Tap to play – made with Mixtape for Mac.">
 <?php if ($image): ?>
 <meta property="og:image" content="<?= htmlspecialchars($image) ?>">
-<meta property="og:image:width" content="690">
-<meta property="og:image:height" content="462">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="<?= htmlspecialchars($image) ?>">
 <?php endif; ?>
