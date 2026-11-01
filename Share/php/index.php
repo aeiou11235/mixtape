@@ -167,7 +167,7 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
       <div class="card"><h3>Label tape</h3><p>Punch titles onto embossed plastic strips – 16 colours, as many as you like, anywhere on the cassette. No delete key: go back and press over it.</p></div>
       <div class="card"><h3>Send it as a link</h3><p>One tap and it plays, on any phone or computer. Encrypted on your Mac – the key travels only in the link, so the server can’t read it.</p></div>
       <div class="card"><h3>Tape sound</h3><p>Hiss, wow &amp; flutter, tape tone, winding noise, key clunks – each with its own slider. VU meters and a REC LEVEL fader that saturates like tape.</p></div>
-      <div class="card"><h3>Cassette designs</h3><p>Ferro, Chrome, Metal and Clear – and add-ons like the <em>80s Collection</em> and its well-loved <em>Worn Edition</em>. <a href="#designs">All of them are free.</a></p></div>
+      <div class="card"><h3>Cassette designs</h3><p>Ferro, Chrome, Metal and Clear, worn like real ones – and <a href="#designs">three colourful packs</a>: Neon, Jelly and Vintage.</p></div>
     </div>
   </section>
 
@@ -177,17 +177,20 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
   </section>
 
   <section class="wrap free" id="designs">
-    <h2>Free cassette designs</h2>
-    <p>All the designs are free. Download a pack, double-click it, and the cassettes appear under <b>New Cassette</b> – as C46, C60 or C90. Or get them inside the app: <b>New Cassette → Get Free Designs</b>. If you like them, a <a href="https://aeiou11235.itch.io/mixtape-app/purchase">small donation</a> keeps Mixtape going.</p>
-    <img src="site/80s-collection.png" alt="Eight cassettes from the 80s Collection, each with a label strip" width="1200" height="412" loading="lazy">
-    <p><b>80s Collection</b> – eight cassettes in the loud colours of the time.</p>
-    <div class="buttons"><a class="btn main" href="https://github.com/aeiou11235/mixtape/releases/download/addons/80s-Collection.mixtapeskins">⬇ 80s Collection – 8 designs</a></div>
-    <img src="site/80s-worn-edition.png" alt="The same eight cassettes, scratched, stickered and coffee-stained" width="1200" height="412" loading="lazy">
-    <p><b>80s Collection – Worn Edition</b> – the same eight, well loved: scratched, stickered, coffee-stained, the price tag still on.</p>
-    <div class="buttons"><a class="btn main" href="https://github.com/aeiou11235/mixtape/releases/download/addons/80s-Collection-Worn-Edition.mixtapeskins">⬇ Worn Edition – 8 designs</a></div>
-    <img src="site/free-sampler.png" alt="Three worn cassettes: Japanoise, Indie Rock and Dark Wave" width="1200" height="370" loading="lazy">
-    <p><b>Free Sampler</b> – three from the Worn Edition, if you just want a taste.</p>
-    <div class="buttons"><a class="btn main" href="https://github.com/aeiou11235/mixtape/releases/download/addons/Free-Sampler.mixtapeskins">⬇ Free Sampler – 3 designs</a></div>
+    <h2>Cassette designs</h2>
+    <p>Mixtape comes with four cassettes – Ferro, Chrome, Metal and Clear – well used, scratched and stained, every one its own way.</p>
+    <img src="site/base-designs.png" alt="The four cassettes Mixtape comes with: Ferro, Chrome, Metal and Clear" width="1200" height="196" loading="lazy">
+    <p>Want colour? Three packs of three, <b>3 USD each</b> on itch.io. Buy one, double-click the file, and the cassettes appear under <b>New Cassette</b> – as C46, C60 or C90.</p>
+    <a href="https://aeiou11235.itch.io/mixtape-neon-pack"><img src="site/pack-neon.png" alt="Neon Pack: Pink Neon, Yellow Rainbow, Blue Memphis" width="1200" height="376" loading="lazy"></a>
+    <p><b>Neon Pack</b> – Pink Neon, Yellow Rainbow and Blue Memphis.</p>
+    <div class="buttons"><a class="btn main" href="https://aeiou11235.itch.io/mixtape-neon-pack">Neon Pack – 3 USD</a></div>
+    <a href="https://aeiou11235.itch.io/mixtape-jelly-pack"><img src="site/pack-jelly.png" alt="Jelly Pack: Mint, Orange and Grape Jelly" width="1200" height="375" loading="lazy"></a>
+    <p><b>Jelly Pack</b> – see-through Mint, Orange and the new Grape Jelly.</p>
+    <div class="buttons"><a class="btn main" href="https://aeiou11235.itch.io/mixtape-jelly-pack">Jelly Pack – 3 USD</a></div>
+    <a href="https://aeiou11235.itch.io/mixtape-vintage-pack"><img src="site/pack-vintage.png" alt="Vintage Pack: Clear, Beige and Black" width="1200" height="375" loading="lazy"></a>
+    <p><b>Vintage Pack</b> – Clear, Beige and Black with red stripes, like from the supermarket in 1986.</p>
+    <div class="buttons"><a class="btn main" href="https://aeiou11235.itch.io/mixtape-vintage-pack">Vintage Pack – 3 USD</a></div>
+    <p>Mixtape itself stays free. If you like it, a small donation keeps it going.</p>
     <div class="buttons"><a class="btn alt" href="https://aeiou11235.itch.io/mixtape-app/purchase">♥ Donate on itch.io</a></div>
   </section>
 

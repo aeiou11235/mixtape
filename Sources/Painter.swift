@@ -25,7 +25,18 @@ struct CassetteDesign {
     /// Set for designs that come from an add-on; they are drawn from its pictures.
     var skin: Skin? = nil
 
-    static let all: [CassetteDesign] = [
+    /// The four the app comes with: worn pictures from Resources/Designs/base, under the ids tapes
+    /// have always used. The drawn versions stay as a fallback.
+    static let all: [CassetteDesign] = {
+        guard let base = SkinStore.builtIn() else { return drawn }
+        return drawn.map { d in
+            var b = d
+            b.skin = base.skins.first { $0.spec.id == d.id }
+            return b
+        }
+    }()
+
+    private static let drawn: [CassetteDesign] = [
         CassetteDesign(id: "ferro", name: "Ferro", shell: Color(hex: 0x161618), shellHi: Color(hex: 0x323237), clear: false,
                        label: Color(hex: 0xf0e9d8), accent: Color(hex: 0xc42f28), accent2: Color(hex: 0xe8a33a),
                        ink: Color(hex: 0x2a2a2a), pen: Color(hex: 0x1c3f94), typeText: "NORMAL POSITION · TYPE I"),

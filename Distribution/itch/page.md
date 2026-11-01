@@ -38,7 +38,7 @@ That's the feeling Mixtape App brings back – into the digital age. You're not 
 - **Just a cassette.** No window, no Dock icon – only the tape floats on your desktop. Hover over it and the deck appears.
 - **Records what your Mac plays** – Spotify, YouTube, anything – or the microphone.
 - **Like real tape:** recording overwrites what was there, each side holds half the running time (C46, C60, C90), and you flip the cassette for side B.
-- **Four tape types:** Ferro, Chrome, Metal and Clear – and 19 free designs to download: the *80s Collection*, its *Worn Edition* and the *Free Sampler*.
+- **Four tape types:** Ferro, Chrome, Metal and Clear, worn like real ones – and three colourful packs of three on itch.io: Neon, Jelly and Vintage, 3 USD each.
 - **Label tape:** type the title onto an embossed plastic strip with a blinking block cursor – 16 colours, as many strips as you like, anywhere and at any angle. No delete key: go back and press over it.
 - **Drawings** right on the cassette.
 - **Write protection:** break out the tab and REC won't go down.

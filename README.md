@@ -31,7 +31,7 @@ That’s the feeling Mixtape App brings back – into the digital age. You’re 
 - **Just a cassette.** No window, no Dock icon – only the tape floats on your desktop. Hover over it and the deck appears.
 - **Records what your Mac plays** – Spotify, YouTube, anything – or the microphone. Switch between SYS and MIC while recording.
 - **Like real tape:** recording overwrites what was there, each side holds half the running time (C46, C60, C90), and you flip the cassette to play side B.
-- **Four tape types:** Ferro, Chrome, Metal and Clear – and more as add-ons, like the *80s Collection* and its well-worn *Worn Edition*. Make your own: [docs/ADDONS.md](docs/ADDONS.md).
+- **Four tape types:** Ferro, Chrome, Metal and Clear, worn like real ones – and colourful packs as add-ons: [Neon](https://aeiou11235.itch.io/mixtape-neon-pack), [Jelly](https://aeiou11235.itch.io/mixtape-jelly-pack) and [Vintage](https://aeiou11235.itch.io/mixtape-vintage-pack). Make your own: [docs/ADDONS.md](docs/ADDONS.md).
 - **Label tape:** type the title onto an embossed plastic strip with a blinking block cursor – 16 colours, as many strips as you like, stuck anywhere and at any angle. There is no delete key: go back and press over it, like the real thing.
 - **Drawings** right on the cassette.
 - **Write protection:** break out the tab for side A or B and REC won't go down.
@@ -47,23 +47,27 @@ That’s the feeling Mixtape App brings back – into the digital age. You’re 
 
 <p align="center"><img src="docs/chrome.png" width="440" alt="A black dark wave tape with three label strips"> <img src="docs/clear.png" width="440" alt="A yellow rainbow tape on blue"></p>
 
-## Free cassette designs
+## Cassette designs
 
-All the designs are free: download a pack, double-click it, and the cassettes appear under **New Cassette** in the cassette's menu – each as C46, C60 or C90. Or get them right inside the app: **New Cassette → Get Free Designs**. If you like them, a [small donation](https://aeiou11235.itch.io/mixtape-app/purchase) keeps Mixtape going.
+Mixtape comes with four cassettes – Ferro, Chrome, Metal and Clear – well used, scratched and stained, every one its own way.
 
-<p align="center"><img src="docs/80s-collection.png" width="700" alt="Eight cassettes from the 80s Collection, each with a label strip"></p>
+<p align="center"><img src="docs/base-designs.png" width="760" alt="The four cassettes Mixtape comes with: Ferro, Chrome, Metal and Clear"></p>
 
-**[⬇ 80s Collection](https://github.com/aeiou11235/mixtape/releases/download/addons/80s-Collection.mixtapeskins)** – eight cassettes in the loud colours of the time: clear, beige, black, pink neon, mint jelly, yellow rainbow, orange jelly and blue Memphis.
+Want colour? Three packs of three, **3 USD each** on itch.io. Buy one, download the file, double-click it, and the cassettes appear under **New Cassette** – each as C46, C60 or C90. In the app: **New Cassette → Buy Designs**.
 
-<p align="center"><img src="docs/80s-worn-edition.png" width="700" alt="The same eight cassettes, scratched, stickered and coffee-stained"></p>
+<p align="center"><a href="https://aeiou11235.itch.io/mixtape-neon-pack"><img src="docs/pack-neon.png" width="700" alt="Neon Pack: Pink Neon, Yellow Rainbow, Blue Memphis"></a></p>
 
-**[⬇ 80s Collection – Worn Edition](https://github.com/aeiou11235/mixtape/releases/download/addons/80s-Collection-Worn-Edition.mixtapeskins)** – the same eight, well loved: scratched, stickered, coffee-stained, the price tag still on.
+**[Neon Pack](https://aeiou11235.itch.io/mixtape-neon-pack)** – Pink Neon, Yellow Rainbow and Blue Memphis.
 
-<p align="center"><img src="docs/free-sampler.png" width="700" alt="Three worn cassettes: a clear one labelled Japanoise, a yellow one labelled Indie Rock, a black one labelled Dark Wave"></p>
+<p align="center"><a href="https://aeiou11235.itch.io/mixtape-jelly-pack"><img src="docs/pack-jelly.png" width="700" alt="Jelly Pack: Mint, Orange and Grape Jelly"></a></p>
 
-**[⬇ Free Sampler](https://github.com/aeiou11235/mixtape/releases/download/addons/Free-Sampler.mixtapeskins)** – three from the Worn Edition, if you just want a taste.
+**[Jelly Pack](https://aeiou11235.itch.io/mixtape-jelly-pack)** – see-through Mint, Orange and the new Grape Jelly.
 
-Make your own: [docs/ADDONS.md](docs/ADDONS.md).
+<p align="center"><a href="https://aeiou11235.itch.io/mixtape-vintage-pack"><img src="docs/pack-vintage.png" width="700" alt="Vintage Pack: Clear, Beige and Black"></a></p>
+
+**[Vintage Pack](https://aeiou11235.itch.io/mixtape-vintage-pack)** – Clear, Beige and Black with red stripes, like from the supermarket in 1986.
+
+Mixtape itself stays free. If you like it, a [small donation](https://aeiou11235.itch.io/mixtape-app/purchase) keeps it going. Make your own designs: [docs/ADDONS.md](docs/ADDONS.md).
 
 ## Install
 

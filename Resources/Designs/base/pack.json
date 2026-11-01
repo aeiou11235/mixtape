@@ -1,0 +1,253 @@
+{
+ "format": 1,
+ "id": "mixtape.base",
+ "name": "Mixtape",
+ "author": "AEIOU",
+ "version": "1.0",
+ "designs": [
+  {
+   "id": "ferro",
+   "name": "Ferro",
+   "back": "ferro/back.png",
+   "front": "ferro/front.png",
+   "margin": 5,
+   "hubY": 28.3,
+   "hubColor": "#e9e8e3",
+   "rollers": [
+    8.6,
+    60.8,
+    91.8,
+    60.8,
+    1.7
+   ],
+   "pen": "#1a1a1a",
+   "title": {
+    "x": 14.6,
+    "y": 5.2,
+    "w": 78.5,
+    "h": 7.8
+   },
+   "labelZone": {
+    "x": 5.6,
+    "y": 4.8,
+    "w": 89.2,
+    "h": 13.5
+   },
+   "labels": [
+    {
+     "kind": "side",
+     "x": 9.5,
+     "y": 8.95,
+     "size": 4,
+     "font": "HelveticaNeue-Bold",
+     "color": "#efebe0",
+     "align": "center"
+    },
+    {
+     "kind": "total",
+     "x": 12,
+     "y": 29.6,
+     "size": 1.5,
+     "font": "Futura-Bold",
+     "color": "#efebe0",
+     "align": "center",
+     "tracking": 0.05
+    },
+    {
+     "kind": "length",
+     "x": 38.6,
+     "y": 42,
+     "size": 6,
+     "font": "Futura-Bold",
+     "prefix": "MX-",
+     "prefixColor": "#151515",
+     "color": "#151515",
+     "tracking": 0.1
+    }
+   ]
+  },
+  {
+   "id": "chrome",
+   "name": "Chrome",
+   "back": "chrome/back.png",
+   "front": "chrome/front.png",
+   "margin": 5,
+   "hubY": 28.3,
+   "hubColor": "#f0f0ee",
+   "rollers": [
+    8.6,
+    60.8,
+    91.8,
+    60.8,
+    1.7
+   ],
+   "pen": "#1a1a1a",
+   "title": {
+    "x": 14.6,
+    "y": 5.2,
+    "w": 78.5,
+    "h": 7.8
+   },
+   "labelZone": {
+    "x": 5.6,
+    "y": 4.8,
+    "w": 89.2,
+    "h": 13.5
+   },
+   "labels": [
+    {
+     "kind": "side",
+     "x": 9.5,
+     "y": 8.95,
+     "size": 4,
+     "font": "HelveticaNeue-Bold",
+     "color": "#f4f3ef",
+     "align": "center"
+    },
+    {
+     "kind": "total",
+     "x": 12,
+     "y": 29.6,
+     "size": 1.5,
+     "font": "Futura-Bold",
+     "color": "#f4f3ef",
+     "align": "center",
+     "tracking": 0.05
+    },
+    {
+     "kind": "length",
+     "x": 38.6,
+     "y": 42,
+     "size": 6,
+     "font": "Futura-Bold",
+     "prefix": "MX-",
+     "prefixColor": "#1b1d21",
+     "color": "#55595f",
+     "tracking": 0.1
+    }
+   ]
+  },
+  {
+   "id": "metal",
+   "name": "Metal",
+   "back": "metal/back.png",
+   "front": "metal/front.png",
+   "margin": 5,
+   "hubY": 28.3,
+   "hubColor": "#d4d6d9",
+   "rollers": [
+    8.6,
+    60.8,
+    91.8,
+    60.8,
+    1.7
+   ],
+   "pen": "#ececec",
+   "title": {
+    "x": 14.6,
+    "y": 5.2,
+    "w": 78.5,
+    "h": 7.8
+   },
+   "labelZone": {
+    "x": 5.6,
+    "y": 4.8,
+    "w": 89.2,
+    "h": 13.5
+   },
+   "labels": [
+    {
+     "kind": "side",
+     "x": 9.5,
+     "y": 8.95,
+     "size": 4,
+     "font": "HelveticaNeue-Bold",
+     "color": "#161616",
+     "align": "center"
+    },
+    {
+     "kind": "total",
+     "x": 12,
+     "y": 29.6,
+     "size": 1.5,
+     "font": "Futura-Bold",
+     "color": "#161616",
+     "align": "center",
+     "tracking": 0.05
+    },
+    {
+     "kind": "length",
+     "x": 38.6,
+     "y": 42,
+     "size": 6,
+     "font": "Futura-Bold",
+     "prefix": "MX-",
+     "prefixColor": "#d9dadc",
+     "color": "#d9dadc",
+     "tracking": 0.1
+    }
+   ]
+  },
+  {
+   "id": "klar",
+   "name": "Clear",
+   "back": "klar/back.png",
+   "front": "klar/front.png",
+   "margin": 5,
+   "hubY": 28.3,
+   "hubColor": "#e4e6e6",
+   "rollers": [
+    7.9,
+    58.2,
+    92.5,
+    58.2,
+    3
+   ],
+   "pen": "#1a1a1a",
+   "title": {
+    "x": 14.6,
+    "y": 5.2,
+    "w": 78.5,
+    "h": 7.8
+   },
+   "labelZone": {
+    "x": 5.6,
+    "y": 4.8,
+    "w": 89.2,
+    "h": 13.5
+   },
+   "labels": [
+    {
+     "kind": "side",
+     "x": 9.5,
+     "y": 8.95,
+     "size": 4,
+     "font": "HelveticaNeue-Bold",
+     "color": "#f7f6f1",
+     "align": "center"
+    },
+    {
+     "kind": "total",
+     "x": 12,
+     "y": 29.6,
+     "size": 1.5,
+     "font": "Futura-Bold",
+     "color": "#f7f6f1",
+     "align": "center",
+     "tracking": 0.05
+    },
+    {
+     "kind": "length",
+     "x": 38.6,
+     "y": 42,
+     "size": 6,
+     "font": "Futura-Bold",
+     "prefix": "MX-",
+     "prefixColor": "#151515",
+     "color": "#151515",
+     "tracking": 0.1
+    }
+   ]
+  }
+ ]
+}

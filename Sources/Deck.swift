@@ -963,16 +963,16 @@ final class Deck: NSObject, ObservableObject {
             pack.skins.map(\.design).forEach(addDesign)
         }
         designs.addItem(.separator())
-        let free = NSMenuItem(title: L("Gratis-Designs laden"), action: nil, keyEquivalent: "")
-        let freeMenu = NSMenu()
-        for (n, pack) in AppDelegate.freePacks.enumerated() {
-            let i = item(String(format: L("%@ – %d Designs …"), pack.name, pack.count), #selector(freeDesignsItem(_:)))
+        let shop = NSMenuItem(title: L("Designs kaufen"), action: nil, keyEquivalent: "")
+        let shopMenu = NSMenu()
+        for (n, pack) in AppDelegate.shopPacks.enumerated() {
+            let i = item(String(format: L("%@ – 3 Kassetten …"), pack.name), #selector(shopItem(_:)))
             i.tag = n
             i.state = SkinStore.shared.packs.contains { $0.spec.id == pack.id } ? .on : .off
-            freeMenu.addItem(i)
+            shopMenu.addItem(i)
         }
-        free.submenu = freeMenu
-        designs.addItem(free)
+        shop.submenu = shopMenu
+        designs.addItem(shop)
         designs.addItem(item(L("Mehr Designs ansehen …"), #selector(moreDesignsItem)))
         designs.addItem(item(L("Kassetten-Designs hinzufügen …"), #selector(addDesignsItem)))
         newItem.submenu = designs
@@ -1082,7 +1082,7 @@ final class Deck: NSObject, ObservableObject {
 
     @objc private func openItem() { (NSApp.delegate as? AppDelegate)?.openDocument(nil) }
     @objc private func addDesignsItem() { (NSApp.delegate as? AppDelegate)?.chooseDesigns() }
-    @objc private func freeDesignsItem(_ sender: NSMenuItem) { (NSApp.delegate as? AppDelegate)?.downloadFreeDesigns(AppDelegate.freePacks[sender.tag]) }
+    @objc private func shopItem(_ sender: NSMenuItem) { NSWorkspace.shared.open(AppDelegate.shopPacks[sender.tag].page) }
     @objc private func moreDesignsItem() { NSWorkspace.shared.open(AppDelegate.designsPage) }
 
     @objc private func protectItem(_ sender: NSMenuItem) {

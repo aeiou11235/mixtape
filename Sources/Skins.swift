@@ -155,6 +155,12 @@ final class SkinStore {
         return packs.first { $0.spec.id == pack.spec.id } ?? pack
     }
 
+    /// The designs the app comes with, unpacked in its Resources.
+    static func builtIn() -> Pack? {
+        guard let dir = Bundle.main.url(forResource: "base", withExtension: nil, subdirectory: "Designs") else { return nil }
+        return try? load(dir)
+    }
+
     /// A design that came inside a tape. An installed one with the same name wins.
     func addEmbedded(_ dir: URL) {
         guard let pack = try? Self.load(dir) else { return }
