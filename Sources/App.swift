@@ -201,9 +201,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // Free designs live on GitHub; the website shows them all; donations go through itch.io.
     static let freeDesigns = URL(string: "https://github.com/aeiou11235/mixtape/releases/download/addons/Free-Sampler.mixtapeskins")!
     static let designsPage = URL(string: "https://mixtape.toyko.online/#designs")!
-    static let donatePage = URL(string: "https://aeiou11235.itch.io/mixtape-app")!
+    static let donatePage = URL(string: "https://aeiou11235.itch.io/mixtape-app/purchase")!
 
-    /// Downloads the free designs and installs them, and opens the itch.io page where people can donate.
+    /// Downloads the free designs and installs them, and opens the itch.io donation page (it has a "No thanks" link).
     func downloadFreeDesigns() {
         let a = NSAlert()
         a.messageText = L("Gratis-Designs laden")
