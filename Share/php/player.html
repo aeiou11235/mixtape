@@ -101,8 +101,9 @@
   <canvas class="tape" id="tape" width="520" height="350"></canvas>
   <button class="info-btn" id="infoBtn" aria-label="About Mixtape">i</button>
   <div class="info-box" id="infoBox">Someone made you this tape with <b>Mixtape</b> – the cassette recorder for your Mac.<br>
-    Tape anything, label it, send it to a friend.<br><br><a href="https://aeiou11235.itch.io/mixtape-app" target="_blank" rel="noopener">Get Mixtape for Mac – it’s free</a></div>
-  <div class="tap-hint" id="tapHint">Tap the middle to play · the ends to wind</div>
+    Tape anything, label it, send it to a friend.<br><br>
+    <small>Tap the middle to play or stop · tap the ends to wind · hold an end while it plays to listen · swipe to turn the tape over.</small><br><br><a href="https://aeiou11235.itch.io/mixtape-app" target="_blank" rel="noopener">Get Mixtape for Mac – it’s free</a></div>
+  <div class="tap-hint" id="tapHint">Tap the middle to play · the ends to wind · swipe to turn over</div>
   <div class="controls">
     <div class="panel">
       <div class="counter"><div class="digits" id="digits" title="Reset the counter"><span id="d0">0</span><span id="d1">0</span><span id="d2">0</span></div>
@@ -1053,6 +1054,7 @@ function layout() {
 // On a phone the tape is the deck. Tap while it plays or winds: stop. Tap when stopped: the left
 // end winds back, the right end forward, the middle plays. Hold an end while it plays to listen
 // at speed, like holding REW or FF on a deck; hold it when stopped to wind until you let go.
+// Swipe across the tape to turn it over.
 document.getElementById('infoBtn').addEventListener('click', e => { e.stopPropagation(); document.getElementById('infoBox').classList.toggle('open'); });
 document.getElementById('infoBox').addEventListener('click', e => { if (e.target.tagName !== 'A') e.currentTarget.classList.remove('open'); });
 let hold = null;
@@ -1066,17 +1068,29 @@ tapeCanvas.addEventListener('pointerdown', e => {
   const portrait = getComputedStyle(document.documentElement).getPropertyValue('--turn').trim() === '90deg';
   const along = portrait ? (e.clientY - r.top) / r.height : (e.clientX - r.left) / r.width;   // 0 left end … 1 right end
   const key = along > .66 ? 'ff' : along < .34 ? 'rew' : null;
-  hold = { key, how: null };
+  hold = { key, how: null, x: e.clientX, y: e.clientY, t: performance.now() };
   if (key) hold.timer = setTimeout(() => {
     if (!hold) return;
     hold.how = windDown(key);   // 'cue' while playing, 'wind' when stopped
   }, 350);
 });
-const release = () => {
+// A finger that travels is a swipe, not a press.
+tapeCanvas.addEventListener('pointermove', e => {
+  if (hold && !hold.how && Math.hypot(e.clientX - hold.x, e.clientY - hold.y) > 24) { clearTimeout(hold.timer); hold.moving = true; }
+});
+const release = e => {
   if (!hold) return;
   clearTimeout(hold.timer);
   const h = hold;
   hold = null;
+  if (h.moving || (e && Math.hypot(e.clientX - h.x, e.clientY - h.y) > 24)) {
+    // Turning the tape over: stop it first, like taking it out of the deck.
+    if (e && Math.hypot(e.clientX - h.x, e.clientY - h.y) > 60) {
+      if (st.mode !== 'stopped' || st.paused) { st.paused = false; setMode('stopped'); }
+      flip();
+    }
+    return;
+  }
   if (h.how === 'cue') { if (st.cue) { st.cue = null; updateUI(); } return; }
   if (h.how === 'wind') { if (st.mode === 'ffwd' || st.mode === 'rewind') press(h.key); return; }
   if (st.mode !== 'stopped') press('stop');
