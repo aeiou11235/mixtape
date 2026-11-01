@@ -66,8 +66,9 @@ enum WebTape {
             if side == .a { data.sideA = packed } else { data.sideB = packed }
             audio[name] = try Data(contentsOf: file).base64EncodedString()
         }
-        // A tape you're given starts at the beginning of side A.
+        // A tape you're given starts at the beginning of side A; links to it stay with the sender.
         data.sideUp = .a
+        data.links = nil
         data.headA = 0
 
         // JSONEncoder writes "/" as "\/", so nothing in the tape can close the <script> early.

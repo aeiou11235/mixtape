@@ -21,7 +21,7 @@
   if (!/^[A-Za-z0-9]{10}$/.test(id || '') || !k) return say('This link is incomplete – ask for it again.');
   try {
     const res = await fetch(`t/${id}.bin`, { cache: 'no-store' });
-    if (!res.ok) return say('This tape has run out – links last 30 days.');
+    if (!res.ok) return say('This tape has run out – ask for a new link.');
     const box = new Uint8Array(await res.arrayBuffer());
     const raw = Uint8Array.from(atob(k.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
     const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);

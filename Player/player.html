@@ -24,7 +24,14 @@
   html.phone body > *:not(.deck), html.phone .controls { display: none !important; }
   html.phone canvas.tape { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(var(--turn, 0deg));
     touch-action: manipulation; }
-  .tap-hint { display: none; }
+  .tap-hint, .info-btn, .info-box { display: none; }
+  /* A small "i" in the corner: where the app comes from. */
+  html.phone .info-btn { display: grid; place-items: center; position: fixed; right: 12px; top: 12px; width: 30px; height: 30px; border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,.55); color: rgba(255,255,255,.8); background: rgba(0,0,0,.35); font: italic 700 16px Georgia, serif; z-index: 5; }
+  html.phone .info-box.open { display: block; position: fixed; left: 50%; top: 50%; width: min(78vmax, 420px); z-index: 6;
+    transform: translate(-50%, -50%) rotate(var(--turn, 0deg)); padding: 18px 20px; border-radius: 14px; background: rgba(20,20,24,.92);
+    color: #f2f0ea; font-size: 15px; line-height: 1.45; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+  .info-box a { color: #ffd36b; font-weight: 700; }
   html.phone .deck.fresh .tap-hint { display: block; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(var(--turn, 0deg))
     translateY(38vmin); padding: 8px 16px; border-radius: 20px; background: rgba(0,0,0,.6); color: #fff; font-weight: 600; pointer-events: none; white-space: nowrap; }
   .controls { transition: opacity .25s ease, transform .25s ease; padding: 0 calc(40 / 520 * 100%); }
@@ -92,6 +99,9 @@
 <body>
 <div class="deck fresh" id="deck">
   <canvas class="tape" id="tape" width="520" height="350"></canvas>
+  <button class="info-btn" id="infoBtn" aria-label="About Mixtape">i</button>
+  <div class="info-box" id="infoBox">Someone made you this tape with <b>Mixtape</b> – the cassette recorder for your Mac.<br>
+    Tape anything, label it, send it to a friend.<br><br><a href="https://aeiou11235.itch.io/mixtape-app" target="_blank" rel="noopener">Get Mixtape for Mac – it’s free</a></div>
   <div class="tap-hint" id="tapHint">Tap the middle to play · the ends to wind</div>
   <div class="controls">
     <div class="panel">
@@ -1033,6 +1043,8 @@ function layout() {
 // On a phone the tape is the deck. Tap while it plays or winds: stop. Tap when stopped: the left
 // end winds back, the right end forward, the middle plays. Hold an end while it plays to listen
 // at speed, like holding REW or FF on a deck; hold it when stopped to wind until you let go.
+document.getElementById('infoBtn').addEventListener('click', e => { e.stopPropagation(); document.getElementById('infoBox').classList.toggle('open'); });
+document.getElementById('infoBox').addEventListener('click', e => { if (e.target.tagName !== 'A') e.currentTarget.classList.remove('open'); });
 let hold = null;
 const isPhone = () => document.documentElement.classList.contains('phone');
 tapeCanvas.addEventListener('touchend', () => { if (isPhone()) { startAudio(); unlockMedia(); } }, { passive: true });

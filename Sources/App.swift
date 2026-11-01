@@ -421,11 +421,13 @@ enum Tools {
             let deck = Deck(doc: doc, snapshotMode: true)
             let source = WebTape.source(doc, picture: deck.paint)
             let file = FileManager.default.temporaryDirectory.appendingPathComponent("sharetest.html")
+            let png = ShareLink.picture(deck.paint)
             var done = false
             Task.detached {
                 do {
                     _ = try WebTape.write(source, to: file)
-                    print(try await ShareLink.upload(file).absoluteString)
+                    let link = try await ShareLink.upload(file, picture: png)
+                    print(link.url, link.image ?? "-", link.days)
                 } catch { print("failed: \(error.localizedDescription)") }
                 done = true
             }

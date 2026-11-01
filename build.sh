@@ -20,6 +20,9 @@ cp Info.plist "$APP/Contents/Info.plist"
 # Share links: the upload address and key come from Share/app.env, which stays out of git.
 if [ -f Share/app.env ]; then
     . Share/app.env
+    # Builds to give away (MIXTAPE_PUBLIC=1, as package.sh makes them) carry the public key,
+    # whose links run out after a week; this Mac's own build keeps its links.
+    [ "${MIXTAPE_PUBLIC:-0}" = 1 ] && MIXTAPE_SHARE_KEY=$MIXTAPE_SHARE_KEY_PUBLIC
     /usr/libexec/PlistBuddy -c "Add :MixtapeShareUpload string $MIXTAPE_SHARE_UPLOAD" -c "Add :MixtapeShareKey string $MIXTAPE_SHARE_KEY" "$APP/Contents/Info.plist"
 fi
 cp -R Resources/*.lproj "$APP/Contents/Resources/"

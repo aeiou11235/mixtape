@@ -95,9 +95,22 @@ struct TapeData: Codable {
     /// Label-tape strips stuck on each side; the first is the title.
     var stripsA: [EmbossedTape]?
     var stripsB: [EmbossedTape]?
+    /// Links made to this tape on the share service, newest last, so they can be copied again.
+    var links: [SharedLink]?
     /// A single strip, from before there could be several; read only.
     var embossA: EmbossedTape?
     var embossB: EmbossedTape?
+}
+
+/// A link to a tape on the share service, with the picture of the cassette that goes with it.
+struct SharedLink: Codable, Equatable {
+    var url: String
+    var image: String?
+    var made: Date
+    var days: Int           // how long the service keeps it; 0 for good
+
+    var expires: Date? { days > 0 ? made.addingTimeInterval(Double(days) * 86400) : nil }
+    var expired: Bool { expires.map { $0 < Date() } ?? false }
 }
 
 /// Recording erases whatever was on the tape underneath the new segment.

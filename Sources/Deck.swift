@@ -1025,7 +1025,14 @@ final class Deck: NSObject, ObservableObject {
         m.addItem(soundItem)
         m.addItem(.separator())
         m.addItem(NSMenuItem.sectionHeader(title: L("An Freunde verschicken")))
-        if ShareLink.available { m.addItem(item(L("Als Link – ein Klick, und es spielt …"), #selector(linkItem))) }
+        if ShareLink.available {
+            m.addItem(item(L("Als Link – ein Klick, und es spielt …"), #selector(linkItem)))
+            if let t = lastLinkTitle {
+                let i = item(t, #selector(copyLinkItem))
+                i.isEnabled = !(doc.data.links?.last?.expired ?? true)
+                m.addItem(i)
+            }
+        }
         m.addItem(item(L("Als Webseite – spielt in jedem Browser …"), #selector(webItem)))
         m.addItem(item(L("Als Mixtape-Datei – für Freunde mit der App …"), #selector(tapeFileItem)))
         m.addItem(.separator())
@@ -1151,22 +1158,20 @@ final class Deck: NSObject, ObservableObject {
         picture.hint = false
         picture.hideTitle = false
         let source = WebTape.source(doc, picture: picture)
+        let png = ShareLink.picture(picture)
         busy = BusyPanel(L("Link wird erstellt …"), near: window)
         Task.detached(priority: .userInitiated) {
             let file = FileManager.default.temporaryDirectory.appendingPathComponent("share-\(UUID().uuidString).html")
             defer { try? FileManager.default.removeItem(at: file) }
-            let result: Result<URL, Error>
+            let result: Result<SharedLink, Error>
             do {
-                NSLog("share: making the page")
-                let size = try WebTape.write(source, to: file)
-                NSLog("share: page %d bytes, uploading", size)
-                result = .success(try await ShareLink.upload(file) { done, total in
+                _ = try WebTape.write(source, to: file)
+                result = .success(try await ShareLink.upload(file, picture: png) { done, total in
                     Task { @MainActor [weak self] in
                         self?.busy?.setText(L("Link wird erstellt …") + " \(done)/\(total)")
                     }
                 })
             } catch { result = .failure(error) }
-            NSLog("share: done %@", String(describing: result))
             await MainActor.run { [weak self] in
                 guard let self else { return }
                 self.busy?.close()
@@ -1175,22 +1180,45 @@ final class Deck: NSObject, ObservableObject {
                 case .failure(let error):
                     self.showError(L("Der Link konnte nicht erstellt werden.") + " " + error.localizedDescription)
                 case .success(let link):
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(link.absoluteString, forType: .string)
-                    let a = NSAlert()
-                    a.messageText = L("Link kopiert")
-                    a.informativeText = link.absoluteString + "\n\n" + L("Füge ihn in eine Mail, WhatsApp oder wo du willst ein. Ein Tipp darauf, und das Tape spielt – 30 Tage lang.")
-                    NSApp.activate()
-                    a.runModal()
+                    self.doc.data.links = (self.doc.data.links ?? []) + [link]
+                    self.doc.dirty = true
+                    if self.transport != .recording { self.save() }
+                    self.copyLink(link)
                 }
             }
         }
+    }
+
+    /// Puts the link on the clipboard – as a little cassette that is the link, for an email,
+    /// and as plain text for messages – and says so.
+    private func copyLink(_ link: SharedLink) {
+        ShareLink.copy(link, title: doc.data.titleA)
+        let a = NSAlert()
+        a.messageText = L("Link kopiert")
+        let lasts = link.days > 0 ? String(format: L("Er funktioniert %d Tage lang."), link.days) : L("Er funktioniert ohne Ablaufdatum.")
+        a.informativeText = link.url + "\n\n" + L("In einer Mail erscheint er als kleine Kassette, in Nachrichten als Link. Ein Tipp darauf, und das Tape spielt.") + " " + lasts
+        NSApp.activate()
+        a.runModal()
+    }
+
+    @objc private func copyLinkItem() {
+        if let last = doc.data.links?.last { copyLink(last) }
+    }
+
+    /// The menu line for the last link: how long it still works.
+    var lastLinkTitle: String? {
+        guard let l = doc.data.links?.last else { return nil }
+        if l.expired { return L("Letzter Link ist abgelaufen") }
+        guard let end = l.expires else { return L("Letzten Link kopieren – ohne Ablaufdatum") }
+        let days = max(0, Int(ceil(end.timeIntervalSinceNow / 86400)))
+        return String(format: L("Letzten Link kopieren – noch %d Tage"), days)
     }
 }
 
 /// Uploads a tape's web page to the share service (Share/php) and returns its link. The page is
 /// encrypted first with a fresh key that only travels in the link, after the # – the server
-/// stores nothing it could read.
+/// stores nothing it could read. A small picture of the cassette goes up beside it, unencrypted,
+/// so an email can show the link as the cassette.
 enum ShareLink {
     static var endpoint: URL? {
         // MIXTAPE_SHARE_UPLOAD points development tests at a local server.
@@ -1200,41 +1228,78 @@ enum ShareLink {
     static var key: String? { Bundle.main.object(forInfoDictionaryKey: "MixtapeShareKey") as? String }
     static var available: Bool { endpoint != nil && key != nil }
 
-    struct Reply: Decodable { let id: String }
+    struct Reply: Decodable {
+        let id: String
+        let days: Int?
+    }
+
+    /// The cassette alone, trimmed close, as PNG.
+    @MainActor
+    static func picture(_ state: PaintState) -> Data? {
+        let scale: CGFloat = 1.5
+        guard let png = WebTape.render(state, scale: scale), let rep = NSBitmapImageRep(data: png), let cg = rep.cgImage else { return nil }
+        let side = Geo.cw + 2 * Geo.margin, pad: CGFloat = 14
+        let r = CGRect(x: Geo.margin - pad, y: (side - Geo.ch) / 2 - pad, width: Geo.cw + 2 * pad, height: Geo.ch + 2 * pad)
+        guard let cut = cg.cropping(to: CGRect(x: r.minX * scale, y: r.minY * scale, width: r.width * scale, height: r.height * scale)) else { return nil }
+        return NSBitmapImageRep(cgImage: cut).representation(using: .png, properties: [:])
+    }
+
+    /// Puts a link on the clipboard: HTML with the cassette picture as the link, and the plain link.
+    static func copy(_ l: SharedLink, title: String) {
+        let t = (title.isEmpty ? "Mixtape" : title).replacingOccurrences(of: "&", with: "&amp;")
+            .replacingOccurrences(of: "<", with: "&lt;").replacingOccurrences(of: "\"", with: "&quot;")
+        var html = "<a href=\"\(l.url)\">"
+        if let img = l.image { html += "<img src=\"\(img)\" width=\"340\" alt=\"\(t)\" style=\"border:0\"><br>" }
+        html += "▶︎ \(t)</a>"
+        let pb = NSPasteboard.general
+        pb.clearContents()
+        pb.setString(html, forType: .html)
+        pb.setString(l.url, forType: .string)
+    }
+
+    private static func post(_ query: [URLQueryItem], _ bytes: Data, endpoint: URL, key: String) async throws -> Reply {
+        var c = URLComponents(url: endpoint, resolvingAgainstBaseURL: false)!
+        c.queryItems = query
+        var req = URLRequest(url: c.url!, timeoutInterval: 120)
+        req.httpMethod = "POST"
+        req.setValue(key, forHTTPHeaderField: "x-mixtape-key")
+        req.setValue("text/plain", forHTTPHeaderField: "content-type")
+        // Base64 text with its length up front: web-space firewalls turn away raw binary, and some
+        // web space drops bodies sent in chunks.
+        let body = bytes.base64EncodedData()
+        req.httpBody = body
+        req.setValue("\(body.count)", forHTTPHeaderField: "content-length")
+        let (data, response) = try await URLSession.shared.data(for: req)
+        guard (response as? HTTPURLResponse)?.statusCode == 200 else {
+            throw TapeError.unreadable(String(decoding: data, as: UTF8.self))
+        }
+        return try JSONDecoder().decode(Reply.self, from: data)
+    }
 
     /// `progress` hears how many parts are up, out of how many.
-    static func upload(_ file: URL, progress: @escaping @Sendable (Int, Int) -> Void = { _, _ in }) async throws -> URL {
+    static func upload(_ file: URL, picture: Data?, progress: @escaping @Sendable (Int, Int) -> Void = { _, _ in }) async throws -> SharedLink {
         guard let endpoint, let key else { throw TapeError.tool("Share") }
         let secret = SymmetricKey(size: .bits256)
         guard let sealed = try AES.GCM.seal(try Data(contentsOf: file), using: secret).combined else { throw TapeError.tool("AES") }
-        // In parts of about 1 MB (at most 20 of them), each as Base64 text: web space limits how big
-        // one upload may be, and firewalls tend to turn away raw binary.
-        let size = max(1024 * 1024, (sealed.count + 19) / 20)
+        // In parts of about 1 MB, at most 40: web space limits how big one upload may be.
+        let size = max(1024 * 1024, (sealed.count + 39) / 40)
         let parts = stride(from: 0, to: sealed.count, by: size).map { sealed[$0..<min($0 + size, sealed.count)] }
-        var id = ""
+        var reply = Reply(id: "", days: nil)
         for (i, part) in parts.enumerated() {
-            var c = URLComponents(url: endpoint, resolvingAgainstBaseURL: false)!
-            c.queryItems = [URLQueryItem(name: "part", value: "\(i)"), URLQueryItem(name: "of", value: "\(parts.count)")]
-                + (i > 0 ? [URLQueryItem(name: "id", value: id)] : [])
-            var req = URLRequest(url: c.url!, timeoutInterval: 120)
-            req.httpMethod = "POST"
-            req.setValue(key, forHTTPHeaderField: "x-mixtape-key")
-            req.setValue("text/plain", forHTTPHeaderField: "content-type")
-            // A plain body with its length up front: some web space drops bodies sent in chunks.
-            let body = Data(part).base64EncodedData()
-            req.httpBody = body
-            req.setValue("\(body.count)", forHTTPHeaderField: "content-length")
-            let (data, response) = try await URLSession.shared.data(for: req)
-            guard (response as? HTTPURLResponse)?.statusCode == 200 else {
-                throw TapeError.unreadable("\(i + 1)/\(parts.count) (\(part.count) bytes): " + String(decoding: data, as: UTF8.self))
-            }
-            id = try JSONDecoder().decode(Reply.self, from: data).id
+            let q = [URLQueryItem(name: "part", value: "\(i)"), URLQueryItem(name: "of", value: "\(parts.count)")]
+                + (i > 0 ? [URLQueryItem(name: "id", value: reply.id)] : [])
+            reply = try await post(q, Data(part), endpoint: endpoint, key: key)
             progress(i + 1, parts.count)
+        }
+        let base = endpoint.deletingLastPathComponent().absoluteString
+        var image: String?
+        if let picture, (try? await post([URLQueryItem(name: "image", value: "1"), URLQueryItem(name: "id", value: reply.id)],
+                                         picture, endpoint: endpoint, key: key)) != nil {
+            image = base + "t/\(reply.id).png"
         }
         let linkKey = secret.withUnsafeBytes { Data($0) }.base64EncodedString()
             .replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
-        guard let link = URL(string: endpoint.deletingLastPathComponent().absoluteString + "#\(id).\(linkKey)") else { throw TapeError.tool("Share") }
-        return link
+        return SharedLink(url: base + "#\(reply.id).\(linkKey)", image: image, made: Date(), days: reply.days ?? 7)
     }
 }
 

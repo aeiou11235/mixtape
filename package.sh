@@ -2,7 +2,7 @@
 # Builds the app and the disk image to send around, and puts them in a folder on the Desktop.
 set -euo pipefail
 cd "$(dirname "$0")"
-./build.sh
+MIXTAPE_PUBLIC=1 ./build.sh
 cp build/icon.png Distribution/icon.png 2>/dev/null || true
 sips -z 80 80 build/icon.png --out Distribution/icon-small.png >/dev/null
 GUIDE="build/Zuerst lesen – Read me first.pdf"
