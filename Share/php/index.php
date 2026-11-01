@@ -232,8 +232,8 @@ async function newest(html) {
   }
 }
 (async () => {
-  // Without a tape after the #, this is just the home page.
-  if (location.hash.length < 2) return;
+  // Without a tape after the #, this is just the home page – also for #designs and other sections.
+  if (location.hash.length < 2 || document.getElementById(decodeURIComponent(location.hash.slice(1)))) return;
   document.body.classList.add('tape');
   const say = t => { document.getElementById('msg').textContent = t; };
   const [id, k] = location.hash.slice(1).split('.');
