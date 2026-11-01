@@ -665,8 +665,7 @@ function startAudio() {
   spoolFilter = ac.createBiquadFilter(); spoolFilter.type = 'bandpass'; spoolFilter.frequency.value = 700; spoolFilter.Q.value = .8;
   spoolGain = ac.createGain(); spoolGain.gain.value = 0;
   noise.connect(spoolFilter); spoolFilter.connect(spoolGain); spoolGain.connect(master);
-  // On iPhones and iPads the recording plays as it is: no hiss or spool noise running alongside.
-  if (!IOS) noise.start();
+  noise.start();
   clunkOut = ac.createGain(); clunkOut.gain.value = .5 * lvl('clicks', 1); clunkOut.connect(ac.destination);
   unlockMedia();
 }
