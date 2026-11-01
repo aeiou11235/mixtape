@@ -1,4 +1,5 @@
 import AppKit
+import CryptoKit
 import AVFoundation
 import SwiftUI
 
@@ -1024,6 +1025,7 @@ final class Deck: NSObject, ObservableObject {
         m.addItem(soundItem)
         m.addItem(.separator())
         m.addItem(NSMenuItem.sectionHeader(title: L("An Freunde verschicken")))
+        if ShareLink.available { m.addItem(item(L("Als Link – ein Klick, und es spielt …"), #selector(linkItem))) }
         m.addItem(item(L("Als Webseite – spielt in jedem Browser …"), #selector(webItem)))
         m.addItem(item(L("Als Mixtape-Datei – für Freunde mit der App …"), #selector(tapeFileItem)))
         m.addItem(.separator())
@@ -1138,6 +1140,79 @@ final class Deck: NSObject, ObservableObject {
         }
     }
     private var busy: BusyPanel?
+
+    /// Puts the tape's web page online and copies the link: one tap and it plays, on any phone or computer.
+    @objc private func linkItem() {
+        if transport != .stopped { pressStop() }
+        if drawMode { toggleDrawMode() }
+        save()
+        guard doc.fileURL != nil, busy == nil else { return }
+        var picture = paint
+        picture.hint = false
+        picture.hideTitle = false
+        let source = WebTape.source(doc, picture: picture)
+        busy = BusyPanel(L("Link wird erstellt …"), near: window)
+        Task.detached(priority: .userInitiated) {
+            let file = FileManager.default.temporaryDirectory.appendingPathComponent("share-\(UUID().uuidString).html")
+            defer { try? FileManager.default.removeItem(at: file) }
+            let result: Result<URL, Error>
+            do {
+                _ = try WebTape.write(source, to: file)
+                result = .success(try await ShareLink.upload(file))
+            } catch { result = .failure(error) }
+            await MainActor.run { [weak self] in
+                guard let self else { return }
+                self.busy?.close()
+                self.busy = nil
+                switch result {
+                case .failure(let error):
+                    self.showError(L("Der Link konnte nicht erstellt werden.") + " " + error.localizedDescription)
+                case .success(let link):
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(link.absoluteString, forType: .string)
+                    let a = NSAlert()
+                    a.messageText = L("Link kopiert")
+                    a.informativeText = link.absoluteString + "\n\n" + L("Füge ihn in eine Mail, WhatsApp oder wo du willst ein. Ein Tipp darauf, und das Tape spielt – 30 Tage lang.")
+                    NSApp.activate()
+                    a.runModal()
+                }
+            }
+        }
+    }
+}
+
+/// Uploads a tape's web page to the share service (Share/php) and returns its link. The page is
+/// encrypted first with a fresh key that only travels in the link, after the # – the server
+/// stores nothing it could read.
+enum ShareLink {
+    static var endpoint: URL? {
+        // MIXTAPE_SHARE_UPLOAD points development tests at a local server.
+        (ProcessInfo.processInfo.environment["MIXTAPE_SHARE_UPLOAD"] ?? Bundle.main.object(forInfoDictionaryKey: "MixtapeShareUpload") as? String)
+            .flatMap { URL(string: $0) }
+    }
+    static var key: String? { Bundle.main.object(forInfoDictionaryKey: "MixtapeShareKey") as? String }
+    static var available: Bool { endpoint != nil && key != nil }
+
+    struct Reply: Decodable { let id: String }
+
+    static func upload(_ file: URL) async throws -> URL {
+        guard let endpoint, let key else { throw TapeError.tool("Share") }
+        var req = URLRequest(url: endpoint, timeoutInterval: 120)
+        req.httpMethod = "POST"
+        req.setValue(key, forHTTPHeaderField: "x-mixtape-key")
+        req.setValue("application/octet-stream", forHTTPHeaderField: "content-type")
+        let secret = SymmetricKey(size: .bits256)
+        guard let sealed = try AES.GCM.seal(try Data(contentsOf: file), using: secret).combined else { throw TapeError.tool("AES") }
+        let (data, response) = try await URLSession.shared.upload(for: req, from: sealed)
+        guard (response as? HTTPURLResponse)?.statusCode == 200 else {
+            throw TapeError.unreadable(String(decoding: data, as: UTF8.self))
+        }
+        let id = try JSONDecoder().decode(Reply.self, from: data).id
+        let linkKey = secret.withUnsafeBytes { Data($0) }.base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
+        guard let link = URL(string: endpoint.deletingLastPathComponent().absoluteString + "#\(id).\(linkKey)") else { throw TapeError.tool("Share") }
+        return link
+    }
 }
 
 extension Deck: NSMenuDelegate {

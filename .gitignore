@@ -5,3 +5,6 @@ build/
 DownloadCounter/
 # Add-on sources and builds: sold separately, not part of the public repository
 Addons/
+# Where the app uploads share links, and its key: built in, never committed
+Share/app.env
+Share/deploy-tokion/

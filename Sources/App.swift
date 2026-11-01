@@ -404,6 +404,24 @@ enum Tools {
             deck.doc.discard()
             return true
         }
+        if let path = value("--sharelink") {
+            // Same as "Send as Link", from the command line: prints the link.
+            let doc = try! TapeDocument(url: URL(fileURLWithPath: path))
+            let deck = Deck(doc: doc, snapshotMode: true)
+            let source = WebTape.source(doc, picture: deck.paint)
+            let file = FileManager.default.temporaryDirectory.appendingPathComponent("sharetest.html")
+            var done = false
+            Task.detached {
+                do {
+                    _ = try WebTape.write(source, to: file)
+                    print(try await ShareLink.upload(file).absoluteString)
+                } catch { print("failed: \(error.localizedDescription)") }
+                done = true
+            }
+            while !done { RunLoop.main.run(until: Date().addingTimeInterval(0.1)) }
+            doc.discard()
+            return true
+        }
         if let out = value("--aboutshot") {
             AboutScreen.shared.show(briefly: false)
             if let v = AboutScreen.shared.window?.contentView, let rep = v.bitmapImageRepForCachingDisplay(in: v.bounds) {

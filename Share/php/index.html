@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mixtape</title>
+<style>
+  html, body { margin: 0; height: 100%; background: linear-gradient(#1a0638, #c42583 60%, #ffb347); color: #fff;
+    font: 17px/1.45 -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; }
+  main { min-height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; box-sizing: border-box; }
+</style>
+</head>
+<body>
+<main><p id="msg">Unwrapping your mixtape …</p></main>
+<script>
+// The link is …/#<tape>.<key>. The part after # never leaves this browser: the tape is fetched
+// encrypted and unlocked here with AES-GCM, then it takes over the page.
+(async () => {
+  const say = t => { document.getElementById('msg').textContent = t; };
+  const [id, k] = location.hash.slice(1).split('.');
+  if (!/^[A-Za-z0-9]{10}$/.test(id || '') || !k) return say('This link is incomplete – ask for it again.');
+  try {
+    const res = await fetch(`t/${id}.bin`, { cache: 'no-store' });
+    if (!res.ok) return say('This tape has run out – links last 30 days.');
+    const box = new Uint8Array(await res.arrayBuffer());
+    const raw = Uint8Array.from(atob(k.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+    const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);
+    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: box.slice(0, 12) }, key, box.slice(12));
+    const html = new TextDecoder().decode(plain);
+    document.open();
+    document.write(html);
+    document.close();
+  } catch (e) {
+    say('This tape could not be unlocked – the link may be cut off.');
+  }
+})();
+</script>
+</body>
+</html>

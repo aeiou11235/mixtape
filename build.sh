@@ -17,6 +17,11 @@ lipo -create build/Mixtape-arm64 build/Mixtape-x86_64 -output "$BIN"
 rm build/Mixtape-arm64 build/Mixtape-x86_64
 
 cp Info.plist "$APP/Contents/Info.plist"
+# Share links: the upload address and key come from Share/app.env, which stays out of git.
+if [ -f Share/app.env ]; then
+    . Share/app.env
+    /usr/libexec/PlistBuddy -c "Add :MixtapeShareUpload string $MIXTAPE_SHARE_UPLOAD" -c "Add :MixtapeShareKey string $MIXTAPE_SHARE_KEY" "$APP/Contents/Info.plist"
+fi
 cp -R Resources/*.lproj "$APP/Contents/Resources/"
 cp Resources/startbild.jpg Resources/aeiou-logo.png "$APP/Contents/Resources/"   # the About screen
 cp Player/player.html "$APP/Contents/Resources/player.html"   # the web-page player for "Send as Web Page"
