@@ -107,7 +107,7 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
   .btn.alt { background: rgba(20,5,46,.45); border: 2px solid rgba(255,247,238,.6); }
   .small { font-size: 14px; color: var(--dim); }
 
-  section.wrap { padding: 40px 16px; }
+  section.wrap { padding: 72px 16px; }
   h2 { margin: 0 0 18px; font: italic 900 clamp(28px, 4.6vw, 40px)/1.05 "Futura", "Avenir Next", sans-serif; text-transform: uppercase; letter-spacing: .01em;
     text-shadow: 0 3px 0 rgba(58,10,94,.8); }
   .features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
@@ -120,12 +120,18 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
   .tapes img:nth-child(1) { transform: rotate(-3deg); }
   .tapes img:nth-child(2) { transform: rotate(2.5deg); }
 
-  .free img { width: 100%; height: auto; margin: 4px 0 14px; filter: drop-shadow(0 16px 28px rgba(20,5,46,.5)); }
+  .free img { width: 100%; height: auto; margin: 8px 0 24px; filter: drop-shadow(0 16px 28px rgba(20,5,46,.5)); }
   .free p { margin: 0; max-width: 40em; }
-  .free h2.addons { margin-top: 64px; }
+  .free h2.addons { margin-top: 72px; }
+  .free > p { margin-bottom: 24px; }
+  .free .buttons { margin: 24px 0 72px; }
+  .free .buttons:last-child { margin-bottom: 0; }
   .story { max-width: 44em; }
-  .story p { margin: 0 0 14px; color: #2c0a5e; font-weight: 500; }
-  .claim { font: italic 900 clamp(22px, 3.4vw, 30px)/1.2 "Futura", "Avenir Next", sans-serif; color: #2c0a5e; margin-top: 22px; }
+  .donate { margin-top: 72px; text-align: center; }
+  .donate p { margin-bottom: 0; }
+  .donate .buttons { justify-content: center; margin: 24px 0 0; }
+  .story p { margin: 0 0 24px; color: #2c0a5e; font-weight: 500; line-height: 1.6; }
+  .claim { font: italic 900 clamp(22px, 3.4vw, 30px)/1.2 "Futura", "Avenir Next", sans-serif; color: #2c0a5e; margin-top: 48px; }
   footer { padding: 36px 0 48px; text-align: center; color: #2c0a5e; font-weight: 600; font-size: 14px; }
   footer a { color: #2c0a5e; }
 
@@ -192,8 +198,6 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
     <a href="https://aeiou11235.itch.io/mixtape-vintage-pack"><img src="site/pack-vintage.png" alt="Vintage Pack: Clear, Beige and Black" width="1200" height="375" loading="lazy"></a>
     <p><b>Vintage Pack</b> – Clear, Beige and Black with red stripes, like from the supermarket in 1986.</p>
     <div class="buttons"><a class="btn main" href="https://aeiou11235.itch.io/mixtape-vintage-pack">Vintage Pack – 3 USD</a></div>
-    <p>Mixtape itself stays free. If you like it, a small donation keeps it going.</p>
-    <div class="buttons"><a class="btn alt" href="https://aeiou11235.itch.io/mixtape-app/purchase">♥ Donate on itch.io</a></div>
   </section>
 
   <section class="wrap story">
@@ -201,6 +205,10 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
     <p>I’m old enough to have done this for real. In 1986, where I grew up – in the south of Germany near the Czech border – our local record store only had country music. Swapping tapes with friends was the only way to hear anything new. We put real effort into every mixtape, because we made them for each other. A good tape was a sign of friendship.</p>
     <p>Tapes stayed with me. In Berlin in the 90s, cassettes were still the medium of the underground, passed from hand to hand. That’s the feeling Mixtape brings back – into the digital age. You’re not recording for yourself. You’re recording for your friends.</p>
     <p class="claim">Make the perfect mixtape. Share it with friends.</p>
+    <div class="donate">
+      <p>Mixtape itself stays free. If you like it, a small donation keeps it going.</p>
+      <div class="buttons"><a class="btn alt" href="https://aeiou11235.itch.io/mixtape-app/purchase">♥ Donate on itch.io</a></div>
+    </div>
   </section>
 
   <footer class="wrap">
