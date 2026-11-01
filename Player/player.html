@@ -149,6 +149,7 @@ const W = 440, H = 280, M = 40;
 const mm = W / 100.4, tapeSpeed = 47.6 * mm, hubY = 128;
 const hubL = { x: W / 2 - 21.25 * mm, y: hubY }, hubR = { x: W / 2 + 21.25 * mm, y: hubY };
 const hubRadius = 10.5 * mm;
+const HUB_BORE = 4.2, HUB_TOOTH = 1.1, HUB_TOOTH_W = 1.3;   // as in the app
 const win = { x: W / 2 - 156, y: hubY - 50, w: 312, h: 100 }, winCorner = 22;
 const LEADER = 4, SIDE = TAPE.length * 30;
 
@@ -461,11 +462,11 @@ function drawSkinHub(c, angle, color) {
   ring(8.2); g.strokeStyle = 'rgba(0,0,0,.10)'; g.lineWidth = .35 * mm; g.stroke();
   ring(5.0); g.strokeStyle = 'rgba(0,0,0,.12)'; g.lineWidth = .25 * mm; g.stroke();
   g.fillStyle = 'rgba(0,0,0,.18)'; g.beginPath(); rr(g, 9.2 * mm, -1.4 * mm, 1.6 * mm, 2.8 * mm, .3 * mm); g.fill();
-  ring(3.45); g.fillStyle = '#0d0c0b'; g.fill();
+  ring(HUB_BORE); g.fillStyle = '#0d0c0b'; g.fill();
   g.fillStyle = color;
   for (let i = 0; i < 6; i++) {
     g.save(); g.rotate(i * Math.PI / 3);
-    g.beginPath(); rr(g, -.55 * mm, -3.55 * mm, 1.1 * mm, 1.25 * mm, .2 * mm); g.fill();
+    g.beginPath(); rr(g, -HUB_TOOTH_W / 2 * mm, -(HUB_BORE + .2) * mm, HUB_TOOTH_W * mm, (HUB_TOOTH + .2) * mm, .25 * mm); g.fill();
     g.restore();
   }
   g.restore();
@@ -494,7 +495,8 @@ function drawPack(c, r, leaderR) {
 
 function drawHub(c, angle) {
   g.save(); g.translate(c.x, c.y); g.rotate(angle);
-  const r = hubRadius, hole = 6.4 * mm, o = { x: 0, y: 0 };
+  // Real cassette hub: drive opening Ø 8.4 mm with six teeth 1.1 mm long, 1.3 mm wide.
+  const r = hubRadius, hole = HUB_BORE * mm, o = { x: 0, y: 0 };
   const rg = g.createRadialGradient(0, 0, hole, 0, 0, r);
   rg.addColorStop(0, '#fbfaf6'); rg.addColorStop(.5, '#f3f1ea'); rg.addColorStop(1, '#d9d6cc');
   g.fillStyle = rg; g.beginPath(); circle(g, o, r); g.fill();
@@ -504,7 +506,7 @@ function drawHub(c, angle) {
   g.fillStyle = '#f3f1ea';
   for (let i = 0; i < 6; i++) {
     g.save(); g.rotate(i * Math.PI / 3);
-    g.beginPath(); rr(g, -.9 * mm, -hole - .5, 1.8 * mm, 2.1 * mm, 1.2); g.fill();
+    g.beginPath(); rr(g, -HUB_TOOTH_W / 2 * mm, -(HUB_BORE + .2) * mm, HUB_TOOTH_W * mm, (HUB_TOOTH + .2) * mm, .25 * mm); g.fill();
     g.restore();
   }
   g.fillStyle = '#d2cec2'; g.strokeStyle = 'rgba(0,0,0,.2)'; g.lineWidth = .7;

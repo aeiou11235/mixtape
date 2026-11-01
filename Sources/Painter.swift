@@ -102,6 +102,8 @@ enum Painter {
     static let hubL = CGPoint(x: W / 2 - 21.25 * mm, y: hubY)
     static let hubR = CGPoint(x: W / 2 + 21.25 * mm, y: hubY)
     static let hubRadius = 10.5 * mm              // the core the tape is wound on, Ø 21 mm
+    /// The hub's drive opening (Ø 8.4 mm) and its six teeth, 1.1 mm long and 1.3 mm wide, as on a real cassette.
+    static let hubBore = 4.2, hubTooth = 1.1, hubToothWidth = 1.3
     static let window = CGRect(x: W / 2 - 156, y: hubY - 50, width: 312, height: 100)
     static let windowCorner = 22.0
 
@@ -263,7 +265,7 @@ enum Painter {
         g.rotate(by: .radians(angle))
         let hub = Color(hex: 0xf3f1ea)
         let o = CGPoint.zero
-        let r = hubRadius, hole = 6.4 * mm
+        let r = hubRadius, hole = hubBore * mm
         g.fill(circle(o, r), with: .radialGradient(Gradient(colors: [Color(hex: 0xfbfaf6), hub, Color(hex: 0xd9d6cc)]),
                                                    center: o, startRadius: hole, endRadius: r))
         g.stroke(circle(o, r), with: .color(.black.opacity(0.25)), lineWidth: 0.8)
@@ -272,7 +274,8 @@ enum Painter {
         for i in 0..<6 {
             var t = g
             t.rotate(by: .degrees(Double(i) * 60))
-            t.fill(Path(roundedRect: CGRect(x: -0.9 * mm, y: -hole - 0.5, width: 1.8 * mm, height: 2.1 * mm), cornerRadius: 1.2),
+            t.fill(Path(roundedRect: CGRect(x: -hubToothWidth / 2 * mm, y: -hole - 0.2 * mm, width: hubToothWidth * mm,
+                                            height: (hubTooth + 0.2) * mm), cornerRadius: 0.25 * mm),
                    with: .color(hub))
         }
         // Leader clamp, set into the rim; also makes the turning easy to follow.

@@ -306,11 +306,12 @@ extension Painter {
         g.stroke(ring(5.0), with: .color(.black.opacity(0.12)), lineWidth: 0.25 * mm)
         g.fill(Path(roundedRect: CGRect(x: 9.2 * mm, y: -1.4 * mm, width: 1.6 * mm, height: 2.8 * mm), cornerRadius: 0.3 * mm),
                with: .color(.black.opacity(0.18)))
-        g.fill(ring(3.45), with: .color(Color(hex: 0x0d0c0b)))
+        g.fill(ring(hubBore), with: .color(Color(hex: 0x0d0c0b)))
         for i in 0..<6 {
             var t = g
             t.rotate(by: .degrees(Double(i) * 60))
-            t.fill(Path(roundedRect: CGRect(x: -0.55 * mm, y: -3.55 * mm, width: 1.1 * mm, height: 1.25 * mm), cornerRadius: 0.2 * mm),
+            t.fill(Path(roundedRect: CGRect(x: -hubToothWidth / 2 * mm, y: -(hubBore + 0.2) * mm, width: hubToothWidth * mm,
+                                            height: (hubTooth + 0.2) * mm), cornerRadius: 0.25 * mm),
                    with: .color(color))
         }
     }
