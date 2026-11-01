@@ -92,7 +92,7 @@
 <body>
 <div class="deck fresh" id="deck">
   <canvas class="tape" id="tape" width="520" height="350"></canvas>
-  <div class="tap-hint" id="tapHint">▶ Tap to play · hold right or left to wind</div>
+  <div class="tap-hint" id="tapHint">Tap the middle to play · the ends to wind</div>
   <div class="controls">
     <div class="panel">
       <div class="counter"><div class="digits" id="digits" title="Reset the counter"><span id="d0">0</span><span id="d1">0</span><span id="d2">0</span></div>
@@ -149,7 +149,7 @@ const DESIGNS = {
   klar:   { shell: 'rgba(255,255,255,.10)', shellHi: 'rgba(255,255,255,.34)', clear: true, label: '#fbfaf6', accent: '#e8632b', accent2: '#f3b43a', ink: '#333333', pen: '#1c3f94', type: 'NORMAL POSITION · TYPE I' },
 };
 const design = DESIGNS[TAPE.design] || DESIGNS.ferro;
-const skinImages = SKIN ? ['back', 'front'].map(k => { const i = new Image(); i.src = SKIN[k]; return i; }) : null;
+const skinImages = SKIN ? ['back', 'front'].map(k => { const i = new Image(); i.onload = () => { needsDraw = true; }; i.src = SKIN[k]; return i; }) : null;
 const sound = Object.assign({ hiss: false, wow: true, tone: true, spool: true, clicks: true }, TAPE.sound || {});
 // How strong each effect is: the middle (0.5) is the original sound; key clunks start at full.
 const lvl = (k, d = .5) => sound[k + 'Level'] != null ? sound[k + 'Level'] : d;
@@ -192,12 +192,15 @@ function advance(de) {
 
 // ---------- Painter ----------
 const tapeCanvas = document.getElementById('tape');
-const g = tapeCanvas.getContext('2d');
+let g = tapeCanvas.getContext('2d');
+// Redrawing every frame keeps a phone busy and warm: draw only when something changed.
+let needsDraw = true;
 function fitCanvas() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  const dpr = Math.min(window.devicePixelRatio || 1, document.documentElement.classList.contains('phone') ? 2 : 3);
   const cssW = tapeCanvas.clientWidth || 520;
   tapeCanvas.width = Math.round(cssW * dpr);
   tapeCanvas.height = Math.round(cssW * dpr * 350 / 520);
+  needsDraw = true;
 }
 function rr(ctx, x, y, w, h, r) { ctx.roundRect(x, y, w, h, r); }
 function circle(ctx, c, r) { ctx.moveTo(c.x + r, c.y); ctx.arc(c.x, c.y, r, 0, Math.PI * 2); }
@@ -277,7 +280,25 @@ function pressNoise(i, k, code) {
   return () => { h ^= h << 13; h >>>= 0; h ^= h >>> 17; h ^= h << 5; h >>>= 0; return (h % 10000) / 10000; };
 }
 
+// The strips are drawn once per side and size into a picture of their own, then just copied:
+// every letter is five strokes, too many to redraw sixty times a second.
+let stripCache = null;
 function drawEmboss(tr) {
+  const key = `${tapeCanvas.width}x${tapeCanvas.height}|${st.side}`;
+  if (!stripCache || stripCache.key !== key) {
+    const c = document.createElement('canvas');
+    c.width = tapeCanvas.width; c.height = tapeCanvas.height;
+    const real = g, m = g.getTransform();
+    g = c.getContext('2d');
+    g.setTransform(m);
+    drawStripsNow(tr);
+    g = real;
+    stripCache = { key, canvas: c };
+  }
+  g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(stripCache.canvas, 0, 0); g.restore();
+}
+
+function drawStripsNow(tr) {
   strips().forEach((t, i) => {
     // Each position holds every letter pressed there: twice the same goes deeper, two different overlap.
     const cells = t.cells || [];
@@ -605,6 +626,8 @@ function noiseBuffer(seconds) {
 
 function startAudio() {
   if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
+  // iPhones mute web audio when the ring switch is on silent, unless the page says it plays media.
+  if (navigator.audioSession) navigator.audioSession.type = 'playback';
   ac = new (window.AudioContext || window.webkitAudioContext)();
   master = ac.createGain(); master.gain.value = volumeGain(); master.connect(ac.destination);
   vuTap = ac.createGain(); vuTap.connect(master);
@@ -626,6 +649,15 @@ function startAudio() {
   noise.connect(spoolFilter); spoolFilter.connect(spoolGain); spoolGain.connect(master);
   noise.start();
   clunkOut = ac.createGain(); clunkOut.gain.value = .5 * lvl('clicks', 1); clunkOut.connect(ac.destination);
+  // Phones only let sound start from a tap. The recordings start later, when the tape reaches them,
+  // so each one is set up and given a silent start here, during the tap that starts the audio.
+  for (const file in AUDIO) {
+    const el = element(file);
+    el.muted = true;
+    const p = el.play();
+    const done = () => { el.pause(); el.muted = false; };
+    if (p && p.then) p.then(done, done); else done();
+  }
 }
 
 function clunk(kind) {
@@ -705,6 +737,7 @@ function press(k) {
 
 // EJECT when stopped: take the cassette out and turn it over.
 function flip() {
+  needsDraw = true;
   clunk('eject');
   st.side = st.side === 'a' ? 'b' : 'a';
   [st.leftAngle, st.rightAngle] = [-st.rightAngle, -st.leftAngle];
@@ -760,7 +793,9 @@ function tick(now) {
     spoolGain.gain.setTargetAtTime(sound.spool && winding ? .05 * lvl('spool') * 2 : 0, t, .08);
     if (winding) spoolFilter.frequency.setTargetAtTime(500 + 900 * (1 - packRadius(elapsed()) / packRadius(SIDE)), t, .2);
   }
-  draw(); drawCounter(); drawMeters(dt);
+  if (moving || needsDraw) { draw(); needsDraw = false; }
+  drawCounter();
+  if (!document.documentElement.classList.contains('phone')) drawMeters(dt);
   requestAnimationFrame(tick);
 }
 
@@ -824,6 +859,7 @@ function drawVU(cv, f, ch) {
 
 const EJECT_ICON = '<path d="M12 4 4 13h16zM4 16h16v3H4z"/>', STOP_ICON = '<path d="M6 6h12v12H6z"/>';
 function updateUI() {
+  needsDraw = true;
   const playing = st.mode === 'playing';
   document.getElementById('play').classList.toggle('down', playing);
   document.getElementById('ff').classList.toggle('down', st.mode === 'ffwd' || st.cue === 'ff');
@@ -952,22 +988,24 @@ function layout() {
   }
   fitCanvas();
 }
-// On a phone: tap to play or pause; hold the right half of the tape to wind forward, the left half
-// to wind back. Letting go stops winding, and the tape plays on if it was playing.
+// On a phone the tape is the deck. Tap while it plays or winds: stop. Tap when stopped: the left
+// end winds back, the right end forward, the middle plays. Hold an end while it plays to listen
+// at speed, like holding REW or FF on a deck; hold it when stopped to wind until you let go.
 let hold = null;
+const isPhone = () => document.documentElement.classList.contains('phone');
+tapeCanvas.addEventListener('touchend', () => { if (isPhone()) startAudio(); }, { passive: true });
 tapeCanvas.addEventListener('pointerdown', e => {
-  if (!document.documentElement.classList.contains('phone')) return;
+  if (!isPhone()) return;
   e.preventDefault();
+  startAudio();
   const r = tapeCanvas.getBoundingClientRect();
   const portrait = getComputedStyle(document.documentElement).getPropertyValue('--turn').trim() === '90deg';
   const along = portrait ? (e.clientY - r.top) / r.height : (e.clientX - r.left) / r.width;   // 0 left end … 1 right end
-  const key = along > .5 ? 'ff' : 'rew';
-  hold = { key, winding: false, wasPlaying: st.mode === 'playing' && !st.paused };
-  hold.timer = setTimeout(() => {
+  const key = along > .66 ? 'ff' : along < .34 ? 'rew' : null;
+  hold = { key, how: null };
+  if (key) hold.timer = setTimeout(() => {
     if (!hold) return;
-    hold.winding = true;
-    if (st.mode === 'playing') { stopActive(); setMode('stopped'); }
-    press(key);
+    hold.how = windDown(key);   // 'cue' while playing, 'wind' when stopped
   }, 350);
 });
 const release = () => {
@@ -975,11 +1013,10 @@ const release = () => {
   clearTimeout(hold.timer);
   const h = hold;
   hold = null;
-  if (h.winding) {
-    if (st.mode === 'ffwd' || st.mode === 'rewind') press(h.key);   // the same key again stops winding
-    if (h.wasPlaying) press('play');
-  } else if (st.mode === 'playing') press('pause');
-  else press('play');
+  if (h.how === 'cue') { if (st.cue) { st.cue = null; updateUI(); } return; }
+  if (h.how === 'wind') { if (st.mode === 'ffwd' || st.mode === 'rewind') press(h.key); return; }
+  if (st.mode !== 'stopped') press('stop');
+  else press(h.key || 'play');
 };
 tapeCanvas.addEventListener('pointerup', release);
 tapeCanvas.addEventListener('pointercancel', release);

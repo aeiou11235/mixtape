@@ -1157,9 +1157,16 @@ final class Deck: NSObject, ObservableObject {
             defer { try? FileManager.default.removeItem(at: file) }
             let result: Result<URL, Error>
             do {
-                _ = try WebTape.write(source, to: file)
-                result = .success(try await ShareLink.upload(file))
+                NSLog("share: making the page")
+                let size = try WebTape.write(source, to: file)
+                NSLog("share: page %d bytes, uploading", size)
+                result = .success(try await ShareLink.upload(file) { done, total in
+                    Task { @MainActor [weak self] in
+                        self?.busy?.setText(L("Link wird erstellt …") + " \(done)/\(total)")
+                    }
+                })
             } catch { result = .failure(error) }
+            NSLog("share: done %@", String(describing: result))
             await MainActor.run { [weak self] in
                 guard let self else { return }
                 self.busy?.close()
@@ -1195,7 +1202,8 @@ enum ShareLink {
 
     struct Reply: Decodable { let id: String }
 
-    static func upload(_ file: URL) async throws -> URL {
+    /// `progress` hears how many parts are up, out of how many.
+    static func upload(_ file: URL, progress: @escaping @Sendable (Int, Int) -> Void = { _, _ in }) async throws -> URL {
         guard let endpoint, let key else { throw TapeError.tool("Share") }
         let secret = SymmetricKey(size: .bits256)
         guard let sealed = try AES.GCM.seal(try Data(contentsOf: file), using: secret).combined else { throw TapeError.tool("AES") }
@@ -1221,6 +1229,7 @@ enum ShareLink {
                 throw TapeError.unreadable("\(i + 1)/\(parts.count) (\(part.count) bytes): " + String(decoding: data, as: UTF8.self))
             }
             id = try JSONDecoder().decode(Reply.self, from: data).id
+            progress(i + 1, parts.count)
         }
         let linkKey = secret.withUnsafeBytes { Data($0) }.base64EncodedString()
             .replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")

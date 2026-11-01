@@ -135,9 +135,10 @@ final class AboutScreen {
 @MainActor
 final class BusyPanel {
     private let panel: NSPanel
+    private let label: NSTextField
 
     init(_ text: String, near window: NSWindow?) {
-        let size = NSSize(width: 250, height: 46)
+        let size = NSSize(width: 280, height: 46)
         panel = NSPanel(contentRect: NSRect(origin: .zero, size: size), styleMask: [.borderless, .nonactivatingPanel],
                         backing: .buffered, defer: false)
         panel.isFloatingPanel = true
@@ -154,7 +155,7 @@ final class BusyPanel {
         spinner.controlSize = .small
         spinner.startAnimation(nil)
         fx.addSubview(spinner)
-        let label = NSTextField(labelWithString: text)
+        label = NSTextField(labelWithString: text)
         label.font = .systemFont(ofSize: 13, weight: .medium)
         label.frame = NSRect(x: 44, y: 14, width: size.width - 56, height: 18)
         fx.addSubview(label)
@@ -169,4 +170,6 @@ final class BusyPanel {
     }
 
     func close() { panel.orderOut(nil) }
+
+    func setText(_ text: String) { label.stringValue = text }
 }

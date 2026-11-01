@@ -356,6 +356,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 /// Command-line helpers for development: rendering previews and the app icon, and a self-test.
 @MainActor
 enum Tools {
+    static var linkDeck: Deck?
     static func run(_ args: [String]) -> Bool {
         if args.contains(where: { ["--rectest", "--mictest", "--tapbench", "--switchtest", "--autorecord", "--autoclick", "--selftest", "--snapshot", "--icon", "--taptest", "--webtape", "--aboutshot"].contains($0) }) {
             TapeDocument.libraryOverride = FileManager.default.temporaryDirectory.appendingPathComponent("MixtapeTests", isDirectory: true)
@@ -403,6 +404,16 @@ enum Tools {
             write(TapeRootView(deck: deck).background(clear ? Color.clear : Color(hex: bg)), scale: 2, to: out)
             deck.doc.discard()
             return true
+        }
+        if let path = value("--linkmenu") {
+            // Development aid: runs "Send as Link" like the menu does, in the running app.
+            let copy = FileManager.default.temporaryDirectory.appendingPathComponent("linkmenu.mixtape")
+            try? FileManager.default.removeItem(at: copy)
+            try? FileManager.default.copyItem(at: URL(fileURLWithPath: path), to: copy)
+            let deck = Deck(doc: try! TapeDocument(url: copy))
+            linkDeck = deck
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { deck.perform(NSSelectorFromString("linkItem")) }
+            return false
         }
         if let path = value("--sharelink") {
             // Same as "Send as Link", from the command line: prints the link.
