@@ -781,13 +781,17 @@ function flip() {
   updateUI();
 }
 
+// Only touch a recording's speed when it really changes: each change restarts its sound on some phones.
+function setRate(el, r) { if (Math.abs(el.playbackRate - r) > 1e-4) el.playbackRate = r; }
+
 function tick(now) {
   const dt = Math.min((now - last) / 1000, .1); last = now;
   const moving = st.mode !== 'stopped' && !(st.mode === 'playing' && st.paused);
   if (moving) {
     if (st.mode === 'playing') {
       wowPhase += dt * 2 * Math.PI * .55;
-      const wow = sound.wow ? 1 + .0022 * lvl('wow') * 2 * Math.sin(wowPhase) : 1;
+      // iPhones stall when a recording's speed changes every frame, so there the wow stays off.
+      const wow = sound.wow && !IOS ? 1 + .0022 * lvl('wow') * 2 * Math.sin(wowPhase) : 1;
       const rate = st.cue ? CUE : wow;
       const dir = st.cue === 'rew' ? -1 : 1;
       advance(dir * dt * rate);
@@ -795,12 +799,12 @@ function tick(now) {
       if (seg !== active) {
         stopActive();
         if (seg) {
-          const el = element(seg.file); el.playbackRate = rate;
+          const el = element(seg.file); setRate(el, rate);
           el.currentTime = seg.fileOffset + (e - seg.start); el.play().catch(err => audioTrouble('play', err)); active = seg;
         }
       } else if (seg) {
         const el = element(seg.file);
-        el.playbackRate = rate;
+        setRate(el, rate);
         if (dir < 0) {
           // A recording can't run backwards: play short bursts as the tape slides back past
           // the head – the chirping you hear when reviewing on a real deck.
