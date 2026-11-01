@@ -201,20 +201,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // Free designs live on GitHub; the website shows them all; donations go through itch.io.
     static let freeDesigns = URL(string: "https://github.com/aeiou11235/mixtape/releases/download/addons/Free-Sampler.mixtapeskins")!
     static let designsPage = URL(string: "https://mixtape.toyko.online/#designs")!
-    static let donatePage = URL(string: "https://aeiou11235.itch.io/mixtape-app/purchase")!
+    static let donatePage = URL(string: "https://aeiou11235.itch.io/mixtape-app")!
 
-    /// Downloads the free designs and installs them – after asking, kindly, for a donation.
+    /// Downloads the free designs and installs them, and opens the itch.io page where people can donate.
     func downloadFreeDesigns() {
         let a = NSAlert()
         a.messageText = L("Gratis-Designs laden")
-        a.informativeText = L("Drei Kassetten aus der 80s Collection – Worn Edition, geschenkt. Mixtape ist ein Hobbyprojekt: Wenn dir die App gefällt, freue ich mich über eine kleine Spende.")
-        a.addButton(withTitle: L("Spenden & laden"))
-        a.addButton(withTitle: L("Nur laden"))
+        a.informativeText = L("Drei Kassetten aus der 80s Collection – Worn Edition, geschenkt. Mixtape ist ein Hobbyprojekt: Wenn dir die App gefällt, freue ich mich über eine kleine Spende auf itch.io – die Seite öffnet sich gleich mit.")
+        a.addButton(withTitle: L("Laden"))
         a.addButton(withTitle: L("Abbrechen"))
         NSApp.activate()
-        let answer = a.runModal()
-        if answer == .alertThirdButtonReturn { return }
-        if answer == .alertFirstButtonReturn { NSWorkspace.shared.open(Self.donatePage) }
+        guard a.runModal() == .alertFirstButtonReturn else { return }
+        NSWorkspace.shared.open(Self.donatePage)
         let busy = BusyPanel(L("Designs werden geladen …"), near: nil)
         Task {
             do {
