@@ -257,7 +257,16 @@ final class DeckAudio {
 
     /// Hiss only comes off magnetic tape, never off the leader.
     func setHiss(_ on: Bool) {
-        noise.hissTarget = on ? Self.hissLevel : 0
+        noise.hissTarget = on ? Self.hissLevel * hissScale : 0
+    }
+
+    /// How strong the effects are: 1 is the original sound, up to 2.
+    var hissScale: Float = 1
+    var wowScale = 1.0
+    var spoolScale: Float = 1
+
+    func setClickVolume(_ v: Float) {
+        fx.volume = v
     }
 
     /// The gentle top-end loss of tape; off means the recording plays back as it went in.
@@ -271,8 +280,10 @@ final class DeckAudio {
         varispeed.rate = rate
     }
 
-    func setTone(_ on: Bool) {
+    /// `amount` 0…1 moves the top-end roll-off from 20 kHz down to about 7.8 kHz; the middle is 12.5 kHz.
+    func setTone(_ on: Bool, amount: Double = 0.5) {
         eq.bypass = !on
+        eq.bands[0].frequency = Float(20_000 * pow(0.625, amount * 2))
     }
 
     func stopPlayback() {
@@ -283,11 +294,11 @@ final class DeckAudio {
 
     /// Wow: the slow pitch drift of a not-quite-perfect capstan.
     func wobble(_ t: Double, on: Bool) {
-        varispeed.rate = on ? Float(1 + 0.0022 * sin(2 * .pi * 0.55 * t) + 0.0009 * sin(2 * .pi * 1.7 * t + 1)) : 1
+        varispeed.rate = on ? Float(1 + wowScale * (0.0022 * sin(2 * .pi * 0.55 * t) + 0.0009 * sin(2 * .pi * 1.7 * t + 1))) : 1
     }
 
     func spool(_ on: Bool, speed: Double = 0) {
-        noise.spoolTarget = on ? Float(0.05 * (0.4 + 0.6 * speed)) : 0
+        noise.spoolTarget = on ? Float(0.05 * (0.4 + 0.6 * speed)) * spoolScale : 0
         noise.spoolHz = Float(3 + 9 * speed)
     }
 

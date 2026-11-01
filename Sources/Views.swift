@@ -10,7 +10,9 @@ struct TapeRootView: View {
                 .frame(width: Geo.cw + 2 * Geo.margin, height: Geo.ch + 2 * Geo.margin)
                 .rotation3DEffect(.degrees(deck.flipAngle), axis: (x: 0, y: 1, z: 0), perspective: 0.35)
             Group {
-                if deck.drawMode { PenPanel(deck: deck) } else { ControlPanel(deck: deck) }
+                if deck.drawMode { PenPanel(deck: deck) }
+                else if deck.editingLabel { LabelPanel(deck: deck) }
+                else { ControlPanel(deck: deck) }
             }
             .frame(width: Geo.panel.width, height: Geo.panel.height)
             .background(PanelBackground())
@@ -31,7 +33,6 @@ struct TapeRootView: View {
 
 struct CassetteView: View {
     @ObservedObject var deck: Deck
-    @FocusState private var focused: Bool
 
     var body: some View {
         let m = Geo.margin
@@ -46,19 +47,6 @@ struct CassetteView: View {
                 DragArea(deck: deck, drawMode: deck.drawMode)
                     .frame(width: Geo.cw, height: Geo.ch)
                     .offset(x: m, y: m)
-            }
-            if deck.editingLabel {
-                let r = Painter.titleRect(state.design)
-                TextField("", text: $deck.draftTitle)
-                    .textFieldStyle(.plain)
-                    .font(.custom(Painter.handFont, size: 25))
-                    .foregroundColor(state.design.pen)
-                    .frame(width: r.width - 4, height: r.height)
-                    .offset(x: m + r.minX + 4, y: m + r.minY)
-                    .focused($focused)
-                    .onSubmit { deck.commitLabel() }
-                    .onExitCommand { deck.commitLabel() }
-                    .onAppear { focused = true }
             }
         }
     }
@@ -103,21 +91,76 @@ final class DragNSView: NSView {
         if drawMode {
             deck.beginStroke(at: point(e))
         } else if e.clickCount == 2 {
-            if Painter.labelZone(deck.doc.design).contains(point(e)) { deck.beginLabelEdit() }
+            // On a strip: press on. On an empty label: the title strip. Anywhere else: a new strip right there.
+            let p = point(e)
+            if let i = deck.stripIndex(at: p) { deck.beginLabelEdit(.existing(i)) }
+            else if deck.doc.strips(deck.side).isEmpty && Painter.labelZone(deck.doc.design).contains(p) { deck.beginLabelEdit(.title) }
+            else { deck.beginLabelEdit(.new(p)) }
+        } else if case let hover = deck.tapeHover(point(e)), hover != .none {
+            deck.beginEmbossDrag(at: point(e), rotate: hover == .turn)
+            movingTape = true
         } else {
             window?.performDrag(with: e)
         }
     }
 
+    private var movingTape = false
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        trackingAreas.forEach(removeTrackingArea)
+        addTrackingArea(NSTrackingArea(rect: bounds, options: [.mouseMoved, .mouseEnteredAndExited, .activeAlways, .inVisibleRect],
+                                       owner: self))
+    }
+
+    /// Over the label strip: a hand to move it, a turning arrow at its corners.
+    override func mouseMoved(with e: NSEvent) {
+        guard let deck, !drawMode, !movingTape else { return }
+        switch deck.tapeHover(point(e)) {
+        case .turn: Self.turnCursor.set()
+        case .move: NSCursor.openHand.set()
+        case .none: NSCursor.arrow.set()
+        }
+    }
+
+    override func mouseExited(with e: NSEvent) {
+        guard let deck, !drawMode else { return }
+        _ = deck.tapeHover(CGPoint(x: -100, y: -100))
+        NSCursor.arrow.set()
+    }
+
+    static let turnCursor: NSCursor = {
+        let image = NSImage(size: NSSize(width: 24, height: 24), flipped: false) { r in
+            for (color, weight) in [(NSColor.white, NSFont.Weight.black), (NSColor.black, .bold)] {
+                let cfg = NSImage.SymbolConfiguration(pointSize: 15, weight: weight).applying(.init(paletteColors: [color]))
+                if let s = NSImage(systemSymbolName: "arrow.clockwise", accessibilityDescription: nil)?.withSymbolConfiguration(cfg) {
+                    s.draw(in: NSRect(x: (r.width - s.size.width) / 2, y: (r.height - s.size.height) / 2,
+                                      width: s.size.width, height: s.size.height))
+                }
+            }
+            return true
+        }
+        return NSCursor(image: image, hotSpot: NSPoint(x: 12, y: 12))
+    }()
+
     override func mouseDragged(with e: NSEvent) {
         if drawMode { deck?.extendStroke(to: point(e)) }
+        if movingTape { deck?.moveEmbossDrag(to: point(e)) }
     }
 
     override func mouseUp(with e: NSEvent) {
         if drawMode { deck?.endStroke() }
+        if movingTape {
+            deck?.endEmbossDrag()
+            movingTape = false
+        }
     }
 
-    override func menu(for event: NSEvent) -> NSMenu? { deck?.makeMenu() }
+    override func menu(for event: NSEvent) -> NSMenu? {
+        guard let deck else { return nil }
+        if let i = deck.stripIndex(at: point(event)) { return deck.stripMenu(i) }
+        return deck.makeMenu()
+    }
 }
 
 // MARK: - Panels
@@ -340,6 +383,54 @@ struct PenPanel: View {
                 .background(Capsule().fill(Color(white: 0.88)))
         }
         .padding(.horizontal, 14)
+    }
+}
+
+/// While pressing the label: the tape colours, a fresh strip, done.
+struct LabelPanel: View {
+    @ObservedObject var deck: Deck
+
+    var body: some View {
+        let current = deck.editingColor
+        let colors = Painter.embossColors
+        HStack(spacing: 12) {
+            VStack(spacing: 5) {
+                ForEach([Array(colors.prefix(8)), Array(colors.dropFirst(8))], id: \.self) { row in
+                    HStack(spacing: 5) {
+                        ForEach(row, id: \.self) { c in
+                            Swatch(color: c, selected: current == c)
+                                .onTapGesture { deck.setEmbossColor(c) }
+                                .help(L("Band ziehen verschiebt es, an den Ecken dreht es sich"))
+                        }
+                    }
+                }
+            }
+            Spacer(minLength: 0)
+            SmallIcon(name: "scissors", help: L("Neues Band – das alte abschneiden")) { deck.newStrip() }
+            SmallIcon(name: "plus", help: L("Weiteres Band prägen")) { deck.nextStrip() }
+            Button(L("Fertig")) { deck.commitLabel() }
+                .buttonStyle(.plain)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(.black)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(Capsule().fill(Color(white: 0.88)))
+        }
+        .padding(.horizontal, 14)
+    }
+}
+
+/// One tape colour. Clear tape shows as a frosted strip.
+private struct Swatch: View {
+    let color: UInt32
+    let selected: Bool
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: 2)
+            .fill(Painter.isClearTape(color) ? AnyShapeStyle(LinearGradient(colors: [.white.opacity(0.6), .white.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing)) : AnyShapeStyle(Color(hex: color)))
+            .frame(width: 22, height: 12)
+            .overlay(RoundedRectangle(cornerRadius: 2).strokeBorder(Color.white.opacity(selected ? 0.95 : 0.25), lineWidth: selected ? 2 : 1))
+            .contentShape(Rectangle())
     }
 }
 

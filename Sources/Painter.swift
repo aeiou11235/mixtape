@@ -22,6 +22,8 @@ struct CassetteDesign {
     let ink: Color
     let pen: Color
     let typeText: String
+    /// Set for designs that come from an add-on; they are drawn from its pictures.
+    var skin: Skin? = nil
 
     static let all: [CassetteDesign] = [
         CassetteDesign(id: "ferro", name: "Ferro", shell: Color(hex: 0x161618), shellHi: Color(hex: 0x323237), clear: false,
@@ -38,7 +40,9 @@ struct CassetteDesign {
                        ink: Color(hex: 0x333333), pen: Color(hex: 0x1c3f94), typeText: "NORMAL POSITION · TYPE I"),
     ]
 
-    static func named(_ id: String) -> CassetteDesign { all.first { $0.id == id } ?? all[0] }
+    static func named(_ id: String) -> CassetteDesign {
+        all.first { $0.id == id } ?? SkinStore.shared.skin(id)?.design ?? all[0]
+    }
 }
 
 /// Everything the painter needs for one frame.
@@ -56,6 +60,20 @@ struct PaintState {
     var hideTitle: Bool
     var hint: Bool
     var strokes: [Stroke]
+    /// The write-protect tab for the side facing up has been broken out.
+    var writeProtected = false
+    /// The label-tape strips stuck on this side; the first one is the title.
+    var strips: [EmbossedTape] = []
+    /// The strip being pressed: which one, its positions so far, the cursor and whether it is lit,
+    /// and where its left end stays.
+    var editingStrip: Int? = nil
+    var embossCells: [String]? = nil
+    var embossCursor: Int? = nil
+    var embossCursorVisible = false
+    var editAnchor: Painter.EmbossAnchor? = nil
+    /// The strip and corner under the pointer, where dragging turns it.
+    var hoverStrip: Int? = nil
+    var embossCorner: Int? = nil
 }
 
 /// Window layout, in points with the origin top-left.
@@ -86,7 +104,6 @@ enum Painter {
     static let hubRadius = 10.5 * mm              // the core the tape is wound on, Ø 21 mm
     static let window = CGRect(x: W / 2 - 156, y: hubY - 50, width: 312, height: 100)
     static let windowCorner = 22.0
-    static let handFont = "BradleyHandITCTT-Bold"
 
     /// Radius of a pack holding `amount` seconds of tape. Wound tape is an annulus, so its area
     /// – length × thickness – grows linearly, not its radius.
@@ -103,16 +120,23 @@ enum Painter {
     }
 
     static func titleRect(_ d: CassetteDesign) -> CGRect {
-        d.clear ? CGRect(x: 72, y: 20, width: W - 152, height: 32) : CGRect(x: 72, y: 26, width: W - 160, height: 32)
+        if let b = d.skin?.spec.title { return CGRect(x: b.x * mm, y: b.y * mm, width: b.w * mm, height: b.h * mm) }
+        return d.clear ? CGRect(x: 72, y: 20, width: W - 152, height: 32) : CGRect(x: 72, y: 26, width: W - 160, height: 32)
     }
 
     /// Double-clicking here edits the label text.
     static func labelZone(_ d: CassetteDesign) -> CGRect {
-        d.clear ? CGRect(x: 24, y: 12, width: W - 48, height: 56) : CGRect(x: 18, y: 12, width: W - 36, height: 62)
+        if let b = d.skin?.spec.labelZone { return CGRect(x: b.x * mm, y: b.y * mm, width: b.w * mm, height: b.h * mm) }
+        return d.clear ? CGRect(x: 24, y: 12, width: W - 48, height: 56) : CGRect(x: 18, y: 12, width: W - 36, height: 62)
     }
 
     static func draw(_ ctx: inout GraphicsContext, _ s: PaintState) {
         let d = s.design
+        if let k = d.skin {
+            drawSkin(&ctx, s, k)
+            if s.writeProtected { drawBrokenTab(&ctx) }
+            return
+        }
         let outer = CGRect(x: 0, y: 0, width: W, height: H)
         let shellShape = Path(roundedRect: outer, cornerRadius: 16)
         let windowShape = Path(roundedRect: window, cornerRadius: windowCorner)
@@ -152,13 +176,30 @@ enum Painter {
                    with: .color(.white.opacity(d.clear ? 0.55 : 0.14)), lineWidth: 1.5)
         ctx.stroke(Path(roundedRect: outer.insetBy(dx: 6, dy: 6), cornerRadius: 11),
                    with: .color(.black.opacity(0.12)), lineWidth: 1)
+        drawStrips(&ctx, s)
+        if s.writeProtected { drawBrokenTab(&ctx) }
+        drawStrokes(&ctx, s)
+    }
 
-        if !s.strokes.isEmpty {
-            ctx.drawLayer { l in
-                l.clip(to: shellShape)
-                for st in s.strokes { drawStroke(&l, st) }
-            }
+    static func drawStrokes(_ ctx: inout GraphicsContext, _ s: PaintState) {
+        guard !s.strokes.isEmpty else { return }
+        ctx.drawLayer { l in
+            l.clip(to: Path(roundedRect: CGRect(x: 0, y: 0, width: W, height: H), cornerRadius: 16))
+            for st in s.strokes { drawStroke(&l, st) }
         }
+    }
+
+    /// The write-protect tab sits in the top edge, at the left of the side facing you.
+    /// Broken out, it leaves a notch you can see through.
+    static func drawBrokenTab(_ ctx: inout GraphicsContext) {
+        let notch = CGRect(x: 7.6 * mm, y: -1, width: 4.8 * mm, height: 1.5 * mm + 1)
+        let shape = Path(roundedRect: notch, cornerRadius: 0.3 * mm)
+        var c = ctx
+        c.blendMode = .clear
+        c.fill(shape, with: .color(.black))
+        // Looking into the hole: dark, darkest at the bottom.
+        ctx.fill(Path(roundedRect: CGRect(x: notch.minX, y: 0, width: notch.width, height: notch.maxY), cornerRadius: 0.3 * mm), with: .linearGradient(Gradient(colors: [.black.opacity(0.35), .black.opacity(0.85)]),
+                                              startPoint: CGPoint(x: 0, y: notch.minY + 1), endPoint: CGPoint(x: 0, y: notch.maxY)))
     }
 
     static func drawStroke(_ ctx: inout GraphicsContext, _ st: Stroke) {
@@ -188,7 +229,7 @@ enum Painter {
     static let leaderColor = Color(hex: 0xe8e3d5, alpha: 0.85)
 
     /// The tape running past the heads right now: brown oxide, or pale leader at either end.
-    private static func tapeColor(_ s: PaintState) -> Color {
+    static func tapeColor(_ s: PaintState) -> Color {
         s.rightAmount < s.leader || s.leftAmount < s.leader ? leaderColor : oxide
     }
 
@@ -206,7 +247,7 @@ enum Painter {
     }
 
     /// Where a line from `p` touches the circle on its outer flank (`sign` −1 right reel, +1 left reel).
-    private static func tangent(from p: CGPoint, to c: CGPoint, radius r: Double, sign: Double) -> CGPoint {
+    static func tangent(from p: CGPoint, to c: CGPoint, radius r: Double, sign: Double) -> CGPoint {
         let dx = p.x - c.x, dy = p.y - c.y
         let d = hypot(dx, dy)
         guard d > r else { return CGPoint(x: c.x - sign * r, y: c.y) }
@@ -310,17 +351,16 @@ enum Painter {
                      at: CGPoint(x: W / 2, y: band.midY))
         }
 
-        if !s.hideTitle {
-            ctx.drawLayer { l in
-                l.clip(to: Path(tr))
-                if !s.title.isEmpty {
-                    l.draw(Text(s.title).font(.custom(handFont, size: 25)).foregroundColor(d.pen),
-                           at: CGPoint(x: tr.minX + 4, y: tr.midY + 2), anchor: .leading)
-                } else if s.hint {
-                    l.draw(Text(L("Doppelklick zum Beschriften")).font(.custom(handFont, size: 17)).foregroundColor(d.pen.opacity(0.3)),
-                           at: CGPoint(x: tr.minX + 4, y: tr.midY + 4), anchor: .leading)
-                }
-            }
+        drawTitle(&ctx, s, rect: tr)
+    }
+
+    static func drawTitle(_ ctx: inout GraphicsContext, _ s: PaintState, rect tr: CGRect) {
+        let d = s.design
+        // Titles go on label tape; an empty label only shows how to make one.
+        if !s.hideTitle && s.strips.isEmpty && s.hint {
+            ctx.draw(Text(L("Doppelklick zum Beschriften")).font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundColor(d.pen.opacity(0.35)),
+                     at: CGPoint(x: tr.minX + 4, y: tr.midY + 1), anchor: .leading)
         }
     }
 

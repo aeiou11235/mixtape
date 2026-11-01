@@ -2,3 +2,6 @@ build/
 .DS_Store
 *.mixtape
 .claude/
+DownloadCounter/
+# Add-on sources and builds: sold separately, not part of the public repository
+Addons/

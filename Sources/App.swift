@@ -100,6 +100,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private(set) var alwaysOnTop = UserDefaults.standard.bool(forKey: "alwaysOnTop")
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        SkinStore.shared.reload()
         if Tools.run(CommandLine.arguments) { exit(0) }
         NSApp.mainMenu = makeMainMenu()
         // ⌥⌘P pauses from any app – plain ⌘P would take Print away from every other app.
@@ -108,7 +109,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .keyUp]) { [weak self] e in
             nonisolated(unsafe) let event = e
-            return MainActor.assumeIsolated { self?.handleKey(event) ?? event }
+            // nil means the key was handled; it must not go on to the window, which would beep.
+            return MainActor.assumeIsolated {
+                guard let self else { return event }
+                return self.handleKey(event)
+            }
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             MainActor.assumeIsolated {
@@ -176,7 +181,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func application(_ sender: NSApplication, open urls: [URL]) {
-        for u in urls { openTape(u) }
+        for u in urls {
+            if u.pathExtension.lowercased() == "mixtapeskins" { installDesigns(u) } else { openTape(u) }
+        }
+    }
+
+    /// Installs an add-on with tape designs and says where to find them.
+    func installDesigns(_ url: URL) {
+        do {
+            let pack = try SkinStore.shared.install(url)
+            let a = NSAlert()
+            a.messageText = String(format: L("„%@“ ist installiert"), pack.spec.name)
+            a.informativeText = String(format: L("%d neue Kassetten findest du im Menü unter „Neue Kassette“."), pack.skins.count)
+            NSApp.activate()
+            a.runModal()
+        } catch { alert(error) }
+    }
+
+    @objc func chooseDesigns() {
+        let p = NSOpenPanel()
+        p.allowedContentTypes = [UTType(filenameExtension: "mixtapeskins") ?? .data]
+        p.allowsMultipleSelection = true
+        NSApp.activate()
+        if p.runModal() == .OK { p.urls.forEach(installDesigns) }
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -220,11 +247,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func openDocument(_ sender: Any?) {
         let p = NSOpenPanel()
-        p.allowedContentTypes = [UTType(filenameExtension: "mixtape") ?? .data]
+        p.allowedContentTypes = ["mixtape", "mixtapeskins"].compactMap { UTType(filenameExtension: $0) }
         p.allowsMultipleSelection = true
         p.directoryURL = TapeDocument.libraryFolder
         NSApp.activate()
-        if p.runModal() == .OK { p.urls.forEach(openTape) }
+        if p.runModal() == .OK { application(NSApp, open: p.urls) }
     }
 
     @objc private func newDefault(_ sender: Any?) { newTape(design: "ferro", length: .c60) }
@@ -264,6 +291,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func handleKey(_ e: NSEvent) -> NSEvent? {
+        // Pressing a label strip: every key goes to the embosser.
+        if let c = controllers.first(where: { $0.window.isKeyWindow }), c.deck.embossing,
+           e.modifierFlags.intersection([.command, .control]).isEmpty {
+            return e.type == .keyDown ? (c.deck.embossKey(e) ? nil : e) : nil
+        }
         guard let c = controllers.first(where: { $0.window.isKeyWindow }), !c.deck.editingLabel,
               e.modifierFlags.intersection([.command, .control, .option]).isEmpty else { return e }
         let d = c.deck
@@ -327,10 +359,17 @@ enum Tools {
     static func run(_ args: [String]) -> Bool {
         if args.contains(where: { ["--rectest", "--mictest", "--tapbench", "--switchtest", "--autorecord", "--autoclick", "--selftest", "--snapshot", "--icon", "--taptest", "--webtape", "--aboutshot"].contains($0) }) {
             TapeDocument.libraryOverride = FileManager.default.temporaryDirectory.appendingPathComponent("MixtapeTests", isDirectory: true)
+            SkinStore.folderOverride = TapeDocument.libraryOverride?.appendingPathComponent("Designs", isDirectory: true)
+            if let f = SkinStore.folderOverride { try? FileManager.default.removeItem(at: f) }
+            SkinStore.shared.reload()
         }
         func value(_ key: String) -> String? {
             guard let i = args.firstIndex(of: key), i + 1 < args.count else { return nil }
             return args[i + 1]
+        }
+        // --designs pack.mixtapeskins: installs an add-on into the test folder first.
+        if let p = value("--designs") {
+            do { _ = try SkinStore.shared.install(URL(fileURLWithPath: p)) } catch { print("designs: \(error.localizedDescription)") }
         }
         if let out = value("--snapshot") {
             let fraction = Double(value("--pos") ?? "") ?? 0.3
@@ -347,12 +386,20 @@ enum Tools {
                 deck = demoDeck(design: value("--design") ?? "ferro", fraction: fraction, side: side,
                                 drawing: args.contains("--draw"))
             }
+            if args.contains("--protect") { deck.doc.setWriteProtected(true, side) }
+            if let s = stripsArg(value("--strips")) { deck.doc.setStrips(s, side) }
+            // --editing n: pressing strip n; --hover x,y: as if the pointer were there (shows the turning ring)
+            if let n = value("--editing").flatMap({ Int($0) }) { deck.beginLabelEdit(.existing(n)) }
+            let h = (value("--hover") ?? "").split(separator: ",").compactMap { Double($0) }
+            if h.count == 2 { _ = deck.tapeHover(CGPoint(x: h[0], y: h[1])) }
             deck.showPanel = !args.contains("--nopanel")
             if args.contains("--meter") {
                 deck.meterOpen = true
                 deck.demoNeedles(-4, 1.5)
             }
-            write(TapeRootView(deck: deck).background(Color(hex: 0x8e98a3)), scale: 2, to: out)
+            // --bg rrggbb: the colour behind the cassette
+            let bg = value("--bg").flatMap { UInt32($0, radix: 16) } ?? 0x8e98a3
+            write(TapeRootView(deck: deck).background(Color(hex: bg)), scale: 2, to: out)
             deck.doc.discard()
             return true
         }
@@ -364,10 +411,22 @@ enum Tools {
             }
             return true
         }
-        if let out = value("--webtape"), let path = value("--file") {
-            // Same as "Send as Web Page", from the command line; the tape is only read.
-            let doc = try! TapeDocument(url: URL(fileURLWithPath: path))
-            let deck = Deck(doc: doc, snapshotMode: true)
+        if let out = value("--webtape"), value("--file") != nil || value("--design") != nil {
+            // Same as "Send as Web Page", from the command line; a tape given with --file is only read.
+            // With --design a demo tape is used instead, and --save also writes it as a .mixtape file.
+            let deck: Deck
+            if let path = value("--file") {
+                deck = Deck(doc: try! TapeDocument(url: URL(fileURLWithPath: path)), snapshotMode: true)
+            } else {
+                deck = demoDeck(design: value("--design")!, fraction: 0, side: .a, drawing: true)
+                if args.contains("--protect") { deck.doc.setWriteProtected(true, .a) }
+                if let s = stripsArg(value("--strips")) { deck.doc.setStrips(s, .a) }
+                if let save = value("--save") {
+                    deck.doc.fileURL = URL(fileURLWithPath: save)
+                    do { try deck.doc.save() } catch { print("save failed: \(error.localizedDescription)") }
+                }
+            }
+            let doc = deck.doc
             var picture = deck.paint
             picture.hint = false
             let url = URL(fileURLWithPath: out)
@@ -518,6 +577,19 @@ enum Tools {
             return true
         }
         return false
+    }
+
+    /// --strips "rrggbb/S|O|XO/x,y,angle;rrggbb/A|B": label-tape strips, the position optional.
+    private static func stripsArg(_ arg: String?) -> [EmbossedTape]? {
+        arg.map {
+            $0.split(separator: ";").compactMap { part in
+                let f = part.split(separator: "/", omittingEmptySubsequences: false).map(String.init)
+                guard f.count >= 2, let c = UInt32(f[0], radix: 16) else { return nil }
+                let v = f.count > 2 ? f[2].split(separator: ",").compactMap { Double($0) } : []
+                return EmbossedTape(color: c, x: v.count == 3 ? v[0] : nil, y: v.count == 3 ? v[1] : nil, angle: v.count == 3 ? v[2] : nil,
+                                    cells: f[1].split(separator: "|", omittingEmptySubsequences: false).map(String.init))
+            }
+        }
     }
 
     private static func demoDeck(design: String, fraction: Double, side: Side, drawing: Bool) -> Deck {

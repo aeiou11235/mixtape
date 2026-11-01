@@ -17,12 +17,26 @@ enum WebTape {
         var audioDir: URL
         var title: String
         var icon: Data?
+        /// An add-on design with its pictures, as JSON for the page; nil for the built-in ones.
+        var skin: String?
+    }
+
+    private struct SkinPayload: Encodable {
+        var spec: SkinSpec
+        var back: String
+        var front: String
     }
 
     @MainActor
     static func source(_ doc: TapeDocument, picture: PaintState) -> Source {
         let title = doc.data.titleA.isEmpty ? (doc.fileURL?.deletingPathExtension().lastPathComponent ?? "Mixtape") : doc.data.titleA
-        return Source(data: doc.data, audioDir: doc.audioDir, title: title, icon: render(picture, scale: 0.25))
+        var skin: String?
+        if let k = doc.design.skin, let b = try? Data(contentsOf: k.backURL), let f = try? Data(contentsOf: k.frontURL),
+           let json = try? JSONEncoder().encode(SkinPayload(spec: k.spec, back: "data:image/png;base64," + b.base64EncodedString(),
+                                                             front: "data:image/png;base64," + f.base64EncodedString())) {
+            skin = String(decoding: json, as: UTF8.self)
+        }
+        return Source(data: doc.data, audioDir: doc.audioDir, title: title, icon: render(picture, scale: 0.25), skin: skin)
     }
 
     /// Builds the page. Slow (it re-encodes the audio), so call it off the main thread.
@@ -38,7 +52,7 @@ enum WebTape {
         // Only what you can hear goes in: each side becomes one recording holding just its
         // segments, back to back, so takes that were recorded over don't weigh anything.
         let heard = (src.data.sideA + src.data.sideB).reduce(0) { $0 + $1.duration }
-        let budget = Double(sizeTarget - template.utf8.count - 200_000) * 3 / 4   // base64 adds a third
+        let budget = Double(sizeTarget - template.utf8.count - (src.skin?.utf8.count ?? 0) - 200_000) * 3 / 4   // base64 adds a third
         let fitting = bitRates.first { Double($0) / 8 * heard <= budget } ?? bitRates.last!
 
         var data = src.data
@@ -59,7 +73,11 @@ enum WebTape {
         // JSONEncoder writes "/" as "\/", so nothing in the tape can close the <script> early.
         let tapeJSON = String(decoding: try JSONEncoder().encode(data), as: UTF8.self)
         let audioJSON = String(decoding: try JSONEncoder().encode(audio), as: UTF8.self)
+        let glyphs = Bundle.main.url(forResource: "emboss-glyphs", withExtension: "json")
+            .flatMap { try? String(contentsOf: $0, encoding: .utf8) } ?? "{}"
         let page = template
+            .replacingOccurrences(of: "__SKIN_JSON__", with: src.skin ?? "null")
+            .replacingOccurrences(of: "__GLYPHS_JSON__", with: glyphs)
             .replacingOccurrences(of: "__TITLE__", with: escapeHTML(src.title))
             .replacingOccurrences(of: "__ICON__", with: src.icon.map { "data:image/png;base64," + $0.base64EncodedString() } ?? "")
             .replacingOccurrences(of: "__TAPE_JSON__", with: tapeJSON)

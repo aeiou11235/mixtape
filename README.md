@@ -1,10 +1,10 @@
-<p align="center"><img src="docs/cassette.png" width="520" alt="A ferro tape labelled MIXTAPE by hand"></p>
+<p align="center"><img src="docs/cassette.png" width="520" alt="A worn clear tape labelled JAPANOISE on red label tape"></p>
 
 <h1 align="center">Mixtape App</h1>
 
 <p align="center"><b>The perfect simulation of an audio cassette for your Mac – just like in 1986.</b></p>
 
-It’s the simulation of a cheap tape recorder, not a high-end audiophile component. A cassette on your Mac desktop. Tape whatever your Mac is playing – a song on Spotify, a clip on YouTube, an Instagram reel (if you REALLY have to) – or your own voice introducing the next song. Flip it over, scribble on the label, and send it to a friend. They don’t even need the app: the tape plays in any browser.
+It’s the simulation of a cheap tape recorder, not a high-end audiophile component. A cassette on your Mac desktop. Tape whatever your Mac is playing – a song on Spotify, a clip on YouTube, an Instagram reel (if you REALLY have to) – or your own voice introducing the next song. Flip it over, punch the title onto label tape, and send it to a friend. They don’t even need the app: the tape plays in any browser.
 
 Recording is fiddly, just like back then in 1986. There’s no shortcut: you can’t just drop in a playlist and hit send. You record in real time, listening to every song as it goes onto the tape. You hit PAUSE at just the right moment – the pause key squeaks a little, and the cut is never quite perfect. It takes time, it’s a pain in the …, but it’s actually fun. That’s exactly the feeling. And you make the effort, because it’s for that one special friend.
 
@@ -29,18 +29,20 @@ That’s the feeling Mixtape App brings back – into the digital age. You’re 
 - **Just a cassette.** No window, no Dock icon – only the tape floats on your desktop. Hover over it and the deck appears.
 - **Records what your Mac plays** – Spotify, YouTube, anything – or the microphone. Switch between SYS and MIC while recording.
 - **Like real tape:** recording overwrites what was there, each side holds half the running time (C46, C60, C90), and you flip the cassette to play side B.
-- **Four tape types:** Ferro, Chrome, Metal and Clear.
-- **Hand-written label and drawings** right on the cassette.
+- **Four tape types:** Ferro, Chrome, Metal and Clear – and more as add-ons, like the *80s Collection* and its well-worn *Worn Edition*. Make your own: [docs/ADDONS.md](docs/ADDONS.md).
+- **Label tape:** type the title onto an embossed plastic strip with a blinking block cursor – 16 colours, as many strips as you like, stuck anywhere and at any angle. There is no delete key: go back and press over it, like the real thing.
+- **Drawings** right on the cassette.
+- **Write protection:** break out the tab for side A or B and REC won't go down.
 - **VU meters and a REC LEVEL fader** that saturates like analog tape when you push it into the red. Outside recording the fader is the volume control.
-- **Tape sound** – hiss, wow & flutter, spool noise, key clunks, pause squeal – each can be switched off, and the settings travel with the tape.
+- **Tape sound** – hiss, wow & flutter, tape tone, spool noise, key clunks – each with its own strength slider, and the settings travel with the tape. Hiss starts switched off.
 - **Pause from anywhere** with ⌥⌘P.
 - **Send it to a friend – two ways:**
   - **As a web page** for anyone: one `.html` file with the whole tape inside. Your friend opens it in any browser – on a Mac, a PC or a phone, no app needed – and sees your cassette with its label and drawings, ready to play from the start of side A. It stays under 25 MB, so it fits in an email.
   - **As a Mixtape file** for friends who have the app: they can record over it and send it back.
 
-<p align="center"><img src="docs/deck.png" width="520" alt="Mixtape with the deck and VU meters open"></p>
+<p align="center"><img src="docs/deck.png" width="520" alt="A yellow 90s indie rock tape with the deck and VU meters open"></p>
 
-<p align="center"><img src="docs/chrome.png" width="440" alt="A chrome tape labelled OCT 30, 2026"> <img src="docs/clear.png" width="440" alt="A clear tape, side B, labelled MIXTAPE 2B"></p>
+<p align="center"><img src="docs/chrome.png" width="440" alt="A black dark wave tape with three label strips"> <img src="docs/clear.png" width="440" alt="A yellow rainbow tape on blue"></p>
 
 ## Install
 

@@ -20,6 +20,7 @@ cp Info.plist "$APP/Contents/Info.plist"
 cp -R Resources/*.lproj "$APP/Contents/Resources/"
 cp Resources/startbild.jpg Resources/aeiou-logo.png "$APP/Contents/Resources/"   # the About screen
 cp Player/player.html "$APP/Contents/Resources/player.html"   # the web-page player for "Send as Web Page"
+cp Resources/emboss-glyphs.json "$APP/Contents/Resources/"    # the label-tape letters, for the app and the web page
 
 # App and document icon, rendered from the cassette itself.
 ICONSET=build/AppIcon.iconset

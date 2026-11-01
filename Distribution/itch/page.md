@@ -17,7 +17,7 @@ Source code link: https://github.com/aeiou11235/mixtape
 
 **The perfect simulation of an audio cassette for your Mac – just like in 1986.**
 
-It's the simulation of a cheap tape recorder, not a high-end audiophile component. A cassette on your Mac desktop. Tape whatever your Mac is playing – a song on Spotify, a clip on YouTube, an Instagram reel (if you REALLY have to) – or your own voice introducing the next song. Flip it over, scribble on the label, and send it to a friend. They don't even need the app: the tape plays in any browser.
+It's the simulation of a cheap tape recorder, not a high-end audiophile component. A cassette on your Mac desktop. Tape whatever your Mac is playing – a song on Spotify, a clip on YouTube, an Instagram reel (if you REALLY have to) – or your own voice introducing the next song. Flip it over, punch the title onto label tape, and send it to a friend. They don't even need the app: the tape plays in any browser.
 
 Recording is fiddly, just like back then in 1986. There's no shortcut: you can't just drop in a playlist and hit send. You record in real time, listening to every song as it goes onto the tape. You hit PAUSE at just the right moment – the pause key squeaks a little, and the cut is never quite perfect. It takes time, it's a pain in the …, but it's actually fun. That's exactly the feeling. And you make the effort, because it's for that one special friend.
 
@@ -36,10 +36,12 @@ That's the feeling Mixtape App brings back – into the digital age. You're not 
 - **Just a cassette.** No window, no Dock icon – only the tape floats on your desktop. Hover over it and the deck appears.
 - **Records what your Mac plays** – Spotify, YouTube, anything – or the microphone.
 - **Like real tape:** recording overwrites what was there, each side holds half the running time (C46, C60, C90), and you flip the cassette for side B.
-- **Four tape types:** Ferro, Chrome, Metal and Clear.
-- **Hand-written label and drawings** right on the cassette.
+- **Four tape types:** Ferro, Chrome, Metal and Clear – and more as add-ons, like the *80s Collection* and its *Worn Edition*.
+- **Label tape:** type the title onto an embossed plastic strip with a blinking block cursor – 16 colours, as many strips as you like, anywhere and at any angle. No delete key: go back and press over it.
+- **Drawings** right on the cassette.
+- **Write protection:** break out the tab and REC won't go down.
 - **VU meters and a REC LEVEL fader** that saturates like analog tape when you push it into the red.
-- **Tape sound** – hiss, wow & flutter, spool noise, key clunks, pause squeal – each can be switched off.
+- **Tape sound** – hiss, wow & flutter, tape tone, spool noise, key clunks – each with its own strength slider. Hiss starts switched off.
 - **Send it:** a tape is a single .mixtape file. Attach it to an email; your friend double-clicks it and the cassette appears.
 
 ### Install

@@ -119,6 +119,10 @@
 // The tape: tape.json from the .mixtape file, plus each recording as a base64 data string.
 const TAPE = __TAPE_JSON__;
 const AUDIO = __AUDIO_JSON__;
+// An add-on design: its spec and the pictures behind and in front of the reels; null for the built-in ones.
+const SKIN = __SKIN_JSON__;
+// The label-tape letters: strokes on a 6 × 10 grid.
+const GLYPHS = __GLYPHS_JSON__;
 
 // ---------- Geometry: true Compact Cassette proportions, as in the Mac app ----------
 const W = 440, H = 280, M = 40;
@@ -135,7 +139,10 @@ const DESIGNS = {
   klar:   { shell: 'rgba(255,255,255,.10)', shellHi: 'rgba(255,255,255,.34)', clear: true, label: '#fbfaf6', accent: '#e8632b', accent2: '#f3b43a', ink: '#333333', pen: '#1c3f94', type: 'NORMAL POSITION · TYPE I' },
 };
 const design = DESIGNS[TAPE.design] || DESIGNS.ferro;
-const sound = Object.assign({ hiss: true, wow: true, tone: true, spool: true, clicks: true }, TAPE.sound || {});
+const skinImages = SKIN ? ['back', 'front'].map(k => { const i = new Image(); i.src = SKIN[k]; return i; }) : null;
+const sound = Object.assign({ hiss: false, wow: true, tone: true, spool: true, clicks: true }, TAPE.sound || {});
+// How strong each effect is: the middle (0.5) is the original sound; key clunks start at full.
+const lvl = (k, d = .5) => sound[k + 'Level'] != null ? sound[k + 'Level'] : d;
 const ROUNDED = 'ui-rounded, "SF Pro Rounded", system-ui, sans-serif';
 
 function packRadius(amount) {
@@ -203,6 +210,7 @@ function draw() {
   const e = elapsed(), left = SIDE - e, right = e;
   const tapeCol = right < LEADER || left < LEADER ? LEADER_COLOR : OXIDE;
   const d = design;
+  if (SKIN) { drawSkin(left, right, tapeCol); return; }
 
   // Shell with the window cut out.
   g.save();
@@ -233,12 +241,193 @@ function draw() {
   g.beginPath(); rr(g, .75, .75, W - 1.5, H - 1.5, 15.5); g.stroke();
   g.lineWidth = 1; g.strokeStyle = 'rgba(0,0,0,.12)'; g.beginPath(); rr(g, 6, 6, W - 12, H - 12, 11); g.stroke();
 
+  drawEmboss(titleBox);
+  drawBrokenTab();
+  drawStrokes();
+}
+
+// ---------- Embossed label tape: coloured plastic, white raised capitals ----------
+// The label-tape strips on the side facing up; older tapes have one strip, or only a title.
+function strips() {
+  const s = st.side === 'a' ? TAPE.stripsA : TAPE.stripsB;
+  if (s) return s;
+  const e = st.side === 'a' ? TAPE.embossA : TAPE.embossB, t = title();
+  if (e) return [Object.assign({ cells: embossChars(t).map(c => c === ' ' ? '' : c) }, e)];
+  return t ? [{ color: 0x161618, cells: embossChars(t).map(c => c === ' ' ? '' : c) }] : [];
+}
+const GU = 1.3, GPITCH = 11.3, GSTROKE = 1.65, EPAD = 11, EH = 31;
+const glyphPaths = {};
+for (const k in GLYPHS) glyphPaths[k] = new Path2D(GLYPHS[k]);
+const embossChars = s => [...s.toUpperCase().replace(/ß/g, 'SS')];
+
+// The same repeatable randomness per press as the app, so letters land the same way.
+function pressNoise(i, k, code) {
+  let h = (Math.imul(i, 73856093) ^ Math.imul(k, 19349663) ^ Math.imul(code, 83492791)) >>> 0;
+  if (!h) h = 1;
+  return () => { h ^= h << 13; h >>>= 0; h ^= h >>> 17; h ^= h << 5; h >>>= 0; return (h % 10000) / 10000; };
+}
+
+function drawEmboss(tr) {
+  strips().forEach((t, i) => {
+    // Each position holds every letter pressed there: twice the same goes deeper, two different overlap.
+    const cells = t.cells || [];
+    if (!cells.some(c => c.length)) return;
+    const text = cells.map(c => c.length ? [...c].pop() : ' ').join('').trim();
+    const w = Math.min(Math.max(cells.length * GPITCH - (GPITCH - 6), 0) * GU + 2 * EPAD, W);
+    let cx, cy, angle;
+    if (t.x != null && t.y != null) { cx = t.x; cy = t.y; angle = t.angle || 0; }
+    else {
+      // Never moved: from the title line downwards, never quite straight.
+      let seed = 7; for (const ch of text) seed = (seed * 31 + ch.codePointAt(0)) & 0xffff;
+      cx = tr.x - 4 + w / 2; cy = Math.min(tr.y + tr.h / 2 + 1 + i * 36, H - 20); angle = (seed % 21 - 10) * .12;
+    }
+    drawStrip(t, cells, cx, cy, angle, w);
+  });
+}
+
+function drawStrip(t, cells, cx, cy, angle, w) {
+  const h = EH;
+  const col = t.color, cr = (col >> 16) & 255, cg = (col >> 8) & 255, cb = col & 255;
+  const pale = k => `rgb(${cr + (255 - cr) * k},${cg + (255 - cg) * k},${cb + (255 - cb) * k})`;
+  g.save(); g.translate(cx, cy); g.rotate(angle * Math.PI / 180);
+  const x0 = -w / 2, y0 = -h / 2;
+  const clear = (col >>> 24) === 1;   // clear tape: no colour of its own
+  g.save(); g.shadowColor = `rgba(0,0,0,${clear ? .2 : .45})`; g.shadowBlur = 3.2; g.shadowOffsetY = 1.2;
+  g.fillStyle = clear ? 'rgba(255,255,255,.16)' : hexColor(col & 0xffffff, 1); g.beginPath(); rr(g, x0, y0, w, h, 1.2); g.fill(); g.restore();
+  if (clear) { g.strokeStyle = 'rgba(255,255,255,.5)'; g.lineWidth = .8; g.beginPath(); rr(g, x0, y0, w, h, 1.2); g.stroke(); }
+  const lg = g.createLinearGradient(0, y0, 0, y0 + h);
+  lg.addColorStop(0, 'rgba(255,255,255,.22)'); lg.addColorStop(.3, 'rgba(255,255,255,.05)');
+  lg.addColorStop(.6, 'rgba(0,0,0,0)'); lg.addColorStop(1, 'rgba(0,0,0,.22)');
+  g.fillStyle = lg; g.beginPath(); rr(g, x0, y0, w, h, 1.2); g.fill();
+  g.fillStyle = 'rgba(255,255,255,.2)'; g.fillRect(x0 + 1, y0 + 2, w - 2, .8);
+  g.strokeStyle = 'rgba(0,0,0,.3)'; g.lineWidth = .6; g.beginPath(); rr(g, x0, y0, w, h, 1.2); g.stroke();
+  g.beginPath(); rr(g, x0, y0, w, h, 1.2); g.clip();
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  cells.forEach((cell, i) => {
+    [...cell].forEach((ch, k) => {
+      const glyph = glyphPaths[ch];
+      if (!glyph) return;
+      const r = pressNoise(i, k, ch.codePointAt(0));
+      const dy = (r() - .5) * 1.3, rot = (r() - .5) * 3.2, depth = .6 + r() * .4;
+      const dx = (r() - .5) * .6 + (k > 0 ? (r() - .5) * .9 : 0);
+      const x = x0 + EPAD + i * GPITCH * GU + dx;
+      const stroke = (color, width, sx = 0, sy = 0) => {
+        g.save();
+        g.translate(x + 3 * GU, dy); g.rotate(rot * Math.PI / 180); g.translate(-3 * GU + sx, -5 * GU + sy); g.scale(GU, GU);
+        g.strokeStyle = color; g.lineWidth = width / GU; g.stroke(glyph);
+        g.restore();
+      };
+      stroke(`rgba(255,255,255,${.07 * depth})`, GSTROKE * 3.2);
+      stroke(`rgba(0,0,0,${.55 * depth})`, GSTROKE + .5, .55, .75);
+      stroke(`rgba(255,255,255,${.75 * depth})`, GSTROKE, -.4, -.5);
+      stroke(pale(.62 + .25 * depth), GSTROKE);
+      stroke(`rgba(255,255,255,${.45 * depth})`, GSTROKE * .35, -.25, -.3);
+    });
+  });
+  g.restore();
+}
+
+function drawStrokes() {
   const sk = strokes();
   if (sk.length) {
     g.save(); g.beginPath(); rr(g, 0, 0, W, H, 16); g.clip();
     for (const k of sk) drawStroke(k);
     g.restore();
   }
+}
+
+// The write-protect tab for the side facing you has been broken out of the top edge.
+function drawBrokenTab() {
+  if (!(st.side === 'a' ? TAPE.protectA : TAPE.protectB)) return;
+  const x = 7.6 * mm, w = 4.8 * mm, h = 1.5 * mm;
+  g.clearRect(x, -1, w, h + 1);
+  const lg = g.createLinearGradient(0, 0, 0, h);
+  lg.addColorStop(0, 'rgba(0,0,0,.35)'); lg.addColorStop(1, 'rgba(0,0,0,.85)');
+  g.fillStyle = lg; g.fillRect(x, 0, w, h);
+}
+
+// ---------- Add-on designs: back picture, reels and tape, front picture, label text ----------
+function drawSkin(left, right, tapeCol) {
+  const sp = SKIN.spec, m = sp.margin * mm;
+  if (!skinImages.every(i => i.complete && i.naturalWidth)) return;
+  g.drawImage(skinImages[0], -m, -m, W + 2 * m, H + 2 * m);
+  const hy = (sp.hubY || 28.3) * mm, cl = { x: hubL.x, y: hy }, cr = { x: hubR.x, y: hy };
+  const rl = packRadius(left), rrad = packRadius(right);
+  const ro = sp.rollers || [8.6, 60.8, 91.8, 60.8, 1.7];
+  if (ro.length === 5) {
+    const r = ro[4] * mm, gL = { x: ro[0] * mm, y: ro[1] * mm }, gR = { x: ro[2] * mm, y: ro[3] * mm };
+    const outL = { x: gL.x - r, y: gL.y }, outR = { x: gR.x + r, y: gR.y };
+    const a = tangent(outL, cl, rl, 1), b = tangent(outR, cr, rrad, -1);
+    const path = () => {
+      g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(outL.x, outL.y);
+      g.quadraticCurveTo(outL.x, gL.y + r, gL.x, gL.y + r); g.lineTo(gR.x, gR.y + r);
+      g.quadraticCurveTo(outR.x, gR.y + r, outR.x, outR.y); g.lineTo(b.x, b.y);
+    };
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    path(); g.strokeStyle = tapeCol; g.lineWidth = .62 * mm; g.stroke();
+    if (tapeCol === OXIDE) { path(); g.strokeStyle = 'rgba(181,83,42,.7)'; g.lineWidth = .22 * mm; g.stroke(); }
+  }
+  drawSkinPack(cl, rl, packRadius(Math.min(left, LEADER)));
+  drawSkinPack(cr, rrad, packRadius(Math.min(right, LEADER)));
+  const hub = sp.hubColor || '#f3f1ea';
+  drawSkinHub(cl, st.leftAngle, hub); drawSkinHub(cr, st.rightAngle, hub);
+  g.drawImage(skinImages[1], -m, -m, W + 2 * m, H + 2 * m);
+
+  for (const t of sp.labels || []) {
+    const str = t.kind === 'side' ? st.side.toUpperCase() : t.kind === 'length' ? `C${TAPE.length}`
+              : t.kind === 'minutes' ? `2×${TAPE.length / 2} MIN` : t.kind === 'total' ? `${TAPE.length} MIN` : (t.text || '');
+    const font = `${t.size * mm}px "${(t.font || 'Futura-Bold').replace(/-Bold$/, '')}", "Futura", "Century Gothic", sans-serif`;
+    g.font = `700 ${font}`; g.textBaseline = 'middle';
+    if ('letterSpacing' in g) g.letterSpacing = ((t.tracking || 0) * mm) + 'px';
+    const pre = t.prefix || '', wPre = g.measureText(pre).width, wAll = wPre + g.measureText(str).width;
+    let x = t.x * mm;
+    if (t.align === 'center') x -= wAll / 2; else if (t.align === 'right') x -= wAll;
+    g.textAlign = 'left';
+    if (pre) { g.fillStyle = t.prefixColor || t.color; g.fillText(pre, x, t.y * mm); }
+    g.fillStyle = t.color; g.fillText(str, x + wPre, t.y * mm);
+    if ('letterSpacing' in g) g.letterSpacing = '0px';
+  }
+  const b = sp.title;
+  drawEmboss({ x: b.x * mm, y: b.y * mm, w: b.w * mm, h: b.h * mm });
+  drawBrokenTab();
+  drawStrokes();
+}
+
+function drawSkinPack(c, r, leaderR) {
+  const rg = g.createRadialGradient(c.x, c.y, hubRadius, c.x, c.y, r);
+  rg.addColorStop(0, '#3a2618'); rg.addColorStop(.5, '#24170f'); rg.addColorStop(1, '#33221a');
+  g.fillStyle = rg; g.beginPath(); circle(g, c, r); g.fill();
+  g.lineWidth = .7;
+  for (let k = hubRadius + 1.5, i = 0; k < r - .8; i++) {
+    g.strokeStyle = (i * 7919) % 5 < 2 ? 'rgba(160,122,90,.10)' : 'rgba(0,0,0,.08)';
+    g.beginPath(); circle(g, c, k); g.stroke();
+    k += 1.6 + ((i * 104729) % 7) * .35;
+  }
+  if (leaderR > hubRadius + .5) { g.fillStyle = LEADER_COLOR; g.beginPath(); circle(g, c, leaderR); g.fill(); }
+  const lg = g.createLinearGradient(c.x - r, c.y - r, c.x + r, c.y + r);
+  lg.addColorStop(.2, 'rgba(255,255,255,0)'); lg.addColorStop(.45, 'rgba(201,162,124,.22)');
+  lg.addColorStop(.55, 'rgba(255,255,255,0)'); lg.addColorStop(.85, 'rgba(0,0,0,.22)');
+  g.fillStyle = lg; g.beginPath(); circle(g, c, r); g.fill();
+}
+
+function drawSkinHub(c, angle, color) {
+  g.save(); g.translate(c.x, c.y); g.rotate(angle);
+  const o = { x: 0, y: 0 }, ring = r => { g.beginPath(); circle(g, o, r * mm); };
+  ring(10.6); g.fillStyle = color; g.fill();
+  const rg = g.createRadialGradient(-2 * mm, -2.5 * mm, 0, -2 * mm, -2.5 * mm, 12 * mm);
+  rg.addColorStop(0, 'rgba(255,255,255,.25)'); rg.addColorStop(1, 'rgba(0,0,0,.18)');
+  ring(10.6); g.fillStyle = rg; g.fill();
+  ring(8.2); g.strokeStyle = 'rgba(0,0,0,.10)'; g.lineWidth = .35 * mm; g.stroke();
+  ring(5.0); g.strokeStyle = 'rgba(0,0,0,.12)'; g.lineWidth = .25 * mm; g.stroke();
+  g.fillStyle = 'rgba(0,0,0,.18)'; g.beginPath(); rr(g, 9.2 * mm, -1.4 * mm, 1.6 * mm, 2.8 * mm, .3 * mm); g.fill();
+  ring(3.45); g.fillStyle = '#0d0c0b'; g.fill();
+  g.fillStyle = color;
+  for (let i = 0; i < 6; i++) {
+    g.save(); g.rotate(i * Math.PI / 3);
+    g.beginPath(); rr(g, -.55 * mm, -3.55 * mm, 1.1 * mm, 1.25 * mm, .2 * mm); g.fill();
+    g.restore();
+  }
+  g.restore();
 }
 
 function drawStroke(k) {
@@ -309,6 +498,7 @@ function text(str, x, y, font, color, spacing) {
   if ('letterSpacing' in g) g.letterSpacing = '0px';
 }
 
+let titleBox = null;
 function drawLabel() {
   const d = design, letter = st.side.toUpperCase();
   let tr;
@@ -337,13 +527,7 @@ function drawLabel() {
     if (TAPE.design === 'metal') { g.fillStyle = d.accent; g.fillRect(28, 208.5, W - 56, 1); }
     text(d.type, W / 2, 196.5, '700 8.5px -apple-system, "Helvetica Neue", sans-serif', TAPE.design === 'metal' ? '#000' : '#fff', 1.6);
   }
-  const t = title();
-  if (t) {
-    g.save(); g.beginPath(); g.rect(tr.x, tr.y, tr.w, tr.h); g.clip();
-    g.font = '700 25px "Bradley Hand", "Segoe Print", cursive'; g.fillStyle = d.pen; g.textAlign = 'left'; g.textBaseline = 'middle';
-    g.fillText(t, tr.x + 4, tr.y + tr.h / 2 + 2);
-    g.restore();
-  }
+  titleBox = tr;
 }
 
 function drawGlass() {
@@ -419,7 +603,7 @@ function startAudio() {
   split.connect(analyserL, 0); split.connect(analyserR, 1);
   // Tape tone: a softer top end and a little warmth.
   toneIn = ac.createGain();
-  const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = sound.tone ? 10500 : 20000; lp.Q.value = .5;
+  const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = sound.tone ? 20000 * Math.pow(.625, lvl('tone') * 2) : 20000; lp.Q.value = .5;
   const warm = ac.createBiquadFilter(); warm.type = 'peaking'; warm.frequency.value = 120; warm.gain.value = sound.tone ? 1.5 : 0;
   toneIn.connect(lp); lp.connect(warm); warm.connect(vuTap);
   // Hiss and spool noise run all the time; their gains open while the tape moves.
@@ -431,7 +615,7 @@ function startAudio() {
   spoolGain = ac.createGain(); spoolGain.gain.value = 0;
   noise.connect(spoolFilter); spoolFilter.connect(spoolGain); spoolGain.connect(master);
   noise.start();
-  clunkOut = ac.createGain(); clunkOut.gain.value = .5; clunkOut.connect(ac.destination);
+  clunkOut = ac.createGain(); clunkOut.gain.value = .5 * lvl('clicks', 1); clunkOut.connect(ac.destination);
 }
 
 function clunk(kind) {
@@ -523,7 +707,7 @@ function tick(now) {
   if (moving) {
     if (st.mode === 'playing') {
       wowPhase += dt * 2 * Math.PI * .55;
-      const wow = sound.wow ? 1 + .0022 * Math.sin(wowPhase) : 1;
+      const wow = sound.wow ? 1 + .0022 * lvl('wow') * 2 * Math.sin(wowPhase) : 1;
       const rate = st.cue ? CUE : wow;
       const dir = st.cue === 'rew' ? -1 : 1;
       advance(dir * dt * rate);
@@ -561,9 +745,9 @@ function tick(now) {
   }
   if (ac) {
     const t = ac.currentTime;
-    hissGain.gain.setTargetAtTime(sound.hiss && st.mode === 'playing' && !st.paused ? .012 : 0, t, .05);
+    hissGain.gain.setTargetAtTime(sound.hiss && st.mode === 'playing' && !st.paused ? .012 * lvl('hiss') * 2 : 0, t, .05);
     const winding = st.mode === 'ffwd' || st.mode === 'rewind';
-    spoolGain.gain.setTargetAtTime(sound.spool && winding ? .05 : 0, t, .08);
+    spoolGain.gain.setTargetAtTime(sound.spool && winding ? .05 * lvl('spool') * 2 : 0, t, .08);
     if (winding) spoolFilter.frequency.setTargetAtTime(500 + 900 * (1 - packRadius(elapsed()) / packRadius(SIDE)), t, .2);
   }
   draw(); drawCounter(); drawMeters(dt);

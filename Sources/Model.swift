@@ -18,11 +18,45 @@ enum TapeLength: Int, Codable, CaseIterable {
 /// The tape's character on playback. Stored in the tape, so the sender's choice travels
 /// with it, but whoever has the cassette can change it. Nothing here is baked into the audio.
 struct SoundSettings: Codable, Equatable {
-    var hiss = true     // Bandrauschen
+    var hiss = false    // Bandrauschen – off unless you want it
     var wow = true      // Leiern
     var tone = true     // dull top end of tape
     var spool = true    // whirr while winding
     var clicks = true   // key clunks
+    /// How strong each effect is, 0…1; nil in tapes from before there were sliders.
+    /// The middle is the original sound (twice that at the top); key clunks start at the top.
+    var hissLevel: Double?
+    var wowLevel: Double?
+    var toneLevel: Double?
+    var spoolLevel: Double?
+    var clicksLevel: Double?
+
+    /// In menu order: hiss, wow, tone, spool, clicks.
+    func level(_ i: Int) -> Double {
+        [hissLevel, wowLevel, toneLevel, spoolLevel, clicksLevel][i] ?? (i == 4 ? 1 : 0.5)
+    }
+
+    mutating func setLevel(_ i: Int, _ v: Double) {
+        switch i {
+        case 0: hissLevel = v
+        case 1: wowLevel = v
+        case 2: toneLevel = v
+        case 3: spoolLevel = v
+        default: clicksLevel = v
+        }
+    }
+
+    func isOn(_ i: Int) -> Bool { [hiss, wow, tone, spool, clicks][i] }
+
+    mutating func toggle(_ i: Int) {
+        switch i {
+        case 0: hiss.toggle()
+        case 1: wow.toggle()
+        case 2: tone.toggle()
+        case 3: spool.toggle()
+        default: clicks.toggle()
+        }
+    }
 }
 
 /// A stretch of recorded audio on one side of the tape.
@@ -55,6 +89,15 @@ struct TapeData: Codable {
     var headA: Double = 0
     var sideUp: Side = .a
     var sound: SoundSettings?
+    /// Write-protect tabs broken out: that side can't be recorded on.
+    var protectA: Bool?
+    var protectB: Bool?
+    /// Label-tape strips stuck on each side; the first is the title.
+    var stripsA: [EmbossedTape]?
+    var stripsB: [EmbossedTape]?
+    /// A single strip, from before there could be several; read only.
+    var embossA: EmbossedTape?
+    var embossB: EmbossedTape?
 }
 
 /// Recording erases whatever was on the tape underneath the new segment.
@@ -126,6 +169,9 @@ final class TapeDocument {
             d.sideA = d.sideA.filter(safe)
             d.sideB = d.sideB.filter(safe)
             data = d
+            // A tape in an add-on design brings that design along.
+            let skin = workDir.appendingPathComponent("skin", isDirectory: true)
+            if FileManager.default.fileExists(atPath: skin.path) { SkinStore.shared.addEmbedded(skin) }
         } catch {
             try? FileManager.default.removeItem(at: workDir)
             throw TapeError.unreadable(url.lastPathComponent)
@@ -168,6 +214,36 @@ final class TapeDocument {
         return c.duration > 0.05 ? c : nil
     }
 
+    /// The label-tape strips on a side. Older tapes have one strip, or only a title, which
+    /// then shows on black tape.
+    func strips(_ side: Side) -> [EmbossedTape] {
+        if let s = side == .a ? data.stripsA : data.stripsB { return s }
+        let t = title(side)
+        if var e = side == .a ? data.embossA : data.embossB {
+            if e.cells == nil { e.cells = Painter.cells(of: t) }
+            return [e]
+        }
+        return t.isEmpty ? [] : [EmbossedTape(color: Painter.embossColors[0], cells: Painter.cells(of: t))]
+    }
+
+    /// The first strip is the tape's title: it names the file and the web page.
+    func setStrips(_ s: [EmbossedTape], _ side: Side) {
+        let t = Painter.embossText(s.first?.cells ?? [])
+        if side == .a {
+            data.stripsA = s; data.embossA = nil; data.titleA = t
+        } else {
+            data.stripsB = s; data.embossB = nil; data.titleB = t
+        }
+        dirty = true
+    }
+
+    func writeProtected(_ side: Side) -> Bool { (side == .a ? data.protectA : data.protectB) ?? false }
+
+    func setWriteProtected(_ on: Bool, _ side: Side) {
+        if side == .a { data.protectA = on } else { data.protectB = on }
+        dirty = true
+    }
+
     func drawing(_ side: Side) -> [Stroke] { side == .a ? data.drawingA : data.drawingB }
 
     func setDrawing(_ strokes: [Stroke], _ side: Side) {
@@ -187,6 +263,13 @@ final class TapeDocument {
         let enc = JSONEncoder()
         enc.outputFormatting = [.prettyPrinted, .sortedKeys]
         try enc.encode(data).write(to: workDir.appendingPathComponent("tape.json"))
+        // An add-on design travels inside the tape, so it looks the same for whoever gets it.
+        let skinDir = workDir.appendingPathComponent("skin", isDirectory: true)
+        if let k = design.skin {
+            if !k.backURL.standardizedFileURL.path.hasPrefix(skinDir.standardizedFileURL.path) { try k.export(to: skinDir) }
+        } else {
+            try? fm.removeItem(at: skinDir)
+        }
 
         let url = try fileURL ?? Self.newFileURL(title: data.titleA)
         let tmp = workDir.deletingLastPathComponent().appendingPathComponent(UUID().uuidString + ".zip")

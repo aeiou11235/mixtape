@@ -14,7 +14,6 @@ final class Deck: NSObject, ObservableObject {
     @Published private(set) var transport: Transport = .stopped
     @Published var showPanel = false
     @Published var editingLabel = false
-    @Published var draftTitle = ""
     @Published private(set) var flipAngle: Double = 0
     @Published private(set) var paused = false
     @Published var onTop = false
@@ -89,11 +88,21 @@ final class Deck: NSObject, ObservableObject {
                 self.audio?.play(self.doc.segments(self.side), from: self.elapsed, in: self.doc.audioDir)
             }
         }
-        audio?.setTone(doc.sound.tone)
+        applySound()
         audio?.setVolume(Self.volumeGain(playVolume))
     }
 
     var sound: SoundSettings { doc.sound }
+
+    /// Hands the tape's effect settings to the audio engine.
+    private func applySound() {
+        let s = doc.sound
+        audio?.setTone(s.tone, amount: s.level(2))
+        audio?.hissScale = Float(s.level(0) * 2)
+        audio?.wowScale = s.level(1) * 2
+        audio?.spoolScale = Float(s.level(3) * 2)
+        audio?.setClickVolume(Float(s.level(4)))
+    }
 
     private func click(_ kind: Clunk) {
         if sound.clicks { audio?.clunk(kind) }
@@ -129,7 +138,13 @@ final class Deck: NSObject, ObservableObject {
                           leftAngle: leftAngle, rightAngle: rightAngle,
                           hideTitle: editingLabel,
                           hint: showPanel && title.isEmpty && !drawMode && doc.drawing(side).isEmpty,
-                          strokes: doc.drawing(side) + (liveStroke.map { [$0] } ?? []))
+                          strokes: doc.drawing(side) + (liveStroke.map { [$0] } ?? []),
+                          writeProtected: doc.writeProtected(side), strips: shownStrips,
+                          editingStrip: embossing ? editingStrip : nil,
+                          embossCells: embossing ? embossDraft : nil,
+                          embossCursor: embossing ? embossCursorPos : nil, embossCursorVisible: cursorOn,
+                          editAnchor: editAnchor, hoverStrip: hoverStrip,
+                          embossCorner: embossDrag == nil || embossDrag?.rotate == true ? tapeCorner : nil)
     }
 
     /// Moves the tape and turns the hubs. Each hub turns by tape length over its pack radius,
@@ -294,6 +309,11 @@ final class Deck: NSObject, ObservableObject {
 
     func pressRecord() {
         if transport == .recording || flipping { return }
+        // The tab for this side is broken out: the REC key won't go down.
+        if doc.writeProtected(side) {
+            click(.key)
+            return
+        }
         if editingLabel { commitLabel() }
         if source == .mic {
             switch AVCaptureDevice.authorizationStatus(for: .audio) {
@@ -574,25 +594,272 @@ final class Deck: NSObject, ObservableObject {
         return over
     }
 
-    // MARK: Label
+    // MARK: Label tape
 
-    func beginLabelEdit() {
+    /// Which strip to press: the title strip, one that is already stuck on, or a new one –
+    /// where you double-clicked, or below the others.
+    enum StripTarget {
+        case title
+        case existing(Int)
+        case new(CGPoint?)
+    }
+
+    /// The strip being pressed, its letters so far, where the next one goes, and its colour.
+    @Published private(set) var editingStrip: Int?
+    @Published private(set) var embossDraft: [String] = []
+    @Published private(set) var embossCursorPos = 0
+    @Published private(set) var cursorOn = true
+    @Published private(set) var editingColor: UInt32 = Deck.lastTapeColor
+    private var editAnchor: Painter.EmbossAnchor?
+    private var blink: Timer?
+    private var stripsChanged = false
+
+    var embossing: Bool { editingLabel && editingStrip != nil }
+
+    static var lastTapeColor: UInt32 {
+        get { (UserDefaults.standard.object(forKey: "tapeColor") as? NSNumber)?.uint32Value ?? Painter.embossColors[0] }
+        set { UserDefaults.standard.set(NSNumber(value: newValue), forKey: "tapeColor") }
+    }
+
+    /// The strips as they are drawn: while one is being pressed, in the colour picked for it.
+    private var shownStrips: [EmbossedTape] {
+        var s = doc.strips(side)
+        if let i = editingStrip, i < s.count { s[i].color = editingColor }
+        return s
+    }
+
+    func beginLabelEdit(_ target: StripTarget = .title) {
         guard !flipping, !drawMode else { return }
-        draftTitle = doc.title(side)
+        if editingLabel { commitLabel() }
+        var strips = doc.strips(side)
+        let i: Int
+        var anchor: Painter.EmbossAnchor?
+        switch target {
+        case .existing(let k) where k < strips.count:
+            i = k
+        case .title where !strips.isEmpty:
+            i = 0
+        case .new(let p?):
+            // A new strip starts where you double-clicked: its left end there.
+            strips.append(EmbossedTape(color: Self.lastTapeColor, cells: []))
+            i = strips.count - 1
+            anchor = Painter.EmbossAnchor(point: CGPoint(x: min(max(p.x, 4), Painter.W - 60), y: p.y), angle: 0)
+        default:
+            strips.append(EmbossedTape(color: Self.lastTapeColor, cells: []))
+            i = strips.count - 1
+        }
+        if strips.count != doc.strips(side).count { doc.setStrips(strips, side) }
+        let t = strips[i]
+        embossDraft = t.cells ?? []
+        while embossDraft.last == "" { embossDraft.removeLast() }
+        embossCursorPos = embossDraft.count
+        editingColor = t.color
+        // A strip that already has its place is pressed where it is.
+        if anchor == nil, t.x != nil {
+            anchor = Painter.anchor(of: Painter.stripFrame(t, index: i, cells: embossDraft, design: doc.design))
+        }
+        editAnchor = anchor
+        editingStrip = i
         editingLabel = true
+        cursorOn = true
+        blink?.invalidate()
+        let timer = Timer(timeInterval: 0.5, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.cursorOn.toggle() }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        blink = timer
         NSApp.activate()
         window?.makeKeyAndOrderFront(nil)
     }
 
+    /// Cuts the strip after the last letter and sticks it where it is. A strip with nothing on it is thrown away.
     func commitLabel() {
         guard editingLabel else { return }
         editingLabel = false
-        let t = draftTitle.trimmingCharacters(in: .whitespacesAndNewlines)
-        if t != doc.title(side) {
-            doc.setTitle(t, side)
-            if transport != .recording { save() }
+        blink?.invalidate()
+        blink = nil
+        if let i = editingStrip {
+            var strips = doc.strips(side)
+            while embossDraft.last == "" { embossDraft.removeLast() }
+            if i < strips.count {
+                if embossDraft.isEmpty {
+                    strips.remove(at: i)
+                } else {
+                    var t = strips[i]
+                    t.cells = embossDraft
+                    t.color = editingColor
+                    // Pressed in place, or below the title: it stays exactly there.
+                    if editAnchor != nil || i > 0 {
+                        let f = Painter.stripFrame(t, index: i, cells: embossDraft, design: doc.design, anchor: editAnchor)
+                        t.x = f.center.x
+                        t.y = f.center.y
+                        t.angle = f.angle
+                    }
+                    strips[i] = t
+                }
+                if strips != doc.strips(side) {
+                    doc.setStrips(strips, side)
+                    stripsChanged = true
+                }
+            }
         }
+        editingStrip = nil
+        editAnchor = nil
+        if stripsChanged && transport != .recording { save() }
+        stripsChanged = false
     }
+
+    /// The colour of the strip being pressed.
+    func setEmbossColor(_ c: UInt32) {
+        editingColor = c
+        Self.lastTapeColor = c
+    }
+
+    /// Done with this strip, on to the next one.
+    func nextStrip() {
+        commitLabel()
+        beginLabelEdit(.new(nil))
+    }
+
+    /// A key on the embosser. There is no rubbing out: ← and ⌫ only wind the tape back,
+    /// so the next letter is pressed over what is already there.
+    func embossKey(_ e: NSEvent) -> Bool {
+        cursorOn = true
+        switch e.keyCode {
+        case 123, 51: embossCursorPos = max(0, embossCursorPos - 1)        // ←, ⌫
+        case 124: embossCursorPos = min(Painter.embossMaxCells(doc.design), embossCursorPos + 1)   // →
+        case 36, 76, 53: commitLabel()                                   // return, enter, esc
+        default:
+            for ch in Painter.embossChars(e.characters ?? "") { press(ch) }
+        }
+        return true
+    }
+
+    private func press(_ ch: Character) {
+        guard embossCursorPos < Painter.embossMaxCells(doc.design) else { return }
+        while embossDraft.count <= embossCursorPos { embossDraft.append("") }
+        if ch != " " && Painter.embossGlyphs[ch] != nil { embossDraft[embossCursorPos].append(ch) }
+        embossCursorPos += 1
+    }
+
+    /// A fresh strip in place of this one, for when it is beyond saving.
+    func newStrip() {
+        embossDraft = []
+        embossCursorPos = 0
+        cursorOn = true
+    }
+
+    /// Where each strip sits, topmost first, for finding the one under the pointer.
+    private var stripFrames: [(Int, Painter.EmbossFrame)] {
+        guard !editingLabel else { return [] }
+        return doc.strips(side).enumerated().compactMap { i, t in
+            let cells = t.cells ?? []
+            guard cells.contains(where: { !$0.isEmpty }) else { return nil }
+            return (i, Painter.stripFrame(t, index: i, cells: cells, design: doc.design))
+        }.reversed()
+    }
+
+    func stripIndex(at p: CGPoint) -> Int? { stripFrames.first { Painter.embossContains($0.1, p) }?.0 }
+
+    @Published private(set) var hoverStrip: Int?
+    @Published private(set) var tapeCorner: Int?
+
+    /// What the pointer is over: a corner of a strip (turn it), a strip (move it), or neither.
+    enum TapeHover { case none, move, turn }
+
+    func tapeHover(_ p: CGPoint) -> TapeHover {
+        var strip: Int?, corner: Int?, kind = TapeHover.none
+        for (i, f) in stripFrames {
+            if let c = Painter.embossCorner(f, p) { strip = i; corner = c; kind = .turn; break }
+            if Painter.embossContains(f, p) { strip = i; kind = .move; break }
+        }
+        if strip != hoverStrip { hoverStrip = strip }
+        if corner != tapeCorner { tapeCorner = corner }
+        return kind
+    }
+
+    private var embossDrag: (strip: Int, start: CGPoint, frame: Painter.EmbossFrame, rotate: Bool, moved: Bool)?
+
+    /// Dragging a strip moves it; dragging a corner turns it around its centre.
+    func beginEmbossDrag(at p: CGPoint, rotate: Bool) {
+        guard let i = hoverStrip ?? stripIndex(at: p), let f = stripFrames.first(where: { $0.0 == i })?.1 else { return }
+        embossDrag = (i, p, f, rotate, false)
+    }
+
+    func moveEmbossDrag(to p: CGPoint) {
+        guard var d = embossDrag else { return }
+        var strips = doc.strips(side)
+        guard d.strip < strips.count else { return }
+        var f = d.frame
+        if d.rotate {
+            let a0 = atan2(d.start.y - f.center.y, d.start.x - f.center.x)
+            let a1 = atan2(p.y - f.center.y, p.x - f.center.x)
+            f.angle += (a1 - a0) * 180 / .pi
+        } else {
+            f.center.x = min(max(f.center.x + p.x - d.start.x, 0), Painter.W)
+            f.center.y = min(max(f.center.y + p.y - d.start.y, 0), Painter.H)
+        }
+        objectWillChange.send()
+        strips[d.strip].x = f.center.x
+        strips[d.strip].y = f.center.y
+        strips[d.strip].angle = f.angle
+        doc.setStrips(strips, side)
+        d.moved = true
+        embossDrag = d
+    }
+
+    func endEmbossDrag() {
+        if embossDrag?.moved == true && transport != .recording { save() }
+        embossDrag = nil
+        objectWillChange.send()
+    }
+
+    var draggingCorner: Bool { embossDrag?.rotate == true }
+
+    /// Turns a strip back to level where it is.
+    func straightenStrip(_ i: Int) {
+        var strips = doc.strips(side)
+        guard i < strips.count, let f = stripFrames.first(where: { $0.0 == i })?.1 else { return }
+        objectWillChange.send()
+        strips[i].x = f.center.x
+        strips[i].y = f.center.y
+        strips[i].angle = 0
+        doc.setStrips(strips, side)
+        if transport != .recording { save() }
+    }
+
+    func peelStrip(_ i: Int) {
+        var strips = doc.strips(side)
+        guard i < strips.count else { return }
+        objectWillChange.send()
+        strips.remove(at: i)
+        doc.setStrips(strips, side)
+        if transport != .recording { save() }
+    }
+
+    func peelAllStrips() {
+        objectWillChange.send()
+        doc.setStrips([], side)
+        if transport != .recording { save() }
+    }
+
+    /// Right-click on a strip.
+    func stripMenu(_ i: Int) -> NSMenu {
+        let m = NSMenu()
+        for (title, action) in [(L("Weiterprägen"), #selector(editStripItem(_:))), (L("Gerade ausrichten"), #selector(straightenItem(_:))),
+                                (L("Abziehen"), #selector(peelItem(_:)))] {
+            let it = item(title, action)
+            it.tag = i
+            m.addItem(it)
+        }
+        return m
+    }
+
+    @objc private func editStripItem(_ sender: NSMenuItem) { beginLabelEdit(.existing(sender.tag)) }
+    @objc private func straightenItem(_ sender: NSMenuItem) { straightenStrip(sender.tag) }
+    @objc private func peelItem(_ sender: NSMenuItem) { peelStrip(sender.tag) }
+    @objc private func moreStripItem() { beginLabelEdit(.new(nil)) }
+    @objc private func peelAllItem() { peelAllStrips() }
 
     // MARK: Drawing
 
@@ -672,21 +939,57 @@ final class Deck: NSObject, ObservableObject {
         let m = NSMenu()
         let newItem = NSMenuItem(title: L("Neue Kassette"), action: nil, keyEquivalent: "")
         let designs = NSMenu()
-        for d in CassetteDesign.all {
+        // Each design offers the three lengths; add-on packs follow under their own heading.
+        let addDesign = { (d: CassetteDesign) in
+            let di = NSMenuItem(title: d.name, action: nil, keyEquivalent: "")
+            let lengths = NSMenu()
             for l in TapeLength.allCases {
-                let i = item("\(d.name) \(l.label)", #selector(newTapeItem(_:)))
+                let i = self.item(l.label, #selector(self.newTapeItem(_:)))
                 i.representedObject = "\(d.id):\(l.rawValue)"
-                designs.addItem(i)
+                lengths.addItem(i)
             }
-            if d.id != CassetteDesign.all.last?.id { designs.addItem(.separator()) }
+            di.submenu = lengths
+            designs.addItem(di)
         }
+        CassetteDesign.all.forEach(addDesign)
+        for pack in SkinStore.shared.packs {
+            designs.addItem(.separator())
+            designs.addItem(NSMenuItem.sectionHeader(title: pack.spec.name))
+            pack.skins.map(\.design).forEach(addDesign)
+        }
+        designs.addItem(.separator())
+        designs.addItem(item(L("Kassetten-Designs hinzufügen …"), #selector(addDesignsItem)))
         newItem.submenu = designs
         m.addItem(newItem)
         m.addItem(item(L("Öffnen …"), #selector(openItem)))
         m.addItem(.separator())
         m.addItem(item(L("Beschriften"), #selector(labelItem)))
+        let tapeItem = NSMenuItem(title: L("Prägeband"), action: nil, keyEquivalent: "")
+        let tapeMenu = NSMenu()
+        tapeMenu.addItem(item(L("Weiteres Band prägen"), #selector(moreStripItem)))
+        if !doc.strips(side).isEmpty { tapeMenu.addItem(item(L("Alle abziehen"), #selector(peelAllItem))) }
+        tapeMenu.addItem(.separator())
+        for text in [L("Doppelklick auf die Kassette: neues Band an dieser Stelle"),
+                     L("Band ziehen verschiebt es, an den Ecken dreht es sich"),
+                     L("Rechtsklick aufs Band: weiterprägen, ausrichten, abziehen")] {
+            let hint = NSMenuItem(title: text, action: nil, keyEquivalent: "")
+            hint.isEnabled = false
+            tapeMenu.addItem(hint)
+        }
+        tapeItem.submenu = tapeMenu
+        m.addItem(tapeItem)
         m.addItem(item(drawMode ? L("Malen beenden") : L("Auf die Kassette malen"), #selector(drawItem)))
         m.addItem(item(L("Kassette umdrehen"), #selector(flipItem)))
+        let protect = NSMenuItem(title: L("Schreibschutz"), action: nil, keyEquivalent: "")
+        let protectMenu = NSMenu()
+        for sd in [Side.a, .b] {
+            let i = item(String(format: L("Seite %@ – Lasche herausgebrochen"), sd.letter), #selector(protectItem(_:)))
+            i.representedObject = sd.rawValue
+            i.state = doc.writeProtected(sd) ? .on : .off
+            protectMenu.addItem(i)
+        }
+        protect.submenu = protectMenu
+        m.addItem(protect)
         let pause = item(L("Pause – geht auch aus jeder App mit ⌥⌘P"), #selector(pauseItem))
         pause.state = paused ? .on : .off
         m.addItem(pause)
@@ -702,12 +1005,15 @@ final class Deck: NSObject, ObservableObject {
         m.addItem(src)
         let soundItem = NSMenuItem(title: L("Klang"), action: nil, keyEquivalent: "")
         let soundMenu = NSMenu()
-        let options = [(L("Bandrauschen"), sound.hiss), (L("Leiern"), sound.wow), (L("Bandklang (weiche Höhen)"), sound.tone),
-                       (L("Spulgeräusch"), sound.spool), (L("Tastenklacken"), sound.clicks)]
-        for (i, (title, on)) in options.enumerated() {
-            let it = item(title, #selector(toggleSound(_:)))
-            it.tag = i
-            it.state = on ? .on : .off
+        soundMenu.delegate = self
+        soundMenu.addItem(NSMenuItem.sectionHeader(title: L("Effekt und Stärke")))
+        let titles = [L("Bandrauschen"), L("Leiern"), L("Bandklang (weiche Höhen)"), L("Spulgeräusch"), L("Tastenklacken")]
+        for (i, title) in titles.enumerated() {
+            let row = SoundRow(title: title, on: sound.isOn(i), level: sound.level(i))
+            row.onToggle = { [weak self] _ in self?.changeSound { $0.toggle(i) } }
+            row.onLevel = { [weak self] v in self?.changeSound { $0.setLevel(i, v) } }
+            let it = NSMenuItem()
+            it.view = row
             soundMenu.addItem(it)
         }
         soundMenu.addItem(.separator())
@@ -751,22 +1057,28 @@ final class Deck: NSObject, ObservableObject {
     }
 
     @objc private func openItem() { (NSApp.delegate as? AppDelegate)?.openDocument(nil) }
+    @objc private func addDesignsItem() { (NSApp.delegate as? AppDelegate)?.chooseDesigns() }
+
+    @objc private func protectItem(_ sender: NSMenuItem) {
+        guard let raw = sender.representedObject as? String, let sd = Side(rawValue: raw) else { return }
+        if transport == .recording && sd == side { finishRecording() }
+        objectWillChange.send()
+        doc.setWriteProtected(!doc.writeProtected(sd), sd)
+        if doc.fileURL != nil { save() }
+    }
     @objc private func labelItem() { beginLabelEdit() }
     @objc private func drawItem() { toggleDrawMode() }
     @objc private func flipItem() { flip() }
     @objc private func pauseItem() { pressPause() }
-    @objc private func toggleSound(_ sender: NSMenuItem) {
+    private var soundChanged = false
+
+    /// Applies at once, so you hear it while you move the slider; saved when the menu closes.
+    private func changeSound(_ change: (inout SoundSettings) -> Void) {
         var s = doc.sound
-        switch sender.tag {
-        case 0: s.hiss.toggle()
-        case 1: s.wow.toggle()
-        case 2: s.tone.toggle()
-        case 3: s.spool.toggle()
-        default: s.clicks.toggle()
-        }
+        change(&s)
         doc.sound = s
-        audio?.setTone(s.tone)
-        if transport != .recording && doc.fileURL != nil { save() }
+        applySound()
+        soundChanged = true
     }
 
     @objc private func sourceSystem() { source = .system }
@@ -826,4 +1138,47 @@ final class Deck: NSObject, ObservableObject {
         }
     }
     private var busy: BusyPanel?
+}
+
+extension Deck: NSMenuDelegate {
+    func menuDidClose(_ menu: NSMenu) {
+        guard soundChanged else { return }
+        soundChanged = false
+        if transport != .recording && doc.fileURL != nil { save() }
+    }
+}
+
+/// One effect in the Sound menu: on or off, and how strong.
+final class SoundRow: NSView {
+    private let check: NSButton
+    private let slider: NSSlider
+    var onToggle: (Bool) -> Void = { _ in }
+    var onLevel: (Double) -> Void = { _ in }
+
+    init(title: String, on: Bool, level: Double) {
+        check = NSButton(checkboxWithTitle: title, target: nil, action: nil)
+        slider = NSSlider(value: level, minValue: 0, maxValue: 1, target: nil, action: nil)
+        super.init(frame: NSRect(x: 0, y: 0, width: 340, height: 26))
+        check.state = on ? .on : .off
+        check.target = self
+        check.action = #selector(toggled)
+        check.frame = NSRect(x: 14, y: 4, width: 200, height: 18)
+        slider.target = self
+        slider.action = #selector(moved)
+        slider.isContinuous = true
+        slider.controlSize = .small
+        slider.isEnabled = on
+        slider.frame = NSRect(x: 216, y: 4, width: 110, height: 18)
+        addSubview(check)
+        addSubview(slider)
+    }
+
+    required init?(coder: NSCoder) { fatalError("not used") }
+
+    @objc private func toggled() {
+        slider.isEnabled = check.state == .on
+        onToggle(check.state == .on)
+    }
+
+    @objc private func moved() { onLevel(slider.doubleValue) }
 }
