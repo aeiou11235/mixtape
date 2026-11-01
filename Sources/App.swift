@@ -122,6 +122,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         if !CommandLine.arguments.contains(where: { $0.hasPrefix("--auto") }) {
             AboutScreen.shared.show(briefly: true)
+            Updates.checkLater()
         }
         // Development aid: clicks the REC key with a real mouse event, like a user.
         if let i = CommandLine.arguments.firstIndex(of: "--autoclick"), i + 1 < CommandLine.arguments.count {
@@ -373,7 +374,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 enum Tools {
     static var linkDeck: Deck?
     static func run(_ args: [String]) -> Bool {
-        if args.contains(where: { ["--rectest", "--mictest", "--tapbench", "--switchtest", "--autorecord", "--autoclick", "--selftest", "--snapshot", "--icon", "--taptest", "--webtape", "--aboutshot"].contains($0) }) {
+        if args.contains(where: { ["--rectest", "--mictest", "--tapbench", "--switchtest", "--autorecord", "--autoclick", "--selftest", "--snapshot", "--icon", "--taptest", "--webtape", "--aboutshot", "--updatecheck"].contains($0) }) {
             TapeDocument.libraryOverride = FileManager.default.temporaryDirectory.appendingPathComponent("MixtapeTests", isDirectory: true)
             SkinStore.folderOverride = TapeDocument.libraryOverride?.appendingPathComponent("Designs", isDirectory: true)
             if let f = SkinStore.folderOverride { try? FileManager.default.removeItem(at: f) }
@@ -449,6 +450,24 @@ enum Tools {
             }
             while !done { RunLoop.main.run(until: Date().addingTimeInterval(0.1)) }
             doc.discard()
+            return true
+        }
+        // --updatecheck 0.4.6: what the update check makes of GitHub's newest release, for that version.
+        if let mine = value("--updatecheck") {
+            let done = DispatchSemaphore(value: 0)
+            Task.detached {
+                var req = URLRequest(url: Updates.latest, timeoutInterval: 15)
+                req.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
+                if let (data, _) = try? await URLSession.shared.data(for: req),
+                   let j = try? JSONSerialization.jsonObject(with: data) as? [String: Any], let tag = j["tag_name"] as? String {
+                    let v = tag.hasPrefix("v") ? String(tag.dropFirst()) : tag
+                    let newer = Updates.isNewer(v, than: mine)
+                    let notes = Updates.summary(j["body"] as? String)
+                    print("latest \(v), newer than \(mine): \(newer)\n\(notes)")
+                } else { print("no answer from GitHub") }
+                done.signal()
+            }
+            while done.wait(timeout: .now()) == .timedOut { RunLoop.main.run(until: Date().addingTimeInterval(0.05)) }
             return true
         }
         if let out = value("--aboutshot") {

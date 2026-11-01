@@ -1057,6 +1057,7 @@ final class Deck: NSObject, ObservableObject {
         m.addItem(item(L("Kassette schließen"), #selector(closeItem)))
         m.addItem(.separator())
         m.addItem(item(L("Über Mixtape"), #selector(aboutItem)))
+        m.addItem(item(L("Nach neuer Version suchen …"), #selector(updatesItem)))
         m.addItem(item(L("Mixtape beenden"), #selector(quitItem)))
         return m
     }
@@ -1119,6 +1120,7 @@ final class Deck: NSObject, ObservableObject {
     }
 
     @objc private func aboutItem() { AboutScreen.shared.show(briefly: false) }
+    @objc private func updatesItem() { Task { await Updates.check(manual: true) } }
 
     /// The .mixtape itself, for friends who have the app: saved and shown in the Finder,
     /// ready to drag into an email or a message.
