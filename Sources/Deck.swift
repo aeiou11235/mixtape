@@ -1197,17 +1197,31 @@ enum ShareLink {
 
     static func upload(_ file: URL) async throws -> URL {
         guard let endpoint, let key else { throw TapeError.tool("Share") }
-        var req = URLRequest(url: endpoint, timeoutInterval: 120)
-        req.httpMethod = "POST"
-        req.setValue(key, forHTTPHeaderField: "x-mixtape-key")
-        req.setValue("application/octet-stream", forHTTPHeaderField: "content-type")
         let secret = SymmetricKey(size: .bits256)
         guard let sealed = try AES.GCM.seal(try Data(contentsOf: file), using: secret).combined else { throw TapeError.tool("AES") }
-        let (data, response) = try await URLSession.shared.upload(for: req, from: sealed)
-        guard (response as? HTTPURLResponse)?.statusCode == 200 else {
-            throw TapeError.unreadable(String(decoding: data, as: UTF8.self))
+        // In parts of about 1 MB (at most 20 of them), each as Base64 text: web space limits how big
+        // one upload may be, and firewalls tend to turn away raw binary.
+        let size = max(1024 * 1024, (sealed.count + 19) / 20)
+        let parts = stride(from: 0, to: sealed.count, by: size).map { sealed[$0..<min($0 + size, sealed.count)] }
+        var id = ""
+        for (i, part) in parts.enumerated() {
+            var c = URLComponents(url: endpoint, resolvingAgainstBaseURL: false)!
+            c.queryItems = [URLQueryItem(name: "part", value: "\(i)"), URLQueryItem(name: "of", value: "\(parts.count)")]
+                + (i > 0 ? [URLQueryItem(name: "id", value: id)] : [])
+            var req = URLRequest(url: c.url!, timeoutInterval: 120)
+            req.httpMethod = "POST"
+            req.setValue(key, forHTTPHeaderField: "x-mixtape-key")
+            req.setValue("text/plain", forHTTPHeaderField: "content-type")
+            // A plain body with its length up front: some web space drops bodies sent in chunks.
+            let body = Data(part).base64EncodedData()
+            req.httpBody = body
+            req.setValue("\(body.count)", forHTTPHeaderField: "content-length")
+            let (data, response) = try await URLSession.shared.data(for: req)
+            guard (response as? HTTPURLResponse)?.statusCode == 200 else {
+                throw TapeError.unreadable("\(i + 1)/\(parts.count) (\(part.count) bytes): " + String(decoding: data, as: UTF8.self))
+            }
+            id = try JSONDecoder().decode(Reply.self, from: data).id
         }
-        let id = try JSONDecoder().decode(Reply.self, from: data).id
         let linkKey = secret.withUnsafeBytes { Data($0) }.base64EncodedString()
             .replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
         guard let link = URL(string: endpoint.deletingLastPathComponent().absoluteString + "#\(id).\(linkKey)") else { throw TapeError.tool("Share") }

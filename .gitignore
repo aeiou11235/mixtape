@@ -7,4 +7,4 @@ DownloadCounter/
 Addons/
 # Where the app uploads share links, and its key: built in, never committed
 Share/app.env
-Share/deploy-tokion/
+Share/deploy/
