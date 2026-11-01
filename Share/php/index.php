@@ -122,6 +122,7 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
 
   .free img { width: 100%; height: auto; margin: 4px 0 14px; filter: drop-shadow(0 16px 28px rgba(20,5,46,.5)); }
   .free p { margin: 0; max-width: 40em; }
+  .free h2.addons { margin-top: 64px; }
   .story { max-width: 44em; }
   .story p { margin: 0 0 14px; color: #2c0a5e; font-weight: 500; }
   .claim { font: italic 900 clamp(22px, 3.4vw, 30px)/1.2 "Futura", "Avenir Next", sans-serif; color: #2c0a5e; margin-top: 22px; }
@@ -180,6 +181,7 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
     <h2>Cassette designs</h2>
     <p>Mixtape comes with four cassettes – Ferro, Chrome, Metal and Clear – well used, scratched and stained, every one its own way.</p>
     <img src="site/base-designs.png" alt="The four cassettes Mixtape comes with: Ferro, Chrome, Metal and Clear" width="1200" height="196" loading="lazy">
+    <h2 class="addons">Add-ons</h2>
     <p>Want colour? Three packs of three, <b>3 USD each</b> on itch.io. Buy one, double-click the file, and the cassettes appear under <b>New Cassette</b> – as C46, C60 or C90.</p>
     <a href="https://aeiou11235.itch.io/mixtape-neon-pack"><img src="site/pack-neon.png" alt="Neon Pack: Pink Neon, Yellow Rainbow, Blue Memphis" width="1200" height="376" loading="lazy"></a>
     <p><b>Neon Pack</b> – Pink Neon, Yellow Rainbow and Blue Memphis.</p>
