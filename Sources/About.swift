@@ -42,7 +42,7 @@ final class AboutScreen {
             let w = width - 2 * margin
             return NSSize(width: w, height: (p.size.height * w / p.size.width).rounded())
         }()
-        let textHeight: CGFloat = 222
+        let textHeight: CGFloat = 238
         let total = NSSize(width: width, height: pictureSize.height + textHeight + margin * 2)
         let view = CardView(frame: NSRect(origin: .zero, size: total))
         view.wantsLayer = true
@@ -95,12 +95,15 @@ final class AboutScreen {
         credits.append(NSAttributedString(string: "\n© 2026 · Mixtape " + Credits.version + " · ", attributes: plain))
         credits.append(NSAttributedString(string: Credits.email, attributes: [.font: small, .foregroundColor: red,
                                                                               .link: URL(string: "mailto:" + Credits.email)!]))
+        credits.append(NSAttributedString(string: "\n" + L("Gefällt dir Mixtape?") + " ", attributes: plain))
+        credits.append(NSAttributedString(string: L("Spende auf itch.io") + " ♥", attributes: [.font: small, .foregroundColor: red,
+                                                                                            .link: AppDelegate.donatePage]))
         credits.addAttribute(.paragraphStyle, value: centred, range: NSRange(location: 0, length: credits.length))
         let cf = NSTextField(labelWithAttributedString: credits)
         cf.isSelectable = true          // makes the address clickable
         cf.allowsEditingTextAttributes = true
         cf.alignment = .center
-        cf.frame = NSRect(x: margin, y: top - 212, width: total.width - margin * 2, height: 30)
+        cf.frame = NSRect(x: margin, y: top - 228, width: total.width - margin * 2, height: 46)
         view.addSubview(cf)
 
 

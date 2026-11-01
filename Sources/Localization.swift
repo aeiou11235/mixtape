@@ -18,6 +18,8 @@ private let english: [String: String] = [
     "Mehr Designs ansehen …": "See More Designs…",
     "Drei Kassetten aus der 80s Collection – Worn Edition, geschenkt. Mixtape ist ein Hobbyprojekt: Wenn dir die App gefällt, freue ich mich über eine kleine Spende auf itch.io – die Seite öffnet sich gleich mit.": "Three cassettes from the 80s Collection – Worn Edition, free. Mixtape is a labour of love: if you like it, a small donation on itch.io would make my day – the page opens along with the download.",
     "Laden": "Download",
+    "Gefällt dir Mixtape?": "Like Mixtape?",
+    "Spende auf itch.io": "Donate on itch.io",
     "Abbrechen": "Cancel",
     "Designs werden geladen …": "Getting the designs…",
     "Schreibschutz": "Write Protection",
