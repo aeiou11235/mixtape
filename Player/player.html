@@ -609,12 +609,16 @@ function b64ToBlobURL(b64) {
   return URL.createObjectURL(new Blob([bytes], { type: 'audio/mp4' }));
 }
 
+const IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 function element(file) {
   if (media[file]) return media[file].el;
   const el = new Audio(); el.preload = 'auto'; el.src = b64ToBlobURL(AUDIO[file]);
   el.addEventListener('error', () => audioTrouble('load ' + file, el.error ? { name: 'MediaError ' + el.error.code, message: el.error.message } : null));
   el.preservesPitch = false; el.mozPreservesPitch = false; el.webkitPreservesPitch = false;
-  const src = ac.createMediaElementSource(el); src.connect(toneIn);
+  // On iPhones and iPads a recording routed through web audio comes out silent, so there it plays
+  // straight out, without the tape-tone filter; everything else (hiss, spool, clunks, wow) stays.
+  const src = IOS ? null : ac.createMediaElementSource(el);
+  if (src) src.connect(toneIn);
   media[file] = { el, src };
   return el;
 }
