@@ -4,6 +4,7 @@ import AppKit
 enum Credits {
     static let line = "Idea by SM/AEIOU"
     static let email = "aeiou11235+mixtape@gmail.com"
+    static let website = "mixtape.toyko.online"
     static var version: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "" }
 }
 
@@ -87,8 +88,11 @@ final class AboutScreen {
         let small = NSFont.systemFont(ofSize: 10.5)
         let centred = NSMutableParagraphStyle()
         centred.alignment = .center
-        let credits = NSMutableAttributedString(string: Credits.line + "\n© 2026 · Mixtape " + Credits.version + " · ",
-                                                attributes: [.font: small, .foregroundColor: ink.withAlphaComponent(0.75)])
+        let plain: [NSAttributedString.Key: Any] = [.font: small, .foregroundColor: ink.withAlphaComponent(0.75)]
+        let credits = NSMutableAttributedString(string: Credits.line + " · ", attributes: plain)
+        credits.append(NSAttributedString(string: Credits.website, attributes: [.font: small, .foregroundColor: red,
+                                                                                .link: URL(string: "https://" + Credits.website)!]))
+        credits.append(NSAttributedString(string: "\n© 2026 · Mixtape " + Credits.version + " · ", attributes: plain))
         credits.append(NSAttributedString(string: Credits.email, attributes: [.font: small, .foregroundColor: red,
                                                                               .link: URL(string: "mailto:" + Credits.email)!]))
         credits.addAttribute(.paragraphStyle, value: centred, range: NSRange(location: 0, length: credits.length))

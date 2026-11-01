@@ -1,13 +1,13 @@
-Zum Kopieren in eine Mail oder Nachricht. Der Link lädt immer die neueste Version.
+Zum Kopieren in eine Mail oder Nachricht. Auf der Seite gibt es immer die neueste Version.
 
 — Deutsch —
 
 Hey! Ich hab dir ein Mixtape aufgenommen 🎧
 
 Zum Anhören brauchst du einmalig die App „Mixtape“ (für Mac, ab macOS 14.4):
-https://github.com/aeiou11235/mixtape/releases/latest/download/Mixtape.dmg
+https://mixtape.toyko.online
 
-Öffne die Datei, zieh Mixtape in den Ordner Programme und folge der Anleitung „Zuerst lesen“. macOS warnt beim ersten Öffnen, weil die App nicht aus dem App Store kommt – das ist normal und dauert eine Minute.
+Lade sie dort herunter, öffne die Datei, zieh Mixtape in den Ordner Programme und folge der Anleitung „Zuerst lesen“. macOS warnt beim ersten Öffnen, weil die App nicht aus dem App Store kommt – das ist normal und dauert eine Minute.
 
 Danach einfach die angehängte .mixtape-Datei doppelklicken. Du kannst auch selbst etwas draufspielen und mir die Kassette zurückschicken.
 
@@ -16,8 +16,8 @@ Danach einfach die angehängte .mixtape-Datei doppelklicken. Du kannst auch selb
 Hey! I made you a mixtape 🎧
 
 To listen, you’ll need the Mixtape app once (Mac, macOS 14.4 or later):
-https://github.com/aeiou11235/mixtape/releases/latest/download/Mixtape.dmg
+https://mixtape.toyko.online
 
-Open the file, drag Mixtape into Applications and follow the “Read me first” guide. macOS shows a warning the first time because the app isn’t from the App Store – that’s normal and takes a minute.
+Download it there, open the file, drag Mixtape into Applications and follow the “Read me first” guide. macOS shows a warning the first time because the app isn’t from the App Store – that’s normal and takes a minute.
 
 Then just double-click the attached .mixtape file. You can record something onto it yourself and send the cassette back to me.
