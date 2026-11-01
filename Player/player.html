@@ -612,6 +612,7 @@ function b64ToBlobURL(b64) {
 function element(file) {
   if (media[file]) return media[file].el;
   const el = new Audio(); el.preload = 'auto'; el.src = b64ToBlobURL(AUDIO[file]);
+  el.addEventListener('error', () => audioTrouble('load ' + file, el.error ? { name: 'MediaError ' + el.error.code, message: el.error.message } : null));
   el.preservesPitch = false; el.mozPreservesPitch = false; el.webkitPreservesPitch = false;
   const src = ac.createMediaElementSource(el); src.connect(toneIn);
   media[file] = { el, src };
@@ -670,8 +671,25 @@ function unlockMedia() {
       if (good && ++ok === files.length) mediaUnlocked = true;
     };
     const p = el.play();
-    if (p && p.then) p.then(() => done(true), () => done(false)); else done(true);
+    if (p && p.then) p.then(() => done(true), err => { audioTrouble('unlock', err); done(false); }); else done(true);
   }
+}
+
+// When a recording won't play, say why on the page, so it can be reported and fixed.
+function audioTrouble(where, err) {
+  let box = document.getElementById('audioTrouble');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'audioTrouble';
+    box.style.cssText = 'position:fixed;left:8px;right:8px;top:8px;z-index:9;padding:8px 10px;border-radius:8px;background:rgba(0,0,0,.8);' +
+      'color:#ffd36b;font:12px/1.35 -apple-system,sans-serif;white-space:pre-wrap;pointer-events:none';
+    document.body.appendChild(box);
+  }
+  const a = document.createElement('audio');
+  const can = ['audio/mp4', 'audio/mp4; codecs="mp4a.40.2"', 'audio/mp4; codecs="mp4a.40.5"'].map(t => (a.canPlayType(t) || 'no')).join(' / ');
+  const line = `${where}: ${err && (err.name || '') } ${err && (err.message || err.code || err)}`;
+  if (!box.textContent.includes(line)) box.textContent += (box.textContent ? '\n' : 'Sound problem – please send a screenshot.\n' +
+    `audio ${ac ? ac.state : '-'} · can play ${can}\n${navigator.userAgent.replace(/^Mozilla\/5\.0 /, '')}\n`) + line;
 }
 for (const type of ['touchend', 'click']) document.addEventListener(type, () => { if (ac) unlockMedia(); }, true);
 
@@ -774,7 +792,7 @@ function tick(now) {
         stopActive();
         if (seg) {
           const el = element(seg.file); el.playbackRate = rate;
-          el.currentTime = seg.fileOffset + (e - seg.start); el.play().catch(() => {}); active = seg;
+          el.currentTime = seg.fileOffset + (e - seg.start); el.play().catch(err => audioTrouble('play', err)); active = seg;
         }
       } else if (seg) {
         const el = element(seg.file);
