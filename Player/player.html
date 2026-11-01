@@ -682,13 +682,16 @@ function unlockMedia() {
   let ok = 0;
   for (const file of files) {
     const el = element(file);
+    if (active && active.file === file) { if (++ok === files.length) mediaUnlocked = true; continue; }
+    // Started and stopped again at once: that is enough to unlock it, and nothing keeps playing.
     el.muted = true;
-    const done = good => {
-      el.pause(); el.muted = false;
-      if (good && ++ok === files.length) mediaUnlocked = true;
-    };
     const p = el.play();
-    if (p && p.then) p.then(() => done(true), err => { audioTrouble('unlock', err); done(false); }); else done(true);
+    el.pause();
+    el.muted = false;
+    const done = good => { if (good && ++ok === files.length) mediaUnlocked = true; };
+    if (p && p.then) p.then(() => { el.pause(); done(true); },
+                            err => { if (err && err.name === 'AbortError') done(true); else { audioTrouble('unlock', err); done(false); } });
+    else done(true);
   }
 }
 
@@ -846,6 +849,11 @@ function tick(now) {
     const winding = st.mode === 'ffwd' || st.mode === 'rewind';
     spoolGain.gain.setTargetAtTime(sound.spool && winding ? .05 * lvl('spool') * 2 : 0, t, .08);
     if (winding) spoolFilter.frequency.setTargetAtTime(500 + 900 * (1 - packRadius(elapsed()) / packRadius(SIDE)), t, .2);
+  }
+  // Only the recording under the head may sound; anything else still running is stopped.
+  for (const f in media) {
+    const el = media[f].el;
+    if (!el.paused && !(active && active.file === f && st.mode === 'playing' && !st.paused)) el.pause();
   }
   if (moving || needsDraw) { draw(); needsDraw = false; }
   drawCounter();

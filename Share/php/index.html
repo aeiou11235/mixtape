@@ -14,7 +14,29 @@
 <main><p id="msg">Unwrapping your mixtape …</p></main>
 <script>
 // The link is …/#<tape>.<key>. The part after # never leaves this browser: the tape is fetched
-// encrypted and unlocked here with AES-GCM, then it takes over the page.
+// encrypted and unlocked here with AES-GCM, then it takes over the page – played by the newest
+// player.html on this server, so links sent before a fix get it too. Only the tape's own data is
+// taken from it; if that can't be found, the tape plays with the player it came with.
+async function newest(html) {
+  try {
+    const res = await fetch('player.html', { cache: 'no-cache' });
+    if (!res.ok) return html;
+    const player = await res.text();
+    const line = name => { const m = html.match(new RegExp('^const ' + name + ' = (.*);$', 'm')); return m ? m[1] : null; };
+    const tape = line('TAPE'), audio = line('AUDIO');
+    if (!tape || !audio || !player.includes('__TAPE_JSON__')) return html;
+    const title = (html.match(/<title>([^<]*)<\/title>/) || [])[1] || 'Mixtape';
+    const icon = (html.match(/<link rel="icon" href="([^"]*)"/) || [])[1] || '';
+    const fill = (s, key, value) => s.split(key).join(value);
+    let page = fill(player, '__SKIN_JSON__', line('SKIN') || 'null');
+    page = fill(page, '__TITLE__', title);
+    page = fill(page, '__ICON__', icon);
+    page = fill(page, '__TAPE_JSON__', tape);
+    return fill(page, '__AUDIO_JSON__', audio);
+  } catch (e) {
+    return html;
+  }
+}
 (async () => {
   const say = t => { document.getElementById('msg').textContent = t; };
   const [id, k] = location.hash.slice(1).split('.');
@@ -26,7 +48,7 @@
     const raw = Uint8Array.from(atob(k.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
     const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);
     const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: box.slice(0, 12) }, key, box.slice(12));
-    const html = new TextDecoder().decode(plain);
+    const html = await newest(new TextDecoder().decode(plain));
     document.open();
     document.write(html);
     document.close();
