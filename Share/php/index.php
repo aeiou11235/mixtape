@@ -38,7 +38,57 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
   body.tape #unwrap { display: flex; }
   body.tape #home { display: none; }
 
-  header { padding: 56px 0 8px; text-align: center; }
+  header.wrap { padding: 104px 16px 8px; text-align: center; }
+  /* A few stars in the night sky above the sunset, fading out towards it. */
+  #home { position: relative; }
+  #home::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 560px; pointer-events: none;
+    background: radial-gradient(circle at 83.2% 57.5%, rgba(255,247,238,0.56) 0.6px, transparent 1.4px),
+    radial-gradient(circle at 47.5% 36.4%, rgba(255,247,238,0.68) 1.3px, transparent 2.1px),
+    radial-gradient(circle at 31.9% 8.8%, rgba(255,247,238,0.43) 1.3px, transparent 2.1px),
+    radial-gradient(circle at 50.6% 58.5%, rgba(255,247,238,0.62) 1px, transparent 1.8px),
+    radial-gradient(circle at 77.5% 83.5%, rgba(255,247,238,0.53) 1.3px, transparent 2.1px),
+    radial-gradient(circle at 4.3% 58.7%, rgba(255,247,238,0.65) 0.6px, transparent 1.4px),
+    radial-gradient(circle at 86.9% 31.9%, rgba(255,247,238,0.39) 1.3px, transparent 2.1px),
+    radial-gradient(circle at 60.5% 48.7%, rgba(255,247,238,0.82) 1px, transparent 1.8px),
+    radial-gradient(circle at 3.2% 94.9%, rgba(255,247,238,0.36) 0.6px, transparent 1.4px),
+    radial-gradient(circle at 97.3% 88.6%, rgba(255,247,238,0.45) 1.3px, transparent 2.1px),
+    radial-gradient(circle at 10.3% 29.0%, rgba(255,247,238,0.67) 1.3px, transparent 2.1px),
+    radial-gradient(circle at 57.6% 58.4%, rgba(255,247,238,0.47) 0.8px, transparent 1.6px),
+    radial-gradient(circle at 90.2% 87.6%, rgba(255,247,238,0.41) 0.8px, transparent 1.6px),
+    radial-gradient(circle at 59.6% 82.0%, rgba(255,247,238,0.63) 1px, transparent 1.8px),
+    radial-gradient(circle at 18.1% 51.9%, rgba(255,247,238,0.79) 0.6px, transparent 1.4px),
+    radial-gradient(circle at 36.9% 29.7%, rgba(255,247,238,0.53) 1.3px, transparent 2.1px),
+    radial-gradient(circle at 87.2% 92.2%, rgba(255,247,238,0.7) 1px, transparent 1.8px),
+    radial-gradient(circle at 24.7% 73.6%, rgba(255,247,238,0.74) 1px, transparent 1.8px),
+    radial-gradient(circle at 11.4% 57.8%, rgba(255,247,238,0.5) 1px, transparent 1.8px),
+    radial-gradient(circle at 36.6% 79.7%, rgba(255,247,238,0.43) 1.3px, transparent 2.1px),
+    radial-gradient(circle at 64.5% 75.7%, rgba(255,247,238,0.72) 1px, transparent 1.8px),
+    radial-gradient(circle at 27.2% 54.2%, rgba(255,247,238,0.44) 0.8px, transparent 1.6px),
+    radial-gradient(circle at 50.2% 49.3%, rgba(255,247,238,0.72) 1.3px, transparent 2.1px),
+    radial-gradient(circle at 30.9% 1.4%, rgba(255,247,238,0.72) 1px, transparent 1.8px),
+    radial-gradient(circle at 61.2% 73.2%, rgba(255,247,238,0.36) 0.8px, transparent 1.6px),
+    radial-gradient(circle at 59.7% 11.8%, rgba(255,247,238,0.52) 1px, transparent 1.8px),
+    radial-gradient(circle at 1.6% 58.6%, rgba(255,247,238,0.47) 0.8px, transparent 1.6px),
+    radial-gradient(circle at 87.8% 9.1%, rgba(255,247,238,0.74) 0.8px, transparent 1.6px),
+    radial-gradient(circle at 79.7% 58.4%, rgba(255,247,238,0.41) 1px, transparent 1.8px),
+    radial-gradient(circle at 64.8% 68.5%, rgba(255,247,238,0.58) 1px, transparent 1.8px),
+    radial-gradient(circle at 58.0% 19.0%, rgba(255,247,238,0.42) 1px, transparent 1.8px),
+    radial-gradient(circle at 6.4% 80.4%, rgba(255,247,238,0.44) 1px, transparent 1.8px),
+    radial-gradient(circle at 10.7% 32.2%, rgba(255,247,238,0.76) 1.3px, transparent 2.1px),
+    radial-gradient(circle at 46.5% 66.0%, rgba(255,247,238,0.46) 1.3px, transparent 2.1px),
+    radial-gradient(circle at 17.8% 90.8%, rgba(255,247,238,0.83) 0.8px, transparent 1.6px),
+    radial-gradient(circle at 59.2% 14.7%, rgba(255,247,238,0.75) 1px, transparent 1.8px),
+    radial-gradient(circle at 77.1% 42.7%, rgba(255,247,238,0.63) 1px, transparent 1.8px),
+    radial-gradient(circle at 57.5% 75.1%, rgba(255,247,238,0.37) 1.3px, transparent 2.1px),
+    radial-gradient(circle at 14.4% 3.6%, rgba(255,247,238,0.84) 1px, transparent 1.8px),
+    radial-gradient(circle at 18.9% 80.8%, rgba(255,247,238,0.45) 0.8px, transparent 1.6px),
+    radial-gradient(circle at 44.8% 29.5%, rgba(255,247,238,0.56) 0.8px, transparent 1.6px),
+    radial-gradient(circle at 2.8% 11.9%, rgba(255,247,238,0.35) 0.8px, transparent 1.6px),
+    radial-gradient(circle at 11.0% 15.9%, rgba(255,247,238,0.36) 0.8px, transparent 1.6px),
+    radial-gradient(circle at 63.2% 45.4%, rgba(255,247,238,0.65) 0.6px, transparent 1.4px),
+    radial-gradient(circle at 82.5% 25.5%, rgba(255,247,238,0.77) 1px, transparent 1.8px),
+    radial-gradient(circle at 83.5% 43.3%, rgba(255,247,238,0.7) 1px, transparent 1.8px);
+    -webkit-mask-image: linear-gradient(#000 40%, transparent); mask-image: linear-gradient(#000 40%, transparent); }
   .logo { margin: 0; font: italic 900 clamp(56px, 14vw, 128px)/.9 "Futura", "Avenir Next", "Helvetica Neue", sans-serif; letter-spacing: -.02em;
     background: linear-gradient(180deg, #fff 0%, #fff 42%, #ffd2f0 48%, #ff7ad0 60%, #ffd23f 100%); -webkit-background-clip: text; background-clip: text;
     color: transparent; filter: drop-shadow(0 3px 0 #3a0a5e) drop-shadow(0 0 22px rgba(255,63,164,.55)); }
@@ -57,7 +107,7 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
   .btn.alt { background: rgba(20,5,46,.45); border: 2px solid rgba(255,247,238,.6); }
   .small { font-size: 14px; color: var(--dim); }
 
-  section { padding: 40px 0; }
+  section.wrap { padding: 40px 16px; }
   h2 { margin: 0 0 18px; font: italic 900 clamp(28px, 4.6vw, 40px)/1.05 "Futura", "Avenir Next", sans-serif; text-transform: uppercase; letter-spacing: .01em;
     text-shadow: 0 3px 0 rgba(58,10,94,.8); }
   .features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
@@ -77,7 +127,7 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
   footer a { color: #2c0a5e; }
 
   @media (max-width: 760px) {
-    header { padding-top: 40px; }
+    header.wrap { padding-top: 64px; }
     .hero { grid-template-columns: 1fr; gap: 20px; padding-top: 24px; }
     .features { grid-template-columns: 1fr; }
     .tapes { grid-template-columns: 1fr; }
