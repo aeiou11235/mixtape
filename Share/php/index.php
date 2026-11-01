@@ -1,9 +1,26 @@
-<!doctype html>
+<?php
+// The share page. Messengers like Signal and WhatsApp read the page for a preview, but never the
+// part after the # – so the link also names its tape as ?t=…, and the preview shows its cassette.
+$id = preg_match('/^[A-Za-z0-9]{10}$/', $_GET['t'] ?? '') ? $_GET['t'] : '';
+$base = 'https://' . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+$image = ($id && is_file(__DIR__ . "/t/$id.png")) ? "$base/t/$id.png" : '';
+?><!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mixtape</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Mixtape">
+<meta property="og:title" content="Someone made you a mixtape">
+<meta property="og:description" content="Tap to play – made with Mixtape for Mac.">
+<?php if ($image): ?>
+<meta property="og:image" content="<?= htmlspecialchars($image) ?>">
+<meta property="og:image:width" content="690">
+<meta property="og:image:height" content="462">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="<?= htmlspecialchars($image) ?>">
+<?php endif; ?>
 <style>
   html, body { margin: 0; height: 100%; background: linear-gradient(#1a0638, #c42583 60%, #ffb347); color: #fff;
     font: 17px/1.45 -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; }

@@ -1299,7 +1299,8 @@ enum ShareLink {
         }
         let linkKey = secret.withUnsafeBytes { Data($0) }.base64EncodedString()
             .replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
-        return SharedLink(url: base + "#\(reply.id).\(linkKey)", image: image, made: Date(), days: reply.days ?? 7)
+        // ?t= names the tape for messengers' previews (they never see the part after #, which holds the key).
+        return SharedLink(url: base + "?t=\(reply.id)#\(reply.id).\(linkKey)", image: image, made: Date(), days: reply.days ?? 7)
     }
 }
 

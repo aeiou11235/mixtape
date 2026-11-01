@@ -1,5 +1,6 @@
 # Tapes need nothing from other sites: everything is in the (encrypted) tape itself.
 Options -Indexes
+DirectoryIndex index.php
 <IfModule mod_headers.c>
   Header set Content-Security-Policy "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; media-src data: blob:; font-src data:; connect-src 'self' data: blob:; form-action 'none'; base-uri 'none'"
   Header set X-Content-Type-Options "nosniff"
