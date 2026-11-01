@@ -4,7 +4,7 @@
 
 <p align="center"><b>The perfect simulation of an audio cassette for your Mac – just like in 1986.</b></p>
 
-It’s the simulation of a cheap tape recorder, not a high-end audiophile component. A cassette on your Mac desktop. Tape whatever your Mac is playing – a song on Spotify, a clip on YouTube, an Instagram reel (if you REALLY have to) – or your own voice introducing the next song. Flip it over, punch the title onto label tape, and send it to a friend. They don’t even need the app: the tape plays in any browser.
+It’s the simulation of a cheap tape recorder, not a high-end audiophile component. A cassette on your Mac desktop. Tape whatever your Mac is playing – a song on Spotify, a clip on YouTube, an Instagram reel (if you REALLY have to) – or your own voice introducing the next song. Flip it over, punch the title onto label tape, and send it to a friend. They don’t even need the app: one tap on the link and the tape plays – on a phone it fills the whole screen.
 
 Recording is fiddly, just like back then in 1986. There’s no shortcut: you can’t just drop in a playlist and hit send. You record in real time, listening to every song as it goes onto the tape. You hit PAUSE at just the right moment – the pause key squeaks a little, and the cut is never quite perfect. It takes time, it’s a pain in the …, but it’s actually fun. That’s exactly the feeling. And you make the effort, because it’s for that one special friend.
 
@@ -36,8 +36,9 @@ That’s the feeling Mixtape App brings back – into the digital age. You’re 
 - **VU meters and a REC LEVEL fader** that saturates like analog tape when you push it into the red. Outside recording the fader is the volume control.
 - **Tape sound** – hiss, wow & flutter, tape tone, spool noise, key clunks – each with its own strength slider, and the settings travel with the tape. Hiss starts switched off.
 - **Pause from anywhere** with ⌥⌘P.
-- **Send it to a friend – two ways:**
-  - **As a web page** for anyone: one `.html` file with the whole tape inside. Your friend opens it in any browser – on a Mac, a PC or a phone, no app needed – and sees your cassette with its label and drawings, ready to play from the start of side A. It stays under 25 MB, so it fits in an email.
+- **Send it to a friend – three ways:**
+  - **As a link** – one tap and it plays, on any phone or computer. Pasted into an email it shows as a little picture of your cassette. On a phone the tape fills the screen sideways: tap the middle to play or stop, the ends to wind, hold an end while it plays to listen at speed. The tape is encrypted on your Mac before it goes up; the key travels only in the link, so the server can’t read it. Links work for 7 days.
+  - **As a web page** for anyone: one `.html` file with the whole tape inside. Your friend opens it in any browser – no app needed – and sees your cassette with its label and drawings, ready to play from the start of side A. It stays under 25 MB, so it fits in an email.
   - **As a Mixtape file** for friends who have the app: they can record over it and send it back.
 
 <p align="center"><img src="docs/deck.png" width="520" alt="A yellow 90s indie rock tape with the deck and VU meters open"></p>
