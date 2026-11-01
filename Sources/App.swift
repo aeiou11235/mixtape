@@ -399,7 +399,8 @@ enum Tools {
             }
             // --bg rrggbb: the colour behind the cassette
             let bg = value("--bg").flatMap { UInt32($0, radix: 16) } ?? 0x8e98a3
-            write(TapeRootView(deck: deck).background(Color(hex: bg)), scale: 2, to: out)
+            let clear = value("--bg") == "clear"   // transparent, for laying over other pictures
+            write(TapeRootView(deck: deck).background(clear ? Color.clear : Color(hex: bg)), scale: 2, to: out)
             deck.doc.discard()
             return true
         }
