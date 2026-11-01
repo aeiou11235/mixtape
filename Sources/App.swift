@@ -198,16 +198,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         } catch { alert(error) }
     }
 
-    // Free designs live on GitHub; the website shows them all; donations go through itch.io.
-    static let freeDesigns = URL(string: "https://github.com/aeiou11235/mixtape/releases/download/addons/Free-Sampler.mixtapeskins")!
+    /// A pack of free designs, kept on GitHub. The website shows them all; donations go through itch.io.
+    struct FreePack {
+        let id: String
+        let name: String
+        let file: String
+        let count: Int
+        var url: URL { URL(string: "https://github.com/aeiou11235/mixtape/releases/download/addons/\(file).mixtapeskins")! }
+    }
+    static let freePacks = [
+        FreePack(id: "aeiou.80s", name: "80s Collection", file: "80s-Collection", count: 8),
+        FreePack(id: "aeiou.80s-worn", name: "80s Collection – Worn Edition", file: "80s-Collection-Worn-Edition", count: 8),
+        FreePack(id: "aeiou.sampler", name: "Free Sampler", file: "Free-Sampler", count: 3),
+    ]
     static let designsPage = URL(string: "https://mixtape.toyko.online/#designs")!
     static let donatePage = URL(string: "https://aeiou11235.itch.io/mixtape-app/purchase")!
 
-    /// Downloads the free designs and installs them, and opens the itch.io donation page (it has a "No thanks" link).
-    func downloadFreeDesigns() {
+    /// Downloads a pack of free designs and installs it, and opens the itch.io donation page (it has a "No thanks" link).
+    func downloadFreeDesigns(_ pack: FreePack) {
         let a = NSAlert()
-        a.messageText = L("Gratis-Designs laden")
-        a.informativeText = L("Drei Kassetten aus der 80s Collection – Worn Edition, geschenkt. Mixtape ist ein Hobbyprojekt: Wenn dir die App gefällt, freue ich mich über eine kleine Spende auf itch.io – die Seite öffnet sich gleich mit.")
+        a.messageText = pack.name
+        a.informativeText = String(format: L("%d Kassetten, geschenkt. Mixtape ist ein Hobbyprojekt: Wenn dir die App gefällt, freue ich mich über eine kleine Spende auf itch.io – die Seite öffnet sich gleich mit."), pack.count)
         a.addButton(withTitle: L("Laden"))
         a.addButton(withTitle: L("Abbrechen"))
         NSApp.activate()
@@ -216,9 +227,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let busy = BusyPanel(L("Designs werden geladen …"), near: nil)
         Task {
             do {
-                let (tmp, response) = try await URLSession.shared.download(from: Self.freeDesigns)
+                let (tmp, response) = try await URLSession.shared.download(from: pack.url)
                 guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw SkinError.invalid }
-                let file = FileManager.default.temporaryDirectory.appendingPathComponent("Free Sampler.mixtapeskins")
+                let file = FileManager.default.temporaryDirectory.appendingPathComponent(pack.file + ".mixtapeskins")
                 try? FileManager.default.removeItem(at: file)
                 try FileManager.default.moveItem(at: tmp, to: file)
                 busy.close()

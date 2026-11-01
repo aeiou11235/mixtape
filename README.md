@@ -49,9 +49,21 @@ That’s the feeling Mixtape App brings back – into the digital age. You’re 
 
 ## Free cassette designs
 
+All the designs are free: download a pack, double-click it, and the cassettes appear under **New Cassette** in the cassette's menu – each as C46, C60 or C90. Or get them right inside the app: **New Cassette → Get Free Designs**. If you like them, a [small donation](https://aeiou11235.itch.io/mixtape-app/purchase) keeps Mixtape going.
+
+<p align="center"><img src="docs/80s-collection.png" width="700" alt="Eight cassettes from the 80s Collection, each with a label strip"></p>
+
+**[⬇ 80s Collection](https://github.com/aeiou11235/mixtape/releases/download/addons/80s-Collection.mixtapeskins)** – eight cassettes in the loud colours of the time: clear, beige, black, pink neon, mint jelly, yellow rainbow, orange jelly and blue Memphis.
+
+<p align="center"><img src="docs/80s-worn-edition.png" width="700" alt="The same eight cassettes, scratched, stickered and coffee-stained"></p>
+
+**[⬇ 80s Collection – Worn Edition](https://github.com/aeiou11235/mixtape/releases/download/addons/80s-Collection-Worn-Edition.mixtapeskins)** – the same eight, well loved: scratched, stickered, coffee-stained, the price tag still on.
+
 <p align="center"><img src="docs/free-sampler.png" width="700" alt="Three worn cassettes: a clear one labelled Japanoise, a yellow one labelled Indie Rock, a black one labelled Dark Wave"></p>
 
-**[⬇ Free Sampler](https://github.com/aeiou11235/mixtape/releases/download/addons/Free-Sampler.mixtapeskins)** – three cassettes from the *80s Collection – Worn Edition*, well loved, scratched and stickered. Download it, double-click it, and the designs appear under **New Cassette** in the cassette's menu – each as C46, C60 or C90. Make your own: [docs/ADDONS.md](docs/ADDONS.md).
+**[⬇ Free Sampler](https://github.com/aeiou11235/mixtape/releases/download/addons/Free-Sampler.mixtapeskins)** – three from the Worn Edition, if you just want a taste.
+
+Make your own: [docs/ADDONS.md](docs/ADDONS.md).
 
 ## Install
 
