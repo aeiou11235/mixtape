@@ -18,6 +18,15 @@
   body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100%; padding: 24px 16px; }
   .deck { width: min(520px, 100%); user-select: none; -webkit-user-select: none; }
   canvas.tape { display: block; width: 100%; height: auto; }
+  /* On a phone: nothing but the tape, as big as the screen, turned to lie along its long side. Tap to play. */
+  html.phone, html.phone body { height: 100%; overflow: hidden; background: #000; }
+  html.phone body { padding: 0; display: block; }
+  html.phone body > *:not(.deck), html.phone .controls { display: none !important; }
+  html.phone canvas.tape { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(var(--turn, 0deg));
+    touch-action: manipulation; }
+  .tap-hint { display: none; }
+  html.phone .deck.fresh .tap-hint { display: block; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(var(--turn, 0deg))
+    translateY(38vmin); padding: 8px 16px; border-radius: 20px; background: rgba(0,0,0,.6); color: #fff; font-weight: 600; pointer-events: none; white-space: nowrap; }
   .controls { transition: opacity .25s ease, transform .25s ease; padding: 0 calc(40 / 520 * 100%); }
   .panel, .drawer { background: linear-gradient(#303136, #222327); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08); }
   .panel { display: flex; align-items: center; gap: 6px; padding: 10px 12px; margin-top: 2px; }
@@ -83,6 +92,7 @@
 <body>
 <div class="deck fresh" id="deck">
   <canvas class="tape" id="tape" width="520" height="350"></canvas>
+  <div class="tap-hint" id="tapHint">▶ Tap to play · hold right or left to wind</div>
   <div class="controls">
     <div class="panel">
       <div class="counter"><div class="digits" id="digits" title="Reset the counter"><span id="d0">0</span><span id="d1">0</span><span id="d2">0</span></div>
@@ -924,8 +934,57 @@ if (/^de\b/i.test(navigator.language || '')) {
   document.getElementById('note').innerHTML = 'Jemand hat dir ein Mixtape aufgenommen. Drück auf Play.<br>' +
     'Wenn du drüber aufnehmen und es zurückschicken willst: <a href="https://aeiou11235.itch.io/mixtape-app" target="_blank" rel="noopener">Mixtape für den Mac</a> – kostenlos.';
 }
-window.addEventListener('resize', fitCanvas);
-fitCanvas(); updateUI();
+// Phones get the tape alone, filling the screen: lying sideways when the phone is upright,
+// so turning the phone shows it the right way up. The margins around the cassette may run off.
+function layout() {
+  const phone = matchMedia('(pointer: coarse)').matches && Math.min(innerWidth, innerHeight) < 600;
+  document.documentElement.classList.toggle('phone', phone);
+  const s = tapeCanvas.style;
+  if (phone) {
+    const portrait = innerHeight > innerWidth;
+    const long = portrait ? innerHeight : innerWidth, short = portrait ? innerWidth : innerHeight;
+    const w = Math.min(long * 520 / 452, short * 520 / 292);
+    s.width = w + 'px'; s.height = w * 350 / 520 + 'px';
+    document.documentElement.style.setProperty('--turn', portrait ? '90deg' : '0deg');
+  } else {
+    s.width = s.height = '';
+    document.documentElement.style.removeProperty('--turn');
+  }
+  fitCanvas();
+}
+// On a phone: tap to play or pause; hold the right half of the tape to wind forward, the left half
+// to wind back. Letting go stops winding, and the tape plays on if it was playing.
+let hold = null;
+tapeCanvas.addEventListener('pointerdown', e => {
+  if (!document.documentElement.classList.contains('phone')) return;
+  e.preventDefault();
+  const r = tapeCanvas.getBoundingClientRect();
+  const portrait = getComputedStyle(document.documentElement).getPropertyValue('--turn').trim() === '90deg';
+  const along = portrait ? (e.clientY - r.top) / r.height : (e.clientX - r.left) / r.width;   // 0 left end … 1 right end
+  const key = along > .5 ? 'ff' : 'rew';
+  hold = { key, winding: false, wasPlaying: st.mode === 'playing' && !st.paused };
+  hold.timer = setTimeout(() => {
+    if (!hold) return;
+    hold.winding = true;
+    if (st.mode === 'playing') { stopActive(); setMode('stopped'); }
+    press(key);
+  }, 350);
+});
+const release = () => {
+  if (!hold) return;
+  clearTimeout(hold.timer);
+  const h = hold;
+  hold = null;
+  if (h.winding) {
+    if (st.mode === 'ffwd' || st.mode === 'rewind') press(h.key);   // the same key again stops winding
+    if (h.wasPlaying) press('play');
+  } else if (st.mode === 'playing') press('pause');
+  else press('play');
+};
+tapeCanvas.addEventListener('pointerup', release);
+tapeCanvas.addEventListener('pointercancel', release);
+window.addEventListener('resize', layout);
+layout(); updateUI();
 requestAnimationFrame(t => { last = t; tick(t); });
 </script>
 </body>

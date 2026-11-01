@@ -764,32 +764,39 @@ final class Deck: NSObject, ObservableObject {
     @Published private(set) var hoverStrip: Int?
     @Published private(set) var tapeCorner: Int?
 
-    /// What the pointer is over: a corner of a strip (turn it), a strip (move it), or neither.
+    /// What the pointer is over: a corner of the strip being pressed (turn it), that strip (move it),
+    /// or neither. Strips that are stuck on stay put, so dragging them moves the cassette.
     enum TapeHover { case none, move, turn }
+
+    /// The strip being pressed, where it is right now.
+    private var editingFrame: Painter.EmbossFrame? {
+        guard embossing, let i = editingStrip else { return nil }
+        let strips = doc.strips(side)
+        guard i < strips.count else { return nil }
+        return Painter.stripFrame(strips[i], index: i, cells: embossDraft, design: doc.design, cursor: embossCursorPos, anchor: editAnchor)
+    }
 
     func tapeHover(_ p: CGPoint) -> TapeHover {
         var strip: Int?, corner: Int?, kind = TapeHover.none
-        for (i, f) in stripFrames {
-            if let c = Painter.embossCorner(f, p) { strip = i; corner = c; kind = .turn; break }
-            if Painter.embossContains(f, p) { strip = i; kind = .move; break }
+        if let f = editingFrame {
+            if let c = Painter.embossCorner(f, p) { strip = editingStrip; corner = c; kind = .turn }
+            else if Painter.embossContains(f, p) { strip = editingStrip; kind = .move }
         }
         if strip != hoverStrip { hoverStrip = strip }
         if corner != tapeCorner { tapeCorner = corner }
         return kind
     }
 
-    private var embossDrag: (strip: Int, start: CGPoint, frame: Painter.EmbossFrame, rotate: Bool, moved: Bool)?
+    private var embossDrag: (start: CGPoint, frame: Painter.EmbossFrame, rotate: Bool)?
 
-    /// Dragging a strip moves it; dragging a corner turns it around its centre.
+    /// While pressing: dragging the strip moves it, dragging a corner turns it around its centre.
     func beginEmbossDrag(at p: CGPoint, rotate: Bool) {
-        guard let i = hoverStrip ?? stripIndex(at: p), let f = stripFrames.first(where: { $0.0 == i })?.1 else { return }
-        embossDrag = (i, p, f, rotate, false)
+        guard let f = editingFrame else { return }
+        embossDrag = (p, f, rotate)
     }
 
     func moveEmbossDrag(to p: CGPoint) {
-        guard var d = embossDrag else { return }
-        var strips = doc.strips(side)
-        guard d.strip < strips.count else { return }
+        guard let d = embossDrag else { return }
         var f = d.frame
         if d.rotate {
             let a0 = atan2(d.start.y - f.center.y, d.start.x - f.center.x)
@@ -799,22 +806,15 @@ final class Deck: NSObject, ObservableObject {
             f.center.x = min(max(f.center.x + p.x - d.start.x, 0), Painter.W)
             f.center.y = min(max(f.center.y + p.y - d.start.y, 0), Painter.H)
         }
+        // The left end is what stays put while pressing, so the strip keeps growing from there.
         objectWillChange.send()
-        strips[d.strip].x = f.center.x
-        strips[d.strip].y = f.center.y
-        strips[d.strip].angle = f.angle
-        doc.setStrips(strips, side)
-        d.moved = true
-        embossDrag = d
+        editAnchor = Painter.anchor(of: f)
     }
 
     func endEmbossDrag() {
-        if embossDrag?.moved == true && transport != .recording { save() }
         embossDrag = nil
         objectWillChange.send()
     }
-
-    var draggingCorner: Bool { embossDrag?.rotate == true }
 
     /// Turns a strip back to level where it is.
     func straightenStrip(_ i: Int) {
@@ -970,7 +970,7 @@ final class Deck: NSObject, ObservableObject {
         if !doc.strips(side).isEmpty { tapeMenu.addItem(item(L("Alle abziehen"), #selector(peelAllItem))) }
         tapeMenu.addItem(.separator())
         for text in [L("Doppelklick auf die Kassette: neues Band an dieser Stelle"),
-                     L("Band ziehen verschiebt es, an den Ecken dreht es sich"),
+                     L("Doppelklick aufs Band: prägen, verschieben, an den Ecken drehen"),
                      L("Rechtsklick aufs Band: weiterprägen, ausrichten, abziehen")] {
             let hint = NSMenuItem(title: text, action: nil, keyEquivalent: "")
             hint.isEnabled = false

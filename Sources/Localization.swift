@@ -17,6 +17,7 @@ private let english: [String: String] = [
     "Prägeband": "Label Tape",
     "Neues Band – das alte abschneiden": "New strip – cut off the old one",
     "Weiteres Band prägen": "Press Another Strip",
+    "Doppelklick aufs Band: prägen, verschieben, an den Ecken drehen": "Double-click a strip: press, move, turn it by its corners",
     "Alle abziehen": "Peel All Off",
     "Weiterprägen": "Press On",
     "Gerade ausrichten": "Straighten",

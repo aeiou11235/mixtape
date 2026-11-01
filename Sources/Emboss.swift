@@ -183,7 +183,7 @@ extension Painter {
         if let i = s.editingStrip, i < s.strips.count, let cells = s.embossCells {
             let t = s.strips[i]
             let f = stripFrame(t, index: i, cells: cells, design: s.design, cursor: s.embossCursor, anchor: s.editAnchor)
-            drawStrip(&ctx, t, cells, f, cursor: s.embossCursorVisible ? s.embossCursor : nil, corner: nil)
+            drawStrip(&ctx, t, cells, f, cursor: s.embossCursorVisible ? s.embossCursor : nil, corner: s.hoverStrip == i ? s.embossCorner : nil)
         }
     }
 

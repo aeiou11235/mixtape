@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Play a Mixtape</title>
+<style>
+  html, body { margin: 0; height: 100%; background: linear-gradient(#1a0638, #c42583 60%, #ffb347); color: #fff;
+    font: 17px/1.45 -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; }
+  main { min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; box-sizing: border-box; }
+  h1 { font-size: 26px; margin: 0 0 8px; }
+  p { max-width: 30em; margin: 6px 0; }
+  .pick { display: inline-block; margin: 22px 0 14px; padding: 14px 28px; border-radius: 30px; background: #fff; color: #1a0638; font-weight: 700; cursor: pointer; }
+  .small { font-size: 14px; opacity: .85; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Someone made you a mixtape.</h1>
+  <p>Choose the tape file you were sent – it ends in <b>.html</b>.</p>
+  <label class="pick">Choose the tape<input type="file" id="file" accept=".html,.htm,text/html" hidden></label>
+  <p class="small">On an iPhone, first save the attachment to Files (tap it, then Share → Save to Files).<br>
+    The tape stays on your phone: nothing is uploaded.</p>
+</main>
+<script>
+// Phones won't run a tape opened straight from a mail attachment; loaded from here it plays like any web page.
+document.getElementById('file').addEventListener('change', async e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const html = await f.text();
+  if (!html.includes('const TAPE = ')) { alert('That file is not a Mixtape tape.'); return; }
+  document.open();
+  document.write(html);
+  document.close();
+});
+</script>
+</body>
+</html>
