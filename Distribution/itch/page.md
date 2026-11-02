@@ -47,6 +47,10 @@ That's the feeling Mixtape App brings back – into the digital age. You're not 
 - **Send it as a link:** one tap and it plays, on any phone or computer – in an email it shows as a little picture of your cassette. Encrypted on your Mac, so the server can't read it; links work for 7 days.
 - **Or as a file:** a web page that plays in any browser, or a .mixtape file for friends who have the app.
 
+---
+
+## Important: before you install
+
 ### Why macOS warns you – and why Mixtape is safe
 
 The first time you open Mixtape, macOS says *“Apple could not verify ‘Mixtape’ is free of malware.”* That sounds scary, but it only means Mixtape isn’t signed by Apple. Signing costs 99 USD a year – too much for a free app made as a hobby. So Apple hasn’t checked it, that’s all.
