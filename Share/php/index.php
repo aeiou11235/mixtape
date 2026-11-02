@@ -34,7 +34,15 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
   .wrap { width: min(1040px, 100%); margin: 0 auto; padding: 0 16px; }
 
   /* The unwrapping note while a shared tape loads. */
-  #unwrap { display: none; min-height: 100vh; align-items: center; justify-content: center; text-align: center; padding: 24px; }
+  #unwrap { display: none; min-height: 100vh; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; }
+  /* How much of the tape has arrived. Without a known size the fill runs back and forth. */
+  #bar { width: min(320px, 80vw); height: 10px; margin-top: 16px; border-radius: 5px; overflow: hidden;
+    background: rgba(255,247,238,.18); box-shadow: inset 0 0 0 1px rgba(255,247,238,.35); }
+  #bar i { display: block; height: 100%; width: 0; border-radius: 5px; transition: width .2s;
+    background: linear-gradient(90deg, #ff5f62, #ffb347, #ffd36b, #5fd3a0, #4fa8ff, #b06bff); }
+  #bar.unknown i { width: 30%; transition: none; animation: sweep 1.2s ease-in-out infinite alternate; }
+  #bar.gone { visibility: hidden; }
+  @keyframes sweep { from { transform: translateX(0); } to { transform: translateX(233%); } }
   body.tape #unwrap { display: flex; }
   body.tape #home { display: none; }
 
@@ -147,7 +155,7 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
 </style>
 </head>
 <body>
-<div id="unwrap"><p id="msg">Unwrapping your mixtape …</p></div>
+<div id="unwrap"><p id="msg">Unwrapping your mixtape …</p><div id="bar"><i></i></div></div>
 
 <div id="home">
   <header class="wrap">
@@ -246,17 +254,37 @@ async function newest(html) {
     return html;
   }
 }
+// Reads the tape in pieces so the bar can show how much has arrived.
+async function download(res, bar) {
+  const total = +res.headers.get('Content-Length') || 0;
+  if (!total || !res.body) bar.classList.add('unknown');
+  if (!res.body) return new Uint8Array(await res.arrayBuffer());
+  const reader = res.body.getReader(), parts = [];
+  let got = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    parts.push(value);
+    got += value.length;
+    if (total) bar.firstChild.style.width = Math.min(100, got / total * 100) + '%';
+  }
+  const box = new Uint8Array(got);
+  let at = 0;
+  for (const p of parts) { box.set(p, at); at += p.length; }
+  return box;
+}
 (async () => {
   // Without a tape after the #, this is just the home page – also for #designs and other sections.
   if (location.hash.length < 2 || document.getElementById(decodeURIComponent(location.hash.slice(1)))) return;
   document.body.classList.add('tape');
-  const say = t => { document.getElementById('msg').textContent = t; };
+  const bar = document.getElementById('bar');
+  const say = t => { document.getElementById('msg').textContent = t; bar.classList.add('gone'); };
   const [id, k] = location.hash.slice(1).split('.');
   if (!/^[A-Za-z0-9]{10}$/.test(id || '') || !k) return say('This link is incomplete – ask for it again.');
   try {
     const res = await fetch(`t/${id}.bin`, { cache: 'no-store' });
     if (!res.ok) return say('This tape has run out – ask for a new link.');
-    const box = new Uint8Array(await res.arrayBuffer());
+    const box = await download(res, bar);
     const raw = Uint8Array.from(atob(k.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
     const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);
     const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: box.slice(0, 12) }, key, box.slice(12));
