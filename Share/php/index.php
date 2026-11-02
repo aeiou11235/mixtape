@@ -25,7 +25,9 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
 <meta name="twitter:image" content="<?= htmlspecialchars($image) ?>">
 <?php endif; ?>
 <style>
-  :root { --ink: #fff7ee; --dim: rgba(255,247,238,.78); --neon: #ff3fa4; --cyan: #33e1ff; --sun: #ffd23f; --night: #14052e; }
+  :root { --ink: #fff7ee; --dim: rgba(255,247,238,.78); --neon: #ff3fa4; --cyan: #33e1ff; --sun: #ffd23f; --night: #14052e; --plum: #2c0a5e;
+    /* One type scale for the whole page: 14 · 16 · 17 · 22 · 40. */
+    --t-small: 14px; --t-text: 16px; --t-body: 17px; --t-lead: 22px; }
   * { box-sizing: border-box; }
   html { background: var(--night); }
   body { margin: 0; color: var(--ink); font: 17px/1.55 -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
@@ -135,27 +137,25 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
 
   /* Liner notes: why macOS warns, as wide as the cassette and the card together. */
   .liner { padding-top: 96px; }
-  .liner h2 { margin: 0 0 24px; text-align: center; font-size: 15px; letter-spacing: .22em; text-transform: uppercase; color: #ffd36b; }
-  .liner h2 small { display: block; margin-top: 6px; font-size: 14px; letter-spacing: .04em; text-transform: none; font-weight: 500; color: var(--dim); }
-  .safe { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; margin: 0; padding: 28px 32px; border-radius: 14px;
-    background: rgba(20,5,46,.55); border: 2px solid rgba(255,211,107,.7); font-size: 15px; line-height: 1.6; }
+  .safe { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; margin: 0; padding: 32px; border-radius: 14px;
+    background: rgba(20,5,46,.55); border: 2px solid rgba(255,210,63,.65); font-size: var(--t-text); line-height: 1.6; }
   .safe p { margin: 0; }
-  .safe b { display: block; margin-bottom: 8px; color: #ffd36b; }
+  .safe b { display: block; margin-bottom: 8px; color: var(--sun); }
   .buttons { display: flex; flex-wrap: wrap; gap: 12px; margin: 22px 0 8px; }
   .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; border-radius: 999px; font-weight: 800; text-decoration: none;
     letter-spacing: .02em; transition: transform .12s; }
   .btn:hover { transform: translateY(-2px); }
   .btn.main { background: var(--sun); color: #2c0a5e; box-shadow: 0 6px 0 #b36b00, 0 10px 24px rgba(20,5,46,.4); }
   .btn.alt { background: rgba(20,5,46,.45); border: 2px solid rgba(255,247,238,.6); }
-  .small { font-size: 14px; color: var(--dim); }
+  .small { font-size: var(--t-small); color: var(--dim); }
 
-  section.wrap { padding: 72px 16px; }
-  h2 { margin: 0 0 18px; font: italic 900 clamp(28px, 4.6vw, 40px)/1.05 "Futura", "Avenir Next", sans-serif; text-transform: uppercase; letter-spacing: .01em;
+  section.wrap { padding: 96px 16px 0; }
+  h2 { margin: 0 0 24px; font: italic 900 clamp(28px, 4.6vw, 40px)/1.05 "Futura", "Avenir Next", sans-serif; text-transform: uppercase; letter-spacing: .01em;
     text-shadow: 0 3px 0 rgba(58,10,94,.8); }
-  .features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-  .card { padding: 18px 18px 16px; border-radius: 16px; background: rgba(20,5,46,.5); border: 1px solid rgba(255,247,238,.18); }
-  .card h3 { margin: 0 0 6px; font: 800 17px/1.25 "Avenir Next", -apple-system, sans-serif; color: var(--sun); }
-  .card p { margin: 0; font-size: 15.5px; color: var(--ink); }
+  /* Six short notes in plain columns: the safety note above stays the only box on the page. */
+  .features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px 48px; }
+  .card h3 { margin: 0 0 8px; font-size: var(--t-body); line-height: 1.3; font-weight: 700; color: var(--sun); }
+  .card p { margin: 0; font-size: var(--t-text); line-height: 1.6; color: var(--ink); }
 
   .tapes { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center; }
   .tapes img { width: 100%; height: auto; filter: drop-shadow(0 16px 28px rgba(20,5,46,.5)); }
@@ -164,8 +164,9 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
 
   .free img { width: 100%; height: auto; margin: 8px 0 24px; filter: drop-shadow(0 16px 28px rgba(20,5,46,.5)); }
   .free p { margin: 0; max-width: 50em; }
+  .free > p { max-width: 46em; }
   .free > p { text-wrap: balance; }
-  .free h2.addons { margin-top: 72px; }
+  .free h2.addons { margin-top: 96px; }
   .free > p { margin-bottom: 24px; }
   .free .buttons { margin: 24px 0 72px; }
   .free .buttons:last-child { margin-bottom: 0; }
@@ -173,14 +174,14 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
      the paragraphs justified and hyphenated in a column of about 65 characters, so both edges run straight. */
   .story { text-align: center; }
   .story > p { max-width: 34em; text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
-  .story > p.claim { max-width: none; margin-top: 48px; text-align: center; }
-  .donate { margin-top: 72px; text-align: center; }
+  .story > p.claim { max-width: none; margin-top: 72px; text-align: center; }
+  .donate { margin-top: 96px; text-align: center; }
   .donate p { margin-bottom: 0; }
   .donate .buttons { justify-content: center; margin: 24px 0 0; }
   .donate .btn { background: #b8323a; border: 2px solid rgba(255,247,238,.45); color: #fff7ee; box-shadow: 0 6px 0 #7e1d24, 0 10px 24px rgba(20,5,46,.3); }
-  .story p { margin: 0 auto 24px; color: #2c0a5e; font-weight: 500; line-height: 1.6; }
-  .claim { font: italic 900 clamp(22px, 3.4vw, 30px)/1.2 "Futura", "Avenir Next", sans-serif; color: #2c0a5e; margin-top: 48px; }
-  footer { padding: 36px 0 48px; text-align: center; color: #2c0a5e; font-weight: 600; font-size: 14px; }
+  .story p { margin: 0 auto 24px; color: var(--plum); font-weight: 500; line-height: 1.6; }
+  .claim { font: italic 900 clamp(28px, 4.6vw, 40px)/1.15 "Futura", "Avenir Next", sans-serif; color: var(--plum); }
+  footer.wrap { padding: 96px 16px 56px; text-align: center; color: #2c0a5e; font-weight: 600; font-size: 14px; }
   footer a { color: #2c0a5e; }
 
   @media (max-width: 760px) {
@@ -190,6 +191,8 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
     .hero img { width: 100%; margin: 0; }
     .jcard { padding: 24px 20px 28px; transform: none; }
     .liner { padding-top: 64px; }
+    section.wrap { padding-top: 64px; }
+    .features { gap: 32px; }
     .story > p { text-align: left; hyphens: manual; -webkit-hyphens: manual; }
     .safe { grid-template-columns: 1fr; gap: 20px; padding: 20px; }
     .features { grid-template-columns: 1fr; }
@@ -226,14 +229,14 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
         <a class="btn main" href="https://aeiou11235.itch.io/mixtape-app">⬇ Download for Mac – free</a>
         <a class="btn alt" href="https://github.com/aeiou11235/mixtape/releases/latest">GitHub</a>
       </div>
-      <p class="small">macOS 14.4 or later · Apple silicon &amp; Intel · pay what you want</p>
+      <p class="small">For macOS 14.4 or later, Apple silicon and Intel. Pay what you want.</p>
     </div>
   </div>
 
   <div class="wrap liner">
-    <h2>Liner notes<small>Read before you press play</small></h2>
+    <h2>Before you install</h2>
     <div class="safe" id="safe">
-      <p><b>Why macOS warns you – and why Mixtape is safe.</b> The first time you open it, macOS says “Apple could not verify ‘Mixtape’ is free of malware.” That only means Mixtape isn’t signed by Apple – signing costs 99 USD a year, too much for a free hobby app. Apple hasn’t checked it, that’s all.</p>
+      <p><b>Why macOS warns you.</b> The first time you open it, macOS says “Apple could not verify ‘Mixtape’ is free of malware.” That only means Mixtape isn’t signed by Apple – signing costs 99 USD a year, too much for a free hobby app. Apple hasn’t checked it, that’s all.</p>
       <p><b>Mixtape contains no malware.</b> Its complete source code is <a href="https://github.com/aeiou11235/mixtape">public on GitHub</a>, so anyone – really anyone – can check that there’s nothing harmful in it. Suspicious? Have ChatGPT or Claude look through the code before you install.</p>
       <p><b>Your data stays on your Mac.</b> No account, no tracking, no ads. Your recordings stay on your Mac. Only a tape you send as a link leaves it – encrypted on your Mac first, the key only in the link, so not even our server can listen; it’s deleted after 7 days (just the small cassette picture for the email preview isn’t encrypted). Once a day Mixtape asks GitHub for the newest version number – nothing about you or your music.</p>
     </div>
@@ -244,7 +247,7 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
     <div class="features">
       <div class="card"><h3>Records what your Mac plays</h3><p>Spotify, YouTube, anything – or the microphone. Real time only: you hit PAUSE at just the right moment, and the pause key squeaks.</p></div>
       <div class="card"><h3>Like real tape</h3><p>Recording overwrites what was there. C46, C60 or C90, side&nbsp;A and side&nbsp;B. Break out the tab and REC won’t go down.</p></div>
-      <div class="card"><h3>Label tape</h3><p>Punch titles onto embossed plastic strips – 16 colours, as many as you like, anywhere on the cassette. No delete key: go back and press over it.</p></div>
+      <div class="card"><h3>Label tape</h3><p>Punch titles onto embossed plastic strips&nbsp;–&nbsp;16 colours, as many as you like, anywhere on the cassette. No delete key: go back and press over it.</p></div>
       <div class="card"><h3>Send it as a link</h3><p>One tap and it plays, on any phone or computer. Encrypted on your Mac – the key travels only in the link, so the server can’t read it.</p></div>
       <div class="card"><h3>Tape sound</h3><p>Hiss, wow &amp; flutter, tape tone, winding noise, key clunks – each with its own slider. VU meters and a REC LEVEL fader that saturates like tape.</p></div>
       <div class="card"><h3>Cassette designs</h3><p>Ferro, Chrome, Metal and Clear, worn like real ones – and <a href="#designs">three colourful packs</a>: Neon, Jelly and Vintage.</p></div>
@@ -261,7 +264,7 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
     <p>Mixtape comes with four cassettes – Ferro, Chrome, Metal and Clear – well used, scratched and stained, every one its own way.</p>
     <img src="site/base-designs.png" alt="The four cassettes Mixtape comes with: Ferro, Chrome, Metal and Clear" width="1200" height="196" loading="lazy">
     <h2 class="addons">Add-ons</h2>
-    <p>Want colour? Three packs of three, <b>3 USD each</b> on itch.io. Buy one, double-click the file, and the cassettes appear under <b>New Cassette</b> – as C46, C60 or C90.</p>
+    <p>Want colour? Three packs of three, <b>3 USD each</b> on itch.io. Buy one, double‑click the file, and the cassettes appear under <b>New Cassette</b> – as C46, C60 or C90.</p>
     <a href="https://aeiou11235.itch.io/mixtape-neon-pack"><img src="site/pack-neon.png" alt="Neon Pack: Pink Neon, Yellow Rainbow, Blue Memphis" width="1200" height="376" loading="lazy"></a>
     <p><b>Neon Pack</b> – Pink Neon, Yellow Rainbow and Blue Memphis.</p>
     <div class="buttons"><a class="btn main" href="https://aeiou11235.itch.io/mixtape-neon-pack">Neon Pack – 3 USD</a></div>
@@ -277,7 +280,7 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
     <h2>The story behind it</h2>
     <p>I’m old enough to have done this for real. In 1986, where I grew up – in the south of Germany near the Czech border – our local record store only had country music. Swapping tapes with friends was the only way to hear anything new. We put real effort into every mixtape, because we made them for each other. A good tape was a sign of friendship.</p>
     <p>Tapes stayed with me. In Berlin in the 90s, cassettes were still the medium of the underground, passed from hand to hand. That’s the feeling Mixtape brings back – into the digital age. You’re not recording for yourself. You’re recording for your friends.</p>
-    <p class="claim">Make the perfect mixtape. Share it with friends.</p>
+    <p class="claim">Make the perfect mixtape.<br>Share it with friends.<br>Spread the love.</p>
     <div class="donate">
       <p>Mixtape itself stays free. If you like it, a small donation keeps it going.</p>
       <div class="buttons"><a class="btn alt" href="https://aeiou11235.itch.io/mixtape-app/purchase">♥ Donate on itch.io</a></div>
