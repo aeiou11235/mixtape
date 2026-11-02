@@ -110,8 +110,13 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
   .hero img { width: 100%; height: auto; filter: drop-shadow(0 24px 40px rgba(20,5,46,.55)); }
   .pitch p { margin: 0 0 14px; color: var(--ink); }
   .pitch > p:first-child { margin-top: -6px; }
+  .pitch > p:last-child { margin-bottom: 0; }
+  /* Download, centred between the hero and the safety note. */
+  .get { padding-top: 80px; text-align: center; }
+  .get .buttons { justify-content: center; gap: 16px; margin: 0; }
+  .get .small { margin: 16px 0 0; }
   /* Why macOS warns, in a box of its own under the hero. */
-  .safe { margin: 72px auto 0; padding: 16px 20px; border-radius: 14px; background: rgba(20,5,46,.55);
+  .safe { margin: 56px auto 0; text-align: left; padding: 16px 20px; border-radius: 14px; background: rgba(20,5,46,.55);
     border: 2px solid rgba(255,211,107,.7); font-size: 15px; line-height: 1.55; }
   .safe { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; padding: 24px 28px; }
   .safe p { margin: 0; }
@@ -157,7 +162,8 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
   @media (max-width: 760px) {
     header.wrap { padding-top: 64px; }
     .hero { grid-template-columns: 1fr; gap: 20px; padding-top: 24px; }
-    .safe { grid-template-columns: 1fr; gap: 16px; margin-top: 48px; padding: 20px; }
+    .safe { grid-template-columns: 1fr; gap: 16px; margin-top: 40px; padding: 20px; }
+    .get { padding-top: 48px; }
     .features { grid-template-columns: 1fr; }
     .tapes { grid-template-columns: 1fr; }
   }
@@ -180,15 +186,15 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
     <div class="pitch">
       <p>A cassette on your Mac desktop. Tape whatever your Mac is playing – a song on Spotify, a clip on YouTube, an Instagram reel (if you REALLY have to) – or your own voice introducing the next song.</p>
       <p>Flip it over, punch the title onto label tape, and send it to a friend. They don’t even need the app: one tap on the link and the tape plays – on a phone it fills the whole screen.</p>
-      <div class="buttons">
-        <a class="btn main" href="https://aeiou11235.itch.io/mixtape-app">⬇ Download for Mac – free</a>
-        <a class="btn alt" href="https://github.com/aeiou11235/mixtape/releases/latest">GitHub</a>
-      </div>
-      <p class="small">macOS 14.4 or later · Apple silicon &amp; Intel · pay what you want</p>
     </div>
   </div>
 
-  <div class="wrap">
+  <div class="wrap get">
+    <div class="buttons">
+      <a class="btn main" href="https://aeiou11235.itch.io/mixtape-app">⬇ Download for Mac – free</a>
+      <a class="btn alt" href="https://github.com/aeiou11235/mixtape/releases/latest">GitHub</a>
+    </div>
+    <p class="small">macOS 14.4 or later · Apple silicon &amp; Intel · pay what you want</p>
     <div class="safe" id="safe">
       <p><b>Why macOS warns you – and why Mixtape is safe.</b> The first time you open it, macOS says “Apple could not verify ‘Mixtape’ is free of malware.” That only means Mixtape isn’t signed by Apple – signing costs 99 USD a year, too much for a free hobby app. Apple hasn’t checked it, that’s all.</p>
       <p><b>Mixtape contains no malware.</b> Its complete source code is <a href="https://github.com/aeiou11235/mixtape">public on GitHub</a>, so anyone – really anyone – can check that there’s nothing harmful in it. Suspicious? Have ChatGPT or Claude look through the code before you install.</p>
