@@ -169,8 +169,9 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
   .free > p { margin-bottom: 24px; }
   .free .buttons { margin: 24px 0 72px; }
   .free .buttons:last-child { margin-bottom: 0; }
-  /* The story reads in a narrower column, but starts at the same left edge as everything else. */
-  .story > h2, .story > p { max-width: 44em; }
+  /* The story stands centred, in a narrow column of its own. */
+  .story { text-align: center; }
+  .story > h2, .story > p { max-width: 44em; margin-left: auto; margin-right: auto; }
   .donate { margin-top: 72px; text-align: center; }
   .donate p { margin-bottom: 0; }
   .donate .buttons { justify-content: center; margin: 24px 0 0; }
