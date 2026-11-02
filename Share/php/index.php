@@ -106,22 +106,38 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
     background: linear-gradient(#ff3b30 0 20%, transparent 20% 25%, #ff9500 25% 45%, transparent 45% 50%, #ffd60a 50% 70%, transparent 70% 75%, #33e1ff 75% 95%, transparent 95%); }
   .tagline { margin: 18px auto 0; max-width: 34em; font-size: clamp(18px, 2.6vw, 22px); font-weight: 600; color: var(--ink); }
 
-  .hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 48px; align-items: start; padding: 72px 16px 0; }
-  .hero img { width: 100%; height: auto; filter: drop-shadow(0 24px 40px rgba(20,5,46,.55)); }
-  .pitch p { margin: 0 0 14px; color: var(--ink); }
-  .pitch > p:first-child { margin-top: -6px; }
-  .pitch > p:last-child { margin-bottom: 0; }
-  /* Download, centred between the hero and the safety note. */
-  .get { padding-top: 80px; text-align: center; }
-  .get .buttons { justify-content: center; gap: 16px; margin: 0; }
-  .get .small { margin: 16px 0 0; }
-  /* Why macOS warns, in a box of its own under the hero. */
-  .safe { margin: 56px auto 0; text-align: left; padding: 16px 20px; border-radius: 14px; background: rgba(20,5,46,.55);
-    border: 2px solid rgba(255,211,107,.7); font-size: 15px; line-height: 1.55; }
-  .safe { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; padding: 24px 28px; }
+  .hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 56px; align-items: stretch; padding: 72px 16px 0; }
+  /* The picture has a transparent rim; pull it out so the cassette itself lines up with the column. */
+  .hero img { width: 110.5%; max-width: none; height: auto; margin: -1.2% 0 -5.5% -5.2%; filter: drop-shadow(0 24px 40px rgba(20,5,46,.55)); }
+
+  /* The J-card: the home-made inlay of a cassette box, typed on a typewriter. */
+  .jcard { position: relative; display: flex; flex-direction: column; padding: 24px 32px 28px; color: #2a1640;
+    background: repeating-linear-gradient(180deg, transparent 0 29px, rgba(196,47,40,.16) 29px 30px), #f6eedb;
+    border-radius: 3px; transform: rotate(.8deg); box-shadow: 0 2px 0 #d9ccae, 0 22px 40px rgba(20,5,46,.5);
+    font: 14.5px/30px "American Typewriter", "Courier New", Courier, monospace; }
+  .jcard::before { content: ""; position: absolute; top: -14px; left: 50%; width: 120px; height: 28px; transform: translateX(-50%) rotate(-3deg);
+    background: rgba(255,250,235,.55); box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+  .jcard .side { margin: 0 0 8px; display: flex; justify-content: space-between; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+  .jcard .side span { color: #c42f28; }
+  .jcard ol { list-style: none; margin: 0; padding: 0; counter-reset: t; }
+  .jcard li { counter-increment: t; display: flex; gap: 8px; }
+  .jcard li::before { content: counter(t, decimal-leading-zero); color: #c42f28; font-weight: 700; min-width: 2.2em; }
+  .jcard li span { flex: 1; }
+  .jcard li i { font-style: normal; opacity: .55; }
+  .jcard .note { display: block; margin: -2px 0 0; padding-left: calc(2.2em + 8px); font-size: 12.5px; line-height: 19px; opacity: .72; }
+  .jcard .buttons { margin: auto 0 0; padding-top: 20px; gap: 16px; font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; line-height: 1.2; }
+  .jcard .btn.alt { background: transparent; border-color: #2a1640; color: #2a1640; }
+  .jcard .small { margin: 12px 0 0; color: #2a1640; opacity: .7; font-size: 12px; line-height: 18px; }
+
+
+  /* Liner notes: why macOS warns, as wide as the cassette and the card together. */
+  .liner { padding-top: 96px; }
+  .liner h2 { margin: 0 0 24px; text-align: center; font-size: 15px; letter-spacing: .22em; text-transform: uppercase; color: #ffd36b; }
+  .liner h2 small { display: block; margin-top: 6px; font-size: 14px; letter-spacing: .04em; text-transform: none; font-weight: 500; color: var(--dim); }
+  .safe { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; margin: 0; padding: 28px 32px; border-radius: 14px;
+    background: rgba(20,5,46,.55); border: 2px solid rgba(255,211,107,.7); font-size: 15px; line-height: 1.6; }
   .safe p { margin: 0; }
-  .safe b { display: block; margin-bottom: 8px; }
-  .safe b { color: #ffd36b; }
+  .safe b { display: block; margin-bottom: 8px; color: #ffd36b; }
   .buttons { display: flex; flex-wrap: wrap; gap: 12px; margin: 22px 0 8px; }
   .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; border-radius: 999px; font-weight: 800; text-decoration: none;
     letter-spacing: .02em; transition: transform .12s; }
@@ -162,8 +178,11 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
   @media (max-width: 760px) {
     header.wrap { padding-top: 64px; }
     .hero { grid-template-columns: 1fr; gap: 20px; padding-top: 24px; }
-    .safe { grid-template-columns: 1fr; gap: 16px; margin-top: 40px; padding: 20px; }
-    .get { padding-top: 48px; }
+    .hero { gap: 40px; }
+    .hero img { width: 100%; margin: 0; }
+    .jcard { padding: 24px 20px 28px; transform: none; }
+    .liner { padding-top: 64px; }
+    .safe { grid-template-columns: 1fr; gap: 20px; padding: 20px; }
     .features { grid-template-columns: 1fr; }
     .tapes { grid-template-columns: 1fr; }
   }
@@ -183,22 +202,31 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
 
   <div class="wrap hero">
     <img src="site/hero.png" alt="A yellow cassette labelled 90’s Indie Rock, with the tape deck and VU meters below it" width="760" height="713">
-    <div class="pitch">
-      <p>A cassette on your Mac desktop. Tape whatever your Mac is playing – a song on Spotify, a clip on YouTube, an Instagram reel (if you REALLY have to) – or your own voice introducing the next song.</p>
-      <p>Flip it over, punch the title onto label tape, and send it to a friend. They don’t even need the app: one tap on the link and the tape plays – on a phone it fills the whole screen.</p>
+    <div class="jcard">
+      <p class="side">Mixtape <span>Side A</span></p>
+      <ol>
+        <li><span>A cassette on your desktop</span><i>0:46</i></li>
+        <li><span>Tape whatever your Mac plays</span><i>3:12</i></li>
+        <li><span>Hit PAUSE just in time</span><i>2:58</i></li>
+        <li><span>Punch the title on label tape</span><i>3:05</i></li>
+        <li><span>Flip it over, record side B</span><i>4:20</i></li>
+        <li><span>Send it to a friend</span><i>∞</i></li>
+      </ol>
+      <span class="note">One tap on the link and it plays – no app needed, on a phone it fills the whole screen.</span>
+      <div class="buttons">
+        <a class="btn main" href="https://aeiou11235.itch.io/mixtape-app">⬇ Download for Mac – free</a>
+        <a class="btn alt" href="https://github.com/aeiou11235/mixtape/releases/latest">GitHub</a>
+      </div>
+      <p class="small">macOS 14.4 or later · Apple silicon &amp; Intel · pay what you want</p>
     </div>
   </div>
 
-  <div class="wrap get">
-    <div class="buttons">
-      <a class="btn main" href="https://aeiou11235.itch.io/mixtape-app">⬇ Download for Mac – free</a>
-      <a class="btn alt" href="https://github.com/aeiou11235/mixtape/releases/latest">GitHub</a>
-    </div>
-    <p class="small">macOS 14.4 or later · Apple silicon &amp; Intel · pay what you want</p>
+  <div class="wrap liner">
+    <h2>Liner notes<small>Read before you press play</small></h2>
     <div class="safe" id="safe">
       <p><b>Why macOS warns you – and why Mixtape is safe.</b> The first time you open it, macOS says “Apple could not verify ‘Mixtape’ is free of malware.” That only means Mixtape isn’t signed by Apple – signing costs 99 USD a year, too much for a free hobby app. Apple hasn’t checked it, that’s all.</p>
       <p><b>Mixtape contains no malware.</b> Its complete source code is <a href="https://github.com/aeiou11235/mixtape">public on GitHub</a>, so anyone – really anyone – can check that there’s nothing harmful in it. Suspicious? Have ChatGPT or Claude look through the code before you install.</p>
-      <p><b>Your data stays on your Mac.</b> No account, no tracking, no ads, no analytics. Your recordings stay on your Mac. Nothing leaves it unless you send a tape as a link – and then the recording is encrypted on your Mac first; the key is only in the link, so not even our server can listen to it, and the tape is deleted after 7 days (only the little cassette picture for the email preview isn’t encrypted). Once a day Mixtape asks GitHub whether there is a new version – it sends nothing about you or your music. No admin password, nothing else gets installed.</p>
+      <p><b>Your data stays on your Mac.</b> No account, no tracking, no ads. Your recordings stay on your Mac. Only a tape you send as a link leaves it – encrypted on your Mac first, the key only in the link, so not even our server can listen; it’s deleted after 7 days (just the small cassette picture for the email preview isn’t encrypted). Once a day Mixtape asks GitHub for the newest version number – nothing about you or your music.</p>
     </div>
   </div>
 
