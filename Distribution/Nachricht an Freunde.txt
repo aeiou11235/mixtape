@@ -7,7 +7,7 @@ Hey! Ich hab dir ein Mixtape aufgenommen 🎧
 Zum Anhören brauchst du einmalig die App „Mixtape“ (für Mac, ab macOS 14.4):
 https://mixtape.toyko.online
 
-Lade sie dort herunter, öffne die Datei, zieh Mixtape in den Ordner Programme und folge der Anleitung „Zuerst lesen“. macOS warnt beim ersten Öffnen, weil die App nicht aus dem App Store kommt – das ist normal und dauert eine Minute.
+Lade sie dort herunter, öffne die Datei, zieh Mixtape in den Ordner Programme und folge der Anleitung „Zuerst lesen“. macOS warnt beim ersten Öffnen („Apple konnte nicht überprüfen …“). Das heißt nur, dass die App nicht bei Apple signiert ist (kostet 99 USD im Jahr) – es ist keine Schadsoftware drin. Der Code liegt offen auf GitHub, jeder kann ihn prüfen. Kein Konto, kein Tracking – deine Aufnahmen bleiben auf deinem Mac. Das Öffnen dauert eine Minute.
 
 Danach einfach die angehängte .mixtape-Datei doppelklicken. Du kannst auch selbst etwas draufspielen und mir die Kassette zurückschicken.
 
@@ -18,6 +18,6 @@ Hey! I made you a mixtape 🎧
 To listen, you’ll need the Mixtape app once (Mac, macOS 14.4 or later):
 https://mixtape.toyko.online
 
-Download it there, open the file, drag Mixtape into Applications and follow the “Read me first” guide. macOS shows a warning the first time because the app isn’t from the App Store – that’s normal and takes a minute.
+Download it there, open the file, drag Mixtape into Applications and follow the “Read me first” guide. macOS shows a warning the first time (“Apple could not verify …”). That only means the app isn’t signed by Apple (it costs 99 USD a year) – there’s no malware in it. The code is public on GitHub, anyone can check it. No account, no tracking – your recordings stay on your Mac. Opening it takes a minute.
 
 Then just double-click the attached .mixtape file. You can record something onto it yourself and send the cassette back to me.

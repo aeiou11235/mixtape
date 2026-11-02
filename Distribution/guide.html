@@ -9,6 +9,8 @@
   .step { margin: 0 0 5pt 14pt; }
   code { font-family: Menlo, monospace; font-size: 9.5pt; background: #f1f1f1; }
   .small { font-size: 9.5pt; color: #555; }
+  .safe { border: 2px solid #c42f28; border-radius: 6pt; padding: 6pt 10pt; margin: 8pt 0 10pt 0; }
+  .safe p { margin: 3pt 0; }
   hr { border: 0; border-top: 1px solid #ccc; margin: 18pt 0; }
 </style>
 </head>
@@ -20,6 +22,11 @@
 
 <h2>Mixtape installieren</h2>
 <p>Mixtape läuft auf jedem Mac mit <b>macOS 14.4 oder neuer</b>, mit Apple- oder Intel-Prozessor. Weil die App (noch) nicht bei Apple registriert ist, warnt macOS beim ersten Öffnen. Das ist normal. So öffnest du sie trotzdem, und zwar nur ein einziges Mal:</p>
+<div class="safe">
+<p><b>Warum macOS warnt – und warum Mixtape trotzdem sicher ist.</b> Beim ersten Öffnen meldet macOS: <i>„Apple konnte nicht überprüfen, ob ‚Mixtape‘ frei von Schadsoftware ist.“</i> Das klingt schlimm, heißt aber nur: Mixtape ist nicht bei Apple signiert. Das kostet 99 USD im Jahr – zu viel für eine kostenlose Hobby-App. Apple hat die App also nicht geprüft, das ist alles.</p>
+<p><b>Mixtape enthält keine Schadsoftware.</b> Der komplette Quellcode liegt öffentlich auf GitHub (github.com/aeiou11235/mixtape) – jeder, wirklich jeder, kann nachsehen, dass nichts Schlimmes drinsteckt. Wer misstrauisch ist, lässt den Code vor der Installation von ChatGPT oder Claude prüfen. Entwickler können die App sogar selbst aus dem Code bauen.</p>
+<p><b>Deine Daten bleiben auf deinem Mac.</b> Kein Konto, kein Tracking, keine Werbung, keine Statistik. Deine Aufnahmen bleiben auf deinem Mac. Nichts verlässt ihn, außer du verschickst ein Tape als Link – dann wird die Aufnahme vorher auf deinem Mac verschlüsselt; der Schlüssel steckt nur im Link, nicht einmal unser Server kann sie anhören, und nach 7 Tagen wird sie gelöscht (nur das kleine Kassettenbild für die Mail-Vorschau ist nicht verschlüsselt). Einmal am Tag fragt Mixtape bei GitHub nach, ob es eine neue Version gibt – dabei wird nichts über dich oder deine Musik gesendet. Kein Admin-Passwort nötig, es wird nichts anderes installiert.</p>
+</div>
 <p class="step"><b>1.</b>&nbsp; Ziehe <b>Mixtape</b> auf den Ordner <b>Programme</b>. Beide liegen im selben Fenster wie diese Anleitung.</p>
 <p class="step"><b>2.</b>&nbsp; Öffne <b>Programme</b> und doppelklicke <b>Mixtape</b>. macOS meldet: <i>„‚Mixtape' wurde nicht geöffnet“</i> oder <i>„Apple konnte nicht überprüfen …“</i>. Klicke auf <b>Fertig</b>, <u>nicht</u> auf „In den Papierkorb legen“.</p>
 <p class="step"><b>3.</b>&nbsp; Öffne <b>Systemeinstellungen → Datenschutz &amp; Sicherheit</b> und scrolle ganz nach unten zum Abschnitt <b>Sicherheit</b>. Dort steht: <i>„‚Mixtape' wurde blockiert …“</i>. Klicke auf <b>Trotzdem öffnen</b> und bestätige mit deinem Passwort oder Touch ID.</p>
@@ -38,6 +45,11 @@
 
 <h2>Installing Mixtape</h2>
 <p>Mixtape runs on any Mac with <b>macOS 14.4 or later</b>, Apple silicon or Intel. Because the app isn’t registered with Apple (yet), macOS shows a warning the first time you open it. That’s expected. Here is how to open it anyway. You only need to do this once:</p>
+<div class="safe">
+<p><b>Why macOS warns you – and why Mixtape is safe.</b> The first time you open Mixtape, macOS says <i>“Apple could not verify ‘Mixtape’ is free of malware.”</i> That sounds scary, but it only means Mixtape isn’t signed by Apple. Signing costs 99 USD a year – too much for a free app made as a hobby. So Apple hasn’t checked it, that’s all.</p>
+<p><b>Mixtape contains no malware.</b> Its complete source code is public on GitHub (github.com/aeiou11235/mixtape), so anyone – really anyone – can check that there is nothing harmful in it. If you’re suspicious, have ChatGPT or Claude look through the code before you install it. Developers can even build the app themselves from the source.</p>
+<p><b>Your data stays on your Mac.</b> No account, no tracking, no ads, no analytics. Your recordings stay on your Mac. Nothing leaves it unless you send a tape as a link – and then the recording is encrypted on your Mac first; the key is only in the link, so not even our server can listen to it, and the tape is deleted after 7 days (only the little cassette picture for the email preview isn’t encrypted). Once a day Mixtape asks GitHub whether there is a new version – it sends nothing about you or your music. No admin password, nothing else gets installed.</p>
+</div>
 <p class="step"><b>1.</b>&nbsp; Drag <b>Mixtape</b> onto the <b>Applications</b> folder. Both are in the same window as this guide.</p>
 <p class="step"><b>2.</b>&nbsp; Open <b>Applications</b> and double-click <b>Mixtape</b>. macOS says <i>“‘Mixtape’ Not Opened”</i> or <i>“Apple could not verify …”</i>. Click <b>Done</b>, <u>not</u> “Move to Trash”.</p>
 <p class="step"><b>3.</b>&nbsp; Open <b>System Settings → Privacy &amp; Security</b> and scroll all the way down to the <b>Security</b> section. It says <i>“‘Mixtape’ was blocked …”</i>. Click <b>Open Anyway</b> and confirm with your password or Touch ID.</p>

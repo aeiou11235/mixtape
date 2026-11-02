@@ -71,6 +71,12 @@ Mixtape itself stays free. If you like it, a [small donation](https://aeiou11235
 
 ## Install
 
+> **Why macOS warns you – and why Mixtape is safe.** The first time you open Mixtape, macOS says *“Apple could not verify ‘Mixtape’ is free of malware.”* That sounds scary, but it only means Mixtape isn’t signed by Apple. Signing costs 99 USD a year – too much for a free app made as a hobby. So Apple hasn’t checked it, that’s all.
+>
+> **Mixtape contains no malware.** Its complete source code is right here on GitHub, so anyone – really anyone – can check that there is nothing harmful in it. If you’re suspicious, have ChatGPT or Claude look through the code before you install it. Developers can even build the app themselves from the source.
+>
+> **Your data stays on your Mac.** No account, no tracking, no ads, no analytics. Your recordings stay on your Mac. Nothing leaves it unless you send a tape as a link – and then the recording is encrypted on your Mac first; the key is only in the link, so not even our server can listen to it, and the tape is deleted after 7 days (only the little cassette picture for the email preview isn’t encrypted). Once a day Mixtape asks GitHub whether there is a new version – it sends nothing about you or your music. No admin password, nothing else gets installed.
+
 1. Download **[Mixtape.dmg](../../releases/latest/download/Mixtape.dmg)** and open it.
 2. Drag **Mixtape** onto **Applications**.
 3. Mixtape isn’t signed by Apple yet, so macOS blocks it the first time. Double-click Mixtape, click **Done**, then go to **System Settings → Privacy & Security**, scroll down and click **Open Anyway**. You only need to do this once.

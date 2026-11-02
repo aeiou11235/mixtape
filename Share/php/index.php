@@ -109,6 +109,12 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
   .hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 40px; align-items: center; padding: 36px 0 24px; }
   .hero img { width: 100%; height: auto; filter: drop-shadow(0 24px 40px rgba(20,5,46,.55)); }
   .pitch p { margin: 0 0 14px; color: var(--ink); }
+  /* Why macOS warns, right under the download button. */
+  .safe { margin: 24px 0 0; padding: 16px 20px; border-radius: 14px; background: rgba(20,5,46,.55);
+    border: 2px solid rgba(255,211,107,.7); font-size: 15px; line-height: 1.55; }
+  .safe p { margin: 0 0 8px; }
+  .safe p:last-child { margin-bottom: 0; }
+  .safe b { color: #ffd36b; }
   .buttons { display: flex; flex-wrap: wrap; gap: 12px; margin: 22px 0 8px; }
   .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; border-radius: 999px; font-weight: 800; text-decoration: none;
     letter-spacing: .02em; transition: transform .12s; }
@@ -176,6 +182,11 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
         <a class="btn alt" href="https://github.com/aeiou11235/mixtape/releases/latest">GitHub</a>
       </div>
       <p class="small">macOS 14.4 or later · Apple silicon &amp; Intel · pay what you want</p>
+      <div class="safe" id="safe">
+        <p><b>Why macOS warns you – and why Mixtape is safe.</b> The first time you open it, macOS says “Apple could not verify ‘Mixtape’ is free of malware.” That only means Mixtape isn’t signed by Apple – signing costs 99 USD a year, too much for a free hobby app. Apple hasn’t checked it, that’s all.</p>
+        <p><b>Mixtape contains no malware.</b> Its complete source code is <a href="https://github.com/aeiou11235/mixtape">public on GitHub</a>, so anyone – really anyone – can check that there’s nothing harmful in it. Suspicious? Have ChatGPT or Claude look through the code before you install.</p>
+        <p><b>Your data stays on your Mac.</b> No account, no tracking, no ads, no analytics. Your recordings stay on your Mac. Nothing leaves it unless you send a tape as a link – and then the recording is encrypted on your Mac first; the key is only in the link, so not even our server can listen to it, and the tape is deleted after 7 days (only the little cassette picture for the email preview isn’t encrypted). Once a day Mixtape asks GitHub whether there is a new version – it sends nothing about you or your music. No admin password, nothing else gets installed.</p>
+      </div>
     </div>
   </div>
 

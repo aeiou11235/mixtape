@@ -47,6 +47,14 @@ That's the feeling Mixtape App brings back – into the digital age. You're not 
 - **Send it as a link:** one tap and it plays, on any phone or computer – in an email it shows as a little picture of your cassette. Encrypted on your Mac, so the server can't read it; links work for 7 days.
 - **Or as a file:** a web page that plays in any browser, or a .mixtape file for friends who have the app.
 
+### Why macOS warns you – and why Mixtape is safe
+
+The first time you open Mixtape, macOS says *“Apple could not verify ‘Mixtape’ is free of malware.”* That sounds scary, but it only means Mixtape isn’t signed by Apple. Signing costs 99 USD a year – too much for a free app made as a hobby. So Apple hasn’t checked it, that’s all.
+
+**Mixtape contains no malware.** Its complete source code is public on GitHub (https://github.com/aeiou11235/mixtape), so anyone – really anyone – can check that there is nothing harmful in it. If you’re suspicious, have ChatGPT or Claude look through the code before you install it. Developers can even build the app themselves from the source.
+
+**Your data stays on your Mac.** No account, no tracking, no ads, no analytics. Your recordings stay on your Mac. Nothing leaves it unless you send a tape as a link – and then the recording is encrypted on your Mac first; the key is only in the link, so not even our server can listen to it, and the tape is deleted after 7 days (only the little cassette picture for the email preview isn’t encrypted). Once a day Mixtape asks GitHub whether there is a new version – it sends nothing about you or your music. No admin password, nothing else gets installed.
+
 ### Install
 
 1. Download Mixtape.dmg, open it and drag Mixtape onto Applications.
