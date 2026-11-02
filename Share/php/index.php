@@ -31,6 +31,9 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
   body { margin: 0; color: var(--ink); font: 17px/1.55 -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
     background: linear-gradient(180deg, #14052e 0%, #2c0a5e 18%, #6a1a8c 36%, #c42583 56%, #ff5f62 74%, #ffb347 92%, #ffd36b 100%); min-height: 100vh; }
   a { color: inherit; }
+  /* No lone words at the end of a paragraph, headings broken into even lines. */
+  p, li { text-wrap: pretty; }
+  h1, h2, h3, .claim { text-wrap: balance; }
   .wrap { width: min(1040px, 100%); margin: 0 auto; padding: 0 16px; }
 
   /* The unwrapping note while a shared tape loads. */
@@ -160,12 +163,14 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
   .tapes img:nth-child(2) { transform: rotate(2.5deg); }
 
   .free img { width: 100%; height: auto; margin: 8px 0 24px; filter: drop-shadow(0 16px 28px rgba(20,5,46,.5)); }
-  .free p { margin: 0; max-width: 40em; }
+  .free p { margin: 0; max-width: 50em; }
+  .free > p { text-wrap: balance; }
   .free h2.addons { margin-top: 72px; }
   .free > p { margin-bottom: 24px; }
   .free .buttons { margin: 24px 0 72px; }
   .free .buttons:last-child { margin-bottom: 0; }
-  .story { max-width: 44em; }
+  /* The story reads in a narrower column, but starts at the same left edge as everything else. */
+  .story > h2, .story > p { max-width: 44em; }
   .donate { margin-top: 72px; text-align: center; }
   .donate p { margin-bottom: 0; }
   .donate .buttons { justify-content: center; margin: 24px 0 0; }
@@ -234,7 +239,7 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
     <h2>What it does</h2>
     <div class="features">
       <div class="card"><h3>Records what your Mac plays</h3><p>Spotify, YouTube, anything – or the microphone. Real time only: you hit PAUSE at just the right moment, and the pause key squeaks.</p></div>
-      <div class="card"><h3>Like real tape</h3><p>Recording overwrites what was there. C46, C60 or C90, side A and side B. Break out the tab and REC won’t go down.</p></div>
+      <div class="card"><h3>Like real tape</h3><p>Recording overwrites what was there. C46, C60 or C90, side&nbsp;A and side&nbsp;B. Break out the tab and REC won’t go down.</p></div>
       <div class="card"><h3>Label tape</h3><p>Punch titles onto embossed plastic strips – 16 colours, as many as you like, anywhere on the cassette. No delete key: go back and press over it.</p></div>
       <div class="card"><h3>Send it as a link</h3><p>One tap and it plays, on any phone or computer. Encrypted on your Mac – the key travels only in the link, so the server can’t read it.</p></div>
       <div class="card"><h3>Tape sound</h3><p>Hiss, wow &amp; flutter, tape tone, winding noise, key clunks – each with its own slider. VU meters and a REC LEVEL fader that saturates like tape.</p></div>
