@@ -25,7 +25,10 @@
   html.full, html.full body { height: 100%; overflow: hidden; }
   html.full body { padding: 0; display: block; }
   html.full body > *:not(.deck), html.full .controls { display: none !important; }
-  html.full canvas.tape { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  /* Centred in what the notch and the home bar leave free. */
+  :root { --sal: env(safe-area-inset-left, 0px); --sar: env(safe-area-inset-right, 0px); --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px); }
+  html.full canvas.tape { position: fixed; left: calc(50% + (var(--sal) - var(--sar)) / 2); top: calc(50% + (var(--sat) - var(--sab)) / 2);
+    transform: translate(-50%, -50%); }
   /* An iPhone lets no page go full screen, but its browser folds its bars away when the page
      scrolls: so the page sideways is a little taller than the screen, and a swipe up does it. */
   html.full.scrolly { height: auto; overflow: auto; }
@@ -1050,12 +1053,14 @@ function layout() {
   document.documentElement.classList.toggle('phone', phone);
   document.documentElement.classList.toggle('full', full);
   document.documentElement.classList.toggle('scrolly', full && !canFullScreen);
-  document.getElementById('tapHint').textContent = full && !canFullScreen
-    ? 'Swipe up for full screen · tap the middle to play' : 'Tap the middle to play · the ends to wind · swipe to turn over';
+  if (!full) askedFullScreen = false;
   if (!full && fullScreenNow()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
   const s = tapeCanvas.style;
   if (full) {
-    const w = Math.min(innerWidth * 520 / 452, innerHeight * 520 / 292);
+    const css = getComputedStyle(document.documentElement), px = k => parseFloat(css.getPropertyValue(k)) || 0;
+    const vv = window.visualViewport;
+    const free = { w: (vv ? vv.width : innerWidth) - px('--sal') - px('--sar'), h: (vv ? vv.height : innerHeight) - px('--sat') - px('--sab') };
+    const w = Math.min(free.w * 520 / 452, free.h * 520 / 292);
     s.width = w + 'px'; s.height = w * 350 / 520 + 'px';
   } else {
     s.width = s.height = '';
@@ -1070,15 +1075,25 @@ document.getElementById('infoBtn').addEventListener('click', e => { e.stopPropag
 document.getElementById('infoBox').addEventListener('click', e => { if (e.target.tagName !== 'A') e.currentTarget.classList.remove('open'); });
 let hold = null;
 const isPhone = () => document.documentElement.classList.contains('phone');
-tapeCanvas.addEventListener('touchend', () => { if (isPhone()) { startAudio(); unlockMedia(); } }, { passive: true });
+// Browsers only let a finger lifting off count as a deliberate touch, so full screen is asked for here,
+// once per turn sideways: if the reader leaves it, it is not forced on them again.
+let askedFullScreen = false;
+tapeCanvas.addEventListener('touchend', () => {
+  if (!isPhone()) return;
+  startAudio(); unlockMedia();
+  if (canFullScreen && !askedFullScreen && !fullScreenNow() && document.documentElement.classList.contains('full')) {
+    askedFullScreen = true;
+    const el = document.documentElement;
+    try {
+      const p = el.requestFullscreen ? el.requestFullscreen({ navigationUI: 'hide' }) : el.webkitRequestFullscreen();
+      if (p && p.catch) p.catch(() => {});
+    } catch (_) {}
+  }
+}, { passive: true });
 tapeCanvas.addEventListener('pointerdown', e => {
   if (!isPhone()) return;
   e.preventDefault();
   startAudio();
-  if (canFullScreen && !fullScreenNow() && document.documentElement.classList.contains('full')) {
-    const el = document.documentElement;
-    try { const p = (el.requestFullscreen || el.webkitRequestFullscreen).call(el); if (p && p.catch) p.catch(() => {}); } catch (_) {}
-  }
   const r = tapeCanvas.getBoundingClientRect();
   const along = (e.clientX - r.left) / r.width;   // 0 left end … 1 right end
   const key = along > .66 ? 'ff' : along < .34 ? 'rew' : null;
@@ -1114,6 +1129,7 @@ tapeCanvas.addEventListener('pointerup', release);
 // The browser took the finger over, to scroll the page: neither a press nor a swipe.
 tapeCanvas.addEventListener('pointercancel', () => { if (hold && !hold.how) hold.moving = true; release(null); });
 window.addEventListener('resize', layout);
+if (window.visualViewport) visualViewport.addEventListener('resize', layout);
 layout(); updateUI();
 requestAnimationFrame(t => { last = t; tick(t); });
 </script>
