@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>__TITLE__</title>
 <link rel="icon" href="__ICON__">
 <style>
@@ -26,6 +26,11 @@
   html.full body { padding: 0; display: block; }
   html.full body > *:not(.deck), html.full .controls { display: none !important; }
   html.full canvas.tape { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  /* An iPhone lets no page go full screen, but its browser folds its bars away when the page
+     scrolls: so the page sideways is a little taller than the screen, and a swipe up does it. */
+  html.full.scrolly { height: auto; overflow: auto; }
+  html.full.scrolly body { height: calc(100vh + 120px); overflow: visible; }
+  html.full.scrolly canvas.tape { touch-action: pan-y; }
   .tap-hint, .info-btn, .info-box { display: none; }
   /* A small "i" in the corner: where the app comes from. */
   html.full .info-btn { display: grid; place-items: center; position: fixed; right: 12px; top: 12px; width: 30px; height: 30px; border-radius: 50%;
@@ -1036,11 +1041,18 @@ if (/^de\b/i.test(navigator.language || '')) {
 }
 // Phones held upright get the deck as on a computer. Turned sideways, the tape alone fills the
 // screen; the margins around the cassette may run off.
+// Where the browser can go full screen (Android, iPad), the first tap on the sideways tape does so.
+const canFullScreen = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+const fullScreenNow = () => document.fullscreenElement || document.webkitFullscreenElement;
 function layout() {
   const phone = matchMedia('(pointer: coarse)').matches && Math.min(innerWidth, innerHeight) < 600;
   const full = phone && innerWidth > innerHeight;
   document.documentElement.classList.toggle('phone', phone);
   document.documentElement.classList.toggle('full', full);
+  document.documentElement.classList.toggle('scrolly', full && !canFullScreen);
+  document.getElementById('tapHint').textContent = full && !canFullScreen
+    ? 'Swipe up for full screen · tap the middle to play' : 'Tap the middle to play · the ends to wind · swipe to turn over';
+  if (!full && fullScreenNow()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
   const s = tapeCanvas.style;
   if (full) {
     const w = Math.min(innerWidth * 520 / 452, innerHeight * 520 / 292);
@@ -1063,6 +1075,10 @@ tapeCanvas.addEventListener('pointerdown', e => {
   if (!isPhone()) return;
   e.preventDefault();
   startAudio();
+  if (canFullScreen && !fullScreenNow() && document.documentElement.classList.contains('full')) {
+    const el = document.documentElement;
+    try { const p = (el.requestFullscreen || el.webkitRequestFullscreen).call(el); if (p && p.catch) p.catch(() => {}); } catch (_) {}
+  }
   const r = tapeCanvas.getBoundingClientRect();
   const along = (e.clientX - r.left) / r.width;   // 0 left end … 1 right end
   const key = along > .66 ? 'ff' : along < .34 ? 'rew' : null;
@@ -1095,7 +1111,8 @@ const release = e => {
   else press(h.key || 'play');
 };
 tapeCanvas.addEventListener('pointerup', release);
-tapeCanvas.addEventListener('pointercancel', release);
+// The browser took the finger over, to scroll the page: neither a press nor a swipe.
+tapeCanvas.addEventListener('pointercancel', () => { if (hold && !hold.how) hold.moving = true; release(null); });
 window.addEventListener('resize', layout);
 layout(); updateUI();
 requestAnimationFrame(t => { last = t; tick(t); });
