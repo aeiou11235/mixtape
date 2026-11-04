@@ -485,7 +485,7 @@ enum Tools {
             if let path = value("--file") {
                 deck = Deck(doc: try! TapeDocument(url: URL(fileURLWithPath: path)), snapshotMode: true)
             } else {
-                deck = demoDeck(design: value("--design")!, fraction: 0, side: .a, drawing: true)
+                deck = demoDeck(design: value("--design")!, fraction: 0, side: .a, drawing: !args.contains("--nodrawing"))
                 if args.contains("--protect") { deck.doc.setWriteProtected(true, .a) }
                 if let s = stripsArg(value("--strips")) { deck.doc.setStrips(s, .a) }
                 if let save = value("--save") {
