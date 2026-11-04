@@ -3,6 +3,12 @@
 // A tape link is …/?t=<tape>#<tape>.<key>. Messengers like Signal and WhatsApp read the page for a
 // preview but never the part after the #, so ?t= names the tape and the preview shows its cassette.
 $id = preg_match('/^[A-Za-z0-9]{10}$/', $_GET['t'] ?? '') ? $_GET['t'] : '';
+// The page says when a tape has been unlocked, for the count (count.php): just that it happened.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['opened'])) {
+    if ($id && is_file(__DIR__ . "/t/$id.bin")) { require __DIR__ . '/count.php'; count_up('opened'); }
+    http_response_code(204);
+    exit;
+}
 $base = 'https://' . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 // Links from before they named their tape get a picture of a cassette all the same.
 $image = ($id && is_file(__DIR__ . "/t/$id.png")) ? "$base/t/$id.png" : (is_file(__DIR__ . '/preview.png') ? "$base/preview.png" : '');
@@ -239,7 +245,7 @@ $about = $id ? 'Tap to play – made with Mixtape for Mac.' : 'Tape anything you
     <div class="safe" id="safe">
       <p><b>Why macOS warns you.</b> The first time you open it, macOS says “Apple could not verify ‘Mixtape’ is free of malware.” That only means Mixtape isn’t signed by Apple – signing costs 99 USD a year, too much for a free hobby app. Apple hasn’t checked it, that’s all.</p>
       <p><b>Mixtape contains no malware.</b> Its complete source code is <a href="https://github.com/aeiou11235/mixtape">public on GitHub</a>, so anyone – really anyone – can check that there’s nothing harmful in it. Suspicious? Have ChatGPT or Claude look through the code before you install.</p>
-      <p><b>Your data stays on your Mac.</b> No account, no tracking, no ads. Your recordings stay on your Mac. Only a tape you send as a link leaves it – encrypted on your Mac first, the key only in the link, so not even our server can listen; it’s deleted after 7 days (just the small cassette picture for the email preview isn’t encrypted). Once a day Mixtape asks GitHub for the newest version number – nothing about you or your music.</p>
+      <p><b>Your data stays on your Mac.</b> No account, no tracking, no ads. Your recordings stay on your Mac. Only a tape you send as a link leaves it – encrypted on your Mac first, the key only in the link, so not even our server can listen; it’s deleted after 7 days (just the small cassette picture for the email preview isn’t encrypted). The server only counts how many tapes are shared and opened – no names, no addresses. Once a day Mixtape asks GitHub for the newest version number – nothing about you or your music.</p>
     </div>
   </div>
 
@@ -352,6 +358,7 @@ async function download(res, bar) {
     const raw = Uint8Array.from(atob(k.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
     const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);
     const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: box.slice(0, 12) }, key, box.slice(12));
+    fetch(`?t=${id}&opened=1`, { method: 'POST', cache: 'no-store' }).catch(() => {});
     const html = await newest(new TextDecoder().decode(plain));
     document.open();
     document.write(html);

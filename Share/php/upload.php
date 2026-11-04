@@ -17,6 +17,7 @@ const MAX = 26 * 1024 * 1024;     // a whole tape
 const PART = 6 * 1024 * 1024;     // one part, as it arrives
 const IMAGE = 1024 * 1024;        // the picture
 
+require __DIR__ . '/count.php';
 header('Content-Type: application/json');
 function fail($code, $why) { http_response_code($code); exit(json_encode(['error' => $why])); }
 
@@ -70,5 +71,6 @@ if (filesize($file) > MAX) { unlink($file); fail(400, 'That tape is too big.'); 
 if ($part === $of - 1) {
     rename($file, "$dir/$id.bin");
     if ($days === 0) touch("$dir/$id.keep");
+    count_up($days === 0 ? 'kept' : 'shared');
 }
 echo json_encode(['id' => $id, 'days' => $days]);

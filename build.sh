@@ -20,14 +20,10 @@ cp Info.plist "$APP/Contents/Info.plist"
 # Share links: the upload address and key come from Share/app.env, which stays out of git.
 if [ -f Share/app.env ]; then
     . Share/app.env
-    # Builds to give away (MIXTAPE_PUBLIC=1, as package.sh makes them) carry the public key,
-    # whose links run out after a week; this Mac's own build keeps its links.
-    # It is called "Mixtape Master", so the two can't be mixed up.
-    if [ "${MIXTAPE_PUBLIC:-0}" = 1 ]; then
-        MIXTAPE_SHARE_KEY=$MIXTAPE_SHARE_KEY_PUBLIC
-    else
-        /usr/libexec/PlistBuddy -c "Set :CFBundleName Mixtape Master" -c "Set :CFBundleDisplayName Mixtape Master" "$APP/Contents/Info.plist"
-    fi
+    MIXTAPE_OWNER_KEY=$MIXTAPE_SHARE_KEY
+    # Every copy carries the public key, whose links run out after a week. The owner's code,
+    # typed in once (⌥ in the menu: Enter Code…), keeps a Mac's links for good.
+    MIXTAPE_SHARE_KEY=$MIXTAPE_SHARE_KEY_PUBLIC
     /usr/libexec/PlistBuddy -c "Add :MixtapeShareUpload string $MIXTAPE_SHARE_UPLOAD" -c "Add :MixtapeShareKey string $MIXTAPE_SHARE_KEY" "$APP/Contents/Info.plist"
 fi
 cp -R Resources/*.lproj "$APP/Contents/Resources/"
@@ -38,7 +34,13 @@ cp -R Resources/Designs "$APP/Contents/Resources/"              # Ferro, Chrome,
 # The share server plays every link with its own copy of the player, so links sent earlier get fixes too.
 python3 -c 'import json,sys; t=open("Player/player.html").read(); g=json.dumps(json.load(open("Resources/emboss-glyphs.json")),ensure_ascii=False,separators=(",",":")); open("Share/php/player.html","w").write(t.replace("__GLYPHS_JSON__",g))'
 if [ -d Share/deploy/mixtape.toyko.online ]; then
-    cp Share/php/player.html Share/php/index.php Share/php/.htaccess Share/php/preview.png Share/deploy/mixtape.toyko.online/
+    cp Share/php/player.html Share/php/index.php Share/php/count.php Share/php/.htaccess Share/php/preview.png Share/deploy/mixtape.toyko.online/
+    # The scripts that hold secrets get them from Share/app.env.
+    if [ -n "${MIXTAPE_SHARE_KEY_PUBLIC:-}" ]; then
+        sed -e "s/REPLACE_WITH_PUBLIC_KEY/$MIXTAPE_SHARE_KEY_PUBLIC/" -e "s/REPLACE_WITH_OWNER_KEY/$MIXTAPE_OWNER_KEY/" \
+            Share/php/upload.php > Share/deploy/mixtape.toyko.online/upload.php
+        sed "s/REPLACE_WITH_STATS_KEY/$MIXTAPE_STATS_KEY/" Share/php/stats.php > Share/deploy/mixtape.toyko.online/stats.php
+    fi
     cp -R Share/php/site Share/deploy/mixtape.toyko.online/
 fi
 

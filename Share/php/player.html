@@ -18,21 +18,23 @@
   body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100%; padding: 24px 16px; }
   .deck { width: min(520px, 100%); user-select: none; -webkit-user-select: none; }
   canvas.tape { display: block; width: 100%; height: auto; }
-  /* On a phone: nothing but the tape, as big as the screen, turned to lie along its long side. Tap to play. */
-  html.phone, html.phone body { height: 100%; overflow: hidden; background: #000; }
-  html.phone body { padding: 0; display: block; }
-  html.phone body > *:not(.deck), html.phone .controls { display: none !important; }
-  html.phone canvas.tape { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(var(--turn, 0deg));
-    touch-action: manipulation; }
+  /* A phone held upright: the deck as on a computer, the cassette at the top and the keys under it. */
+  html.phone:not(.full) body { justify-content: flex-start; padding-top: 32px; }
+  html.phone canvas.tape { touch-action: manipulation; }
+  /* Turned sideways: nothing but the tape, as big as the screen. Tap to play. */
+  html.full, html.full body { height: 100%; overflow: hidden; }
+  html.full body { padding: 0; display: block; }
+  html.full body > *:not(.deck), html.full .controls { display: none !important; }
+  html.full canvas.tape { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); }
   .tap-hint, .info-btn, .info-box { display: none; }
   /* A small "i" in the corner: where the app comes from. */
-  html.phone .info-btn { display: grid; place-items: center; position: fixed; right: 12px; top: 12px; width: 30px; height: 30px; border-radius: 50%;
+  html.full .info-btn { display: grid; place-items: center; position: fixed; right: 12px; top: 12px; width: 30px; height: 30px; border-radius: 50%;
     border: 1.5px solid rgba(255,255,255,.55); color: rgba(255,255,255,.8); background: rgba(0,0,0,.35); font: italic 700 16px Georgia, serif; z-index: 5; }
-  html.phone .info-box.open { display: block; position: fixed; left: 50%; top: 50%; width: min(78vmax, 420px); z-index: 6;
-    transform: translate(-50%, -50%) rotate(var(--turn, 0deg)); padding: 18px 20px; border-radius: 14px; background: rgba(20,20,24,.92);
+  html.full .info-box.open { display: block; position: fixed; left: 50%; top: 50%; width: min(78vmax, 420px); z-index: 6;
+    transform: translate(-50%, -50%); padding: 18px 20px; border-radius: 14px; background: rgba(20,20,24,.92);
     color: #f2f0ea; font-size: 15px; line-height: 1.45; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
   .info-box a { color: #ffd36b; font-weight: 700; }
-  html.phone .deck.fresh .tap-hint { display: block; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(var(--turn, 0deg))
+  html.full .deck.fresh .tap-hint { display: block; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%)
     translateY(38vmin); padding: 8px 16px; border-radius: 20px; background: rgba(0,0,0,.6); color: #fff; font-weight: 600; pointer-events: none; white-space: nowrap; }
   .controls { transition: opacity .25s ease, transform .25s ease; padding: 0 calc(40 / 520 * 100%); }
   .panel, .drawer { background: linear-gradient(#303136, #222327); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08); }
@@ -857,7 +859,7 @@ function tick(now) {
   }
   if (moving || needsDraw) { draw(); needsDraw = false; }
   drawCounter();
-  if (!document.documentElement.classList.contains('phone')) drawMeters(dt);
+  if (!document.documentElement.classList.contains('full')) drawMeters(dt);
   requestAnimationFrame(tick);
 }
 
@@ -1032,25 +1034,23 @@ if (/^de\b/i.test(navigator.language || '')) {
   document.getElementById('note').innerHTML = 'Jemand hat dir ein Mixtape aufgenommen. Drück auf Play.<br>' +
     'Wenn du drüber aufnehmen und es zurückschicken willst: <a href="https://mixtape.toyko.online/" target="_blank" rel="noopener">Mixtape für den Mac</a> – kostenlos.';
 }
-// Phones get the tape alone, filling the screen: lying sideways when the phone is upright,
-// so turning the phone shows it the right way up. The margins around the cassette may run off.
+// Phones held upright get the deck as on a computer. Turned sideways, the tape alone fills the
+// screen; the margins around the cassette may run off.
 function layout() {
   const phone = matchMedia('(pointer: coarse)').matches && Math.min(innerWidth, innerHeight) < 600;
+  const full = phone && innerWidth > innerHeight;
   document.documentElement.classList.toggle('phone', phone);
+  document.documentElement.classList.toggle('full', full);
   const s = tapeCanvas.style;
-  if (phone) {
-    const portrait = innerHeight > innerWidth;
-    const long = portrait ? innerHeight : innerWidth, short = portrait ? innerWidth : innerHeight;
-    const w = Math.min(long * 520 / 452, short * 520 / 292);
+  if (full) {
+    const w = Math.min(innerWidth * 520 / 452, innerHeight * 520 / 292);
     s.width = w + 'px'; s.height = w * 350 / 520 + 'px';
-    document.documentElement.style.setProperty('--turn', portrait ? '90deg' : '0deg');
   } else {
     s.width = s.height = '';
-    document.documentElement.style.removeProperty('--turn');
   }
   fitCanvas();
 }
-// On a phone the tape is the deck. Tap while it plays or winds: stop. Tap when stopped: the left
+// On a phone the tape works as the deck too. Tap while it plays or winds: stop. Tap when stopped: the left
 // end winds back, the right end forward, the middle plays. Hold an end while it plays to listen
 // at speed, like holding REW or FF on a deck; hold it when stopped to wind until you let go.
 // Swipe across the tape to turn it over.
@@ -1064,8 +1064,7 @@ tapeCanvas.addEventListener('pointerdown', e => {
   e.preventDefault();
   startAudio();
   const r = tapeCanvas.getBoundingClientRect();
-  const portrait = getComputedStyle(document.documentElement).getPropertyValue('--turn').trim() === '90deg';
-  const along = portrait ? (e.clientY - r.top) / r.height : (e.clientX - r.left) / r.width;   // 0 left end … 1 right end
+  const along = (e.clientX - r.left) / r.width;   // 0 left end … 1 right end
   const key = along > .66 ? 'ff' : along < .34 ? 'rew' : null;
   hold = { key, how: null, x: e.clientX, y: e.clientY, t: performance.now() };
   if (key) hold.timer = setTimeout(() => {

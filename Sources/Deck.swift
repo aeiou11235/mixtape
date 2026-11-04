@@ -1057,6 +1057,11 @@ final class Deck: NSObject, ObservableObject {
         m.addItem(item(L("Kassette schließen"), #selector(closeItem)))
         m.addItem(.separator())
         m.addItem(item(L("Über Mixtape"), #selector(aboutItem)))
+        // Held with ⌥: where the owner's code goes in.
+        let code = item(L("Code eingeben …"), #selector(codeItem))
+        code.isAlternate = true
+        code.keyEquivalentModifierMask = .option
+        m.addItem(code)
         m.addItem(item(L("Nach neuer Version suchen …"), #selector(updatesItem)))
         m.addItem(item(L("Mixtape beenden"), #selector(quitItem)))
         return m
@@ -1121,6 +1126,7 @@ final class Deck: NSObject, ObservableObject {
 
     @objc private func aboutItem() { AboutScreen.shared.show(briefly: false) }
     @objc private func updatesItem() { Task { await Updates.check(manual: true) } }
+    @objc private func codeItem() { ShareLink.askForCode() }
 
     /// The .mixtape itself, for friends who have the app: saved and shown in the Finder,
     /// ready to drag into an email or a message.
@@ -1244,12 +1250,68 @@ enum ShareLink {
         (ProcessInfo.processInfo.environment["MIXTAPE_SHARE_UPLOAD"] ?? Bundle.main.object(forInfoDictionaryKey: "MixtapeShareUpload") as? String)
             .flatMap { URL(string: $0) }
     }
-    static var key: String? { Bundle.main.object(forInfoDictionaryKey: "MixtapeShareKey") as? String }
+    /// The owner's code, once typed in, replaces the key every copy of the app carries:
+    /// the server keeps tapes sent with it for good instead of for a week.
+    static var key: String? { ownerCode ?? Bundle.main.object(forInfoDictionaryKey: "MixtapeShareKey") as? String }
+    static var ownerCode: String? {
+        get { UserDefaults.standard.string(forKey: "ownerCode") }
+        set { UserDefaults.standard.set(newValue, forKey: "ownerCode") }
+    }
     static var available: Bool { endpoint != nil && key != nil }
 
     struct Reply: Decodable {
         let id: String
         let days: Int?
+    }
+
+    /// Asks for the owner's code and checks it with the server before keeping it.
+    @MainActor
+    static func askForCode() {
+        guard let endpoint else { return }
+        let a = NSAlert()
+        a.messageText = L("Code eingeben")
+        a.informativeText = ownerCode == nil
+            ? L("Mit dem Code bleiben deine geteilten Kassetten für immer online statt eine Woche.")
+            : L("Dieser Mac hat den Code schon: deine Links laufen nicht ab.")
+        let field = NSSecureTextField(frame: NSRect(x: 0, y: 0, width: 260, height: 24))
+        a.accessoryView = field
+        a.addButton(withTitle: L("Freischalten"))
+        a.addButton(withTitle: L("Abbrechen"))
+        if ownerCode != nil { a.addButton(withTitle: L("Code entfernen")) }
+        a.window.initialFirstResponder = field
+        NSApp.activate()
+        switch a.runModal() {
+        case .alertThirdButtonReturn: ownerCode = nil
+        case .alertFirstButtonReturn:
+            let code = field.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !code.isEmpty else { return }
+            Task { @MainActor in
+                let answer = await check(code, endpoint: endpoint)
+                let b = NSAlert()
+                b.messageText = "Mixtape"
+                switch answer {
+                case true?: ownerCode = code; b.informativeText = L("Freigeschaltet. Links von diesem Mac laufen nicht mehr ab.")
+                case false?: b.informativeText = L("Der Code stimmt nicht.")
+                case nil: b.informativeText = L("Der Server ist gerade nicht erreichbar. Versuch es später noch einmal.")
+                }
+                NSApp.activate()
+                b.runModal()
+            }
+        default: break
+        }
+    }
+
+    /// The server turns away a wrong key before it looks at what came with it, and answers
+    /// an empty upload from a right one with "empty".
+    private static func check(_ code: String, endpoint: URL) async -> Bool? {
+        var req = URLRequest(url: endpoint, timeoutInterval: 20)
+        req.httpMethod = "POST"
+        req.setValue(code, forHTTPHeaderField: "x-mixtape-key")
+        req.setValue("text/plain", forHTTPHeaderField: "content-type")
+        req.httpBody = Data()
+        guard let (_, response) = try? await URLSession.shared.data(for: req),
+              let status = (response as? HTTPURLResponse)?.statusCode else { return nil }
+        return status == 403 ? false : status == 400 ? true : nil
     }
 
     /// The cassette alone, trimmed close, as PNG.
@@ -1331,36 +1393,49 @@ extension Deck: NSMenuDelegate {
     }
 }
 
-/// One effect in the Sound menu: on or off, and how strong.
+/// One effect in the Sound menu: on or off, and how strong. The name and its tick are drawn by
+/// hand like an ordinary menu line: a checkbox inside a menu goes missing on some Macs.
 final class SoundRow: NSView {
-    private let check: NSButton
+    private let title: String
+    private var on: Bool
     private let slider: NSSlider
+    private let sliderX: CGFloat = 216
     var onToggle: (Bool) -> Void = { _ in }
     var onLevel: (Double) -> Void = { _ in }
 
     init(title: String, on: Bool, level: Double) {
-        check = NSButton(checkboxWithTitle: title, target: nil, action: nil)
+        self.title = title
+        self.on = on
         slider = NSSlider(value: level, minValue: 0, maxValue: 1, target: nil, action: nil)
         super.init(frame: NSRect(x: 0, y: 0, width: 340, height: 26))
-        check.state = on ? .on : .off
-        check.target = self
-        check.action = #selector(toggled)
-        check.frame = NSRect(x: 14, y: 4, width: 200, height: 18)
         slider.target = self
         slider.action = #selector(moved)
         slider.isContinuous = true
         slider.controlSize = .small
         slider.isEnabled = on
-        slider.frame = NSRect(x: 216, y: 4, width: 110, height: 18)
-        addSubview(check)
+        slider.frame = NSRect(x: sliderX, y: 4, width: 110, height: 18)
         addSubview(slider)
     }
 
     required init?(coder: NSCoder) { fatalError("not used") }
 
-    @objc private func toggled() {
-        slider.isEnabled = check.state == .on
-        onToggle(check.state == .on)
+    override func draw(_ dirtyRect: NSRect) {
+        let font = NSFont.menuFont(ofSize: 0)
+        let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: NSColor.labelColor]
+        let y = (bounds.height - font.boundingRectForFont.height) / 2 + 1
+        if on { ("✓" as NSString).draw(at: NSPoint(x: 12, y: y), withAttributes: attrs) }
+        (title as NSString).draw(in: NSRect(x: 30, y: y, width: sliderX - 36, height: font.boundingRectForFont.height),
+                                 withAttributes: attrs)
+    }
+
+    override func mouseDown(with event: NSEvent) {}
+
+    override func mouseUp(with event: NSEvent) {
+        guard convert(event.locationInWindow, from: nil).x < sliderX - 4 else { return }
+        on.toggle()
+        slider.isEnabled = on
+        needsDisplay = true
+        onToggle(on)
     }
 
     @objc private func moved() { onLevel(slider.doubleValue) }

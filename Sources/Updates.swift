@@ -13,11 +13,9 @@ enum Updates {
     }
 
     /// On launch, at most once a day, and quietly: it says nothing unless there is something new.
-    /// This Mac's own build (Mixtape Master) is left alone; it can still ask from the menu.
     static func checkLater() {
         let d = UserDefaults.standard
         if let last = d.object(forKey: "updateCheck") as? Date, Date().timeIntervalSince(last) < 86_400 { return }
-        if Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String == "Mixtape Master" { return }
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 8_000_000_000)
             await check(manual: false)

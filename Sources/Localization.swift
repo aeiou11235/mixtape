@@ -134,4 +134,14 @@ private let english: [String: String] = [
     "„%@“ ist keine lesbare Mixtape-Kassette.": "“%@” isn’t a readable Mixtape cassette.",
     "%@ ist fehlgeschlagen.": "%@ failed.",
     "Systemton-Aufnahme fehlgeschlagen (%@, Fehler %d).": "System audio recording failed (%@, error %d).",
+    // The owner's code
+    "Code eingeben …": "Enter Code…",
+    "Code eingeben": "Enter Code",
+    "Mit dem Code bleiben deine geteilten Kassetten für immer online statt eine Woche.": "With the code, the cassettes you share stay online for good instead of for a week.",
+    "Dieser Mac hat den Code schon: deine Links laufen nicht ab.": "This Mac already has the code: your links don’t run out.",
+    "Freischalten": "Unlock",
+    "Code entfernen": "Remove Code",
+    "Freigeschaltet. Links von diesem Mac laufen nicht mehr ab.": "Unlocked. Links from this Mac no longer run out.",
+    "Der Code stimmt nicht.": "That code isn’t right.",
+    "Der Server ist gerade nicht erreichbar. Versuch es später noch einmal.": "The server can’t be reached right now. Try again later.",
 ]
